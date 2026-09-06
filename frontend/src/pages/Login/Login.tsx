@@ -1,19 +1,17 @@
 import { useState, type FormEvent } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardPanel,
-  CardTitle,
 } from "@/components/ui/card";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { api, type RespostaAuth } from "@/lib/api";
 import { lerToken, salvarSessao } from "@/lib/auth";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export function Login() {
   const navegar = useNavigate();
