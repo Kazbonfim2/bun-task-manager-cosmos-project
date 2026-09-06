@@ -1,0 +1,16 @@
+services:
+  orion:
+    build:
+      context: .
+      target: prod
+    ports:
+      - "3005:3005"
+    environment:
+      PORT: "3005"
+      JWT_SECRET: orion-local-secret
+      SQLITE_PATH: /app/data/orion.db
+    volumes:
+      - orion-data:/app/data
+
+volumes:
+  orion-data:

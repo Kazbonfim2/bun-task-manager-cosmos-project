@@ -1,0 +1,9 @@
+node_modules
+frontend/node_modules
+frontend/dist
+data
+.git
+.cursor
+*.db
+*.db-wal
+*.db-shm
