@@ -1,12 +1,23 @@
-import { LayoutGrid, List, Plus, Search } from "lucide-react";
+import { ChevronDown, FolderPlus, LayoutGrid, List, Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Field, FieldLabel } from "@/components/ui/field";
+import { Group } from "@/components/ui/group";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
   InputGroupText,
 } from "@/components/ui/input-group";
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/components/ui/toggle-group";
 import { SelectSimples, type ItemSelect } from "@/components/SelectSimples";
 import { FILTRO_STATUS_ITENS } from "@/lib/status";
 
@@ -39,7 +50,7 @@ export function DashboardToolbar({
 }: DashboardToolbarProps) {
   return (
     <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-      {/* // Grupo 1: Filtros de Responsável, Status e Toggle de Visualização */}
+      {/* // Grupo 1: Filtros de Responsável e Status */}
       <div className="flex flex-wrap items-end gap-2.5 sm:gap-3">
         {/* // Filtro por responsável */}
         <Field className="flex-1 min-w-[130px] sm:flex-initial sm:w-48">
@@ -62,56 +73,68 @@ export function DashboardToolbar({
             placeholder="Status"
           />
         </Field>
-
-        {/* // Alternador de modo de visualização (lista em tabela ou grade de cards) */}
-        <div className="flex items-center rounded-lg border bg-muted p-0.5 shrink-0 h-9">
-          <Button
-            type="button"
-            variant={modoVisualizacao === "lista" ? "secondary" : "ghost"}
-            size="sm"
-            className="h-8 px-2.5"
-            onClick={() => onMudarModoVisualizacao("lista")}
-            title="Visualização em lista"
-            aria-label="Visualização em lista"
-          >
-            <List aria-hidden="true" className="size-4" />
-          </Button>
-          <Button
-            type="button"
-            variant={modoVisualizacao === "cards" ? "secondary" : "ghost"}
-            size="sm"
-            className="h-8 px-2.5"
-            onClick={() => onMudarModoVisualizacao("cards")}
-            title="Visualização em cards"
-            aria-label="Visualização em cards"
-          >
-            <LayoutGrid aria-hidden="true" className="size-4" />
-          </Button>
-        </div>
       </div>
 
-      {/* // Grupo 2: Ações de criação (Novo projeto, Nova demanda) e Campo de Busca */}
+      {/* // Grupo 2: Ações agrupadas (Split Button de criação, ToggleGroup lista/cards) e Busca */}
       <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
-        {/* // Botões de criação */}
-        <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onAbrirNovoProjeto}
-            className="w-full sm:w-auto"
-          >
-            Novo projeto
-          </Button>
+        {/* // Split Button: Ação principal (Nova demanda) + Menu secundário (Novo projeto) */}
+        <DropdownMenu>
+          <Group className="w-full sm:w-auto">
+            <Button
+              type="button"
+              onClick={onAbrirNovaDemanda}
+              className="flex-1 sm:flex-initial"
+            >
+              <Plus aria-hidden="true" />
+              Nova demanda
+            </Button>
+            <DropdownMenuTrigger
+              render={
+                <Button
+                  type="button"
+                  size="icon"
+                  className="px-2 border-s border-primary-foreground/20"
+                  aria-label="Mais opções de criação"
+                />
+              }
+            >
+              <ChevronDown aria-hidden="true" className="size-4" />
+            </DropdownMenuTrigger>
+          </Group>
 
-          <Button
-            type="button"
-            onClick={onAbrirNovaDemanda}
-            className="w-full sm:w-auto"
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={onAbrirNovoProjeto}>
+              <FolderPlus aria-hidden="true" className="size-4" />
+              Novo projeto
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {/* // ToggleGroup de alternância de visualização (pill/segmented control) */}
+        <ToggleGroup
+          type="single"
+          value={modoVisualizacao}
+          onValueChange={(valor) => {
+            if (valor) onMudarModoVisualizacao(valor as "lista" | "cards");
+          }}
+          className="hidden sm:inline-flex"
+          aria-label="Modo de visualização"
+        >
+          <ToggleGroupItem
+            value="lista"
+            aria-label="Visualização em lista"
+            title="Visualização em lista"
           >
-            <Plus aria-hidden="true" />
-            Nova demanda
-          </Button>
-        </div>
+            <List aria-hidden="true" className="size-4" />
+          </ToggleGroupItem>
+          <ToggleGroupItem
+            value="cards"
+            aria-label="Visualização em cards"
+            title="Visualização em cards"
+          >
+            <LayoutGrid aria-hidden="true" className="size-4" />
+          </ToggleGroupItem>
+        </ToggleGroup>
 
         {/* // Campo de busca em tempo real */}
         <InputGroup className="w-full sm:w-56 md:w-64">
