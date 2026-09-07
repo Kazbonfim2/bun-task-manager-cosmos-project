@@ -46,7 +46,11 @@ export class DemandaRepository {
       condicoes.push("d.responsavel_id = ?");
       params.push(filtro.responsavel_id);
     }
-    if (filtro.status) {
+    if (filtro.status === "atrasadas") {
+      const hoje = new Date().toISOString().slice(0, 10);
+      condicoes.push("d.status != 'concluida' AND d.prazo < ?");
+      params.push(hoje);
+    } else if (filtro.status) {
       condicoes.push("d.status = ?");
       params.push(filtro.status);
     }

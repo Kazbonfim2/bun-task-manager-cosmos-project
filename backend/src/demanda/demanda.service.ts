@@ -29,7 +29,7 @@ export class DemandaService {
   ) {}
 
   listar(filtro: FiltroDemanda): DemandaComNomes[] {
-    if (filtro.status && !ehStatus(filtro.status)) {
+    if (filtro.status && filtro.status !== "atrasadas" && !ehStatus(filtro.status)) {
       throw new HttpError(400, "Status inválido");
     }
     return this.repository.listar(filtro);

@@ -73,7 +73,10 @@ export function DashboardCards({
       <Tooltip>
         <TooltipTrigger
           render={
-            <Card className="transition-transform duration-200 md:hover:-translate-y-1">
+            <Card
+              className="transition-transform duration-200 md:hover:-translate-y-1 md:hover:cursor-pointer"
+              onClick={() => onFiltrarStatus("atrasadas")}
+            >
               <CardHeader>
                 <CardDescription>Atrasadas</CardDescription>
                 <CardTitle className="text-3xl">{atrasadas}</CardTitle>
@@ -86,7 +89,7 @@ export function DashboardCards({
             </Card>
           }
         />
-        <TooltipPopup>Quantidade de demandas com prazo vencido e não concluídas</TooltipPopup>
+        <TooltipPopup>Clique para filtrar apenas demandas atrasadas</TooltipPopup>
       </Tooltip>
     </section>
   );

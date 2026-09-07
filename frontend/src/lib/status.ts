@@ -1,4 +1,4 @@
-import { CheckCircle2, CircleDot, Clock, type LucideIcon } from "lucide-react";
+import { AlertTriangle, CheckCircle2, CircleDot, Clock, type LucideIcon } from "lucide-react";
 
 export type ItemStatus = {
   label: string;
@@ -39,6 +39,14 @@ export const STATUS_ITENS: readonly ItemStatus[] = [
 export const FILTRO_STATUS_ITENS: readonly ItemStatus[] = [
   { label: "Todos os status", value: "todos" },
   ...STATUS_ITENS,
+  {
+    label: "Atrasadas",
+    value: "atrasadas",
+    icone: AlertTriangle,
+    corTexto: "text-destructive dark:text-red-400",
+    corBg: "bg-destructive/10",
+    corBorda: "border-destructive/30",
+  },
 ];
 
 export function hojeISO(): string {
