@@ -1,5 +1,5 @@
 import { Trash2 } from "lucide-react";
-import type { FormEvent } from "react";
+import type { SubmitEvent } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -36,7 +36,7 @@ interface DialogDemandaProps {
   itensUsuario: readonly ItemSelect[];
   salvando: boolean;
   erro: string;
-  onSalvar: (evento: FormEvent<HTMLFormElement>) => void;
+  onSalvar: (evento: SubmitEvent<HTMLFormElement>) => void;
   onExcluir: () => void;
 }
 

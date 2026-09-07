@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useState, type SubmitEvent } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -22,7 +22,7 @@ export function Login() {
 
   if (lerToken()) return <Navigate to="/" replace />;
 
-  async function enviar(evento: FormEvent<HTMLFormElement>) {
+  async function enviar(evento: SubmitEvent<HTMLFormElement>) {
     evento.preventDefault();
     setErro("");
     setEnviando(true);

@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useState, type SubmitEvent } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,7 +24,7 @@ export function Cadastro() {
 
   if (lerToken()) return <Navigate to="/" replace />;
 
-  async function enviar(evento: FormEvent<HTMLFormElement>) {
+  async function enviar(evento: SubmitEvent<HTMLFormElement>) {
     evento.preventDefault();
     setErro("");
     setEnviando(true);

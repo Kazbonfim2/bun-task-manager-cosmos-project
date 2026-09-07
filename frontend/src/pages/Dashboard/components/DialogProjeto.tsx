@@ -1,4 +1,4 @@
-import type { FormEvent } from "react";
+import type { SubmitEvent } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -23,7 +23,7 @@ interface DialogProjetoProps {
   setDescricao: (descricao: string) => void;
   salvando: boolean;
   erro: string;
-  onSalvar: (evento: FormEvent<HTMLFormElement>) => void;
+  onSalvar: (evento: SubmitEvent<HTMLFormElement>) => void;
 }
 
 export function DialogProjeto({

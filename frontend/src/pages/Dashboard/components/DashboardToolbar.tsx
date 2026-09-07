@@ -38,11 +38,11 @@ export function DashboardToolbar({
   onAbrirNovaDemanda,
 }: DashboardToolbarProps) {
   return (
-    <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-      {/* // Filtros por responsável e status */}
-      <div className="flex flex-col gap-3 sm:flex-row">
+    <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      {/* // Grupo 1: Filtros de Responsável, Status e Toggle de Visualização */}
+      <div className="flex flex-wrap items-end gap-2.5 sm:gap-3">
         {/* // Filtro por responsável */}
-        <Field className="w-full sm:w-52">
+        <Field className="flex-1 min-w-[130px] sm:flex-initial sm:w-48">
           <FieldLabel>Responsável</FieldLabel>
           <SelectSimples
             itens={itensResponsavel}
@@ -51,8 +51,9 @@ export function DashboardToolbar({
             placeholder="Responsável"
           />
         </Field>
+
         {/* // Filtro por status */}
-        <Field className="w-full sm:w-52">
+        <Field className="flex-1 min-w-[120px] sm:flex-initial sm:w-44">
           <FieldLabel>Status</FieldLabel>
           <SelectSimples
             itens={FILTRO_STATUS_ITENS}
@@ -61,61 +62,59 @@ export function DashboardToolbar({
             placeholder="Status"
           />
         </Field>
+
+        {/* // Alternador de modo de visualização (lista em tabela ou grade de cards) */}
+        <div className="flex items-center rounded-lg border bg-muted p-0.5 shrink-0 h-9">
+          <Button
+            type="button"
+            variant={modoVisualizacao === "lista" ? "secondary" : "ghost"}
+            size="sm"
+            className="h-8 px-2.5"
+            onClick={() => onMudarModoVisualizacao("lista")}
+            title="Visualização em lista"
+            aria-label="Visualização em lista"
+          >
+            <List aria-hidden="true" className="size-4" />
+          </Button>
+          <Button
+            type="button"
+            variant={modoVisualizacao === "cards" ? "secondary" : "ghost"}
+            size="sm"
+            className="h-8 px-2.5"
+            onClick={() => onMudarModoVisualizacao("cards")}
+            title="Visualização em cards"
+            aria-label="Visualização em cards"
+          >
+            <LayoutGrid aria-hidden="true" className="size-4" />
+          </Button>
+        </div>
       </div>
 
-      {/* // Ações da barra de ferramentas: alternador de modo, botões e campo de busca */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-        {/* // Grupo de botões de ação e alternador */}
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          {/* // Alternador de modo de visualização (lista em tabela ou grade de cards) */}
-          <div className="flex items-center rounded-lg border bg-muted p-0.5 shrink-0">
-            <Button
-              type="button"
-              variant={modoVisualizacao === "lista" ? "secondary" : "ghost"}
-              size="sm"
-              className="h-8 px-2.5"
-              onClick={() => onMudarModoVisualizacao("lista")}
-              title="Visualização em lista"
-              aria-label="Visualização em lista"
-            >
-              <List aria-hidden="true" className="size-4" />
-            </Button>
-            <Button
-              type="button"
-              variant={modoVisualizacao === "cards" ? "secondary" : "ghost"}
-              size="sm"
-              className="h-8 px-2.5"
-              onClick={() => onMudarModoVisualizacao("cards")}
-              title="Visualização em cards"
-              aria-label="Visualização em cards"
-            >
-              <LayoutGrid aria-hidden="true" className="size-4" />
-            </Button>
-          </div>
-
-          {/* // Botão para abertura do diálogo de criação de novo projeto */}
+      {/* // Grupo 2: Ações de criação (Novo projeto, Nova demanda) e Campo de Busca */}
+      <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
+        {/* // Botões de criação */}
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
           <Button
             type="button"
             variant="outline"
             onClick={onAbrirNovoProjeto}
-            className="flex-1 sm:flex-initial"
+            className="w-full sm:w-auto"
           >
             Novo projeto
           </Button>
 
-          {/* // Botão para abertura do diálogo de criação de nova demanda */}
           <Button
             type="button"
             onClick={onAbrirNovaDemanda}
-            className="flex-1 sm:flex-initial"
+            className="w-full sm:w-auto"
           >
             <Plus aria-hidden="true" />
             Nova demanda
           </Button>
         </div>
 
-        {/* // Campo de busca em tempo real por entidade demanda */}
-        <InputGroup className="w-full sm:w-60">
+        {/* // Campo de busca em tempo real */}
+        <InputGroup className="w-full sm:w-56 md:w-64">
           <InputGroupAddon>
             <InputGroupText>
               <Search className="size-4" aria-hidden="true" />

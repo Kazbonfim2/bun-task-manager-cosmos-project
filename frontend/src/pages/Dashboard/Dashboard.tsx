@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type SubmitEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { type ItemSelect } from "@/components/SelectSimples";
 import {
@@ -78,7 +78,8 @@ export function Dashboard() {
     });
   }, [demandas, busca]);
 
-  const ITENS_POR_PAGINA = 6;
+  // Listagem de conteúdos - número fixo definido como 10, pode ser alterado conforme a necessidade.
+  const ITENS_POR_PAGINA = 10;
   const totalPaginas = Math.max(1, Math.ceil(demandasFiltradas.length / ITENS_POR_PAGINA));
 
   const demandasPaginadas = useMemo(() => {
@@ -86,6 +87,7 @@ export function Dashboard() {
     return demandasFiltradas.slice(inicio, inicio + ITENS_POR_PAGINA);
   }, [demandasFiltradas, paginaAtual]);
 
+  // Sis. de filtros por Responsável
   const itensResponsavel = useMemo<ItemSelect[]>(
     () => [
       FILTRO_TODOS,
@@ -93,10 +95,12 @@ export function Dashboard() {
     ],
     [usuarios],
   );
+  // Sis. de filtros por Projeto
   const itensProjeto = useMemo<ItemSelect[]>(
     () => projetos.map((item) => ({ label: item.nome, value: item.id })),
     [projetos],
   );
+  // Sis. de filtros por Usuário 
   const itensUsuario = useMemo<ItemSelect[]>(
     () => usuarios.map((item) => ({ label: item.nome_completo, value: item.id })),
     [usuarios],
@@ -161,7 +165,7 @@ export function Dashboard() {
     setDialogDemanda(true);
   }
 
-  async function salvarDemanda(evento: FormEvent<HTMLFormElement>) {
+  async function salvarDemanda(evento: SubmitEvent<HTMLFormElement>) {
     evento.preventDefault();
     setSalvando(true);
     setErro("");
@@ -197,7 +201,7 @@ export function Dashboard() {
     }
   }
 
-  async function salvarProjeto(evento: FormEvent<HTMLFormElement>) {
+  async function salvarProjeto(evento: SubmitEvent<HTMLFormElement>) {
     evento.preventDefault();
     setSalvando(true);
     setErro("");

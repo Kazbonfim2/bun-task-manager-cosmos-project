@@ -1,5 +1,5 @@
 import { AlertTriangle, ArrowLeft, Pencil, Trash2 } from "lucide-react";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState, type SubmitEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   Breadcrumb,
@@ -82,7 +82,7 @@ export function DetalhesDemanda() {
     setDialogEdicao(true);
   }
 
-  async function salvarEdicao(evento: FormEvent<HTMLFormElement>) {
+  async function salvarEdicao(evento: SubmitEvent<HTMLFormElement>) {
     evento.preventDefault();
     if (!demanda) return;
     setSalvando(true);
