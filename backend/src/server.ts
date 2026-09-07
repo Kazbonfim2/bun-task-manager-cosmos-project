@@ -6,6 +6,7 @@ import express, { type NextFunction, type Request, type Response } from "express
 import { authRoutes } from "./auth/auth.routes";
 import { demandaRoutes } from "./demanda/demanda.routes";
 import { HttpError } from "./http-error";
+import { notificacaoRoutes } from "./notificacao/notificacao.routes";
 import { projetoRoutes } from "./projeto/projeto.routes";
 import { usuarioRoutes } from "./usuario/usuario.routes";
 import "./database/connection";
@@ -25,6 +26,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/usuarios", usuarioRoutes);
 app.use("/api/projetos", projetoRoutes);
 app.use("/api/demandas", demandaRoutes);
+app.use("/api/notificacoes", notificacaoRoutes);
 app.use("/api", (_req, res) => {
   res.status(404).json({ erro: "Não encontrado" });
 });

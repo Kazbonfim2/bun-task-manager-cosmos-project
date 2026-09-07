@@ -1,7 +1,8 @@
 import { HttpError } from "../http-error";
-import { ProjetoRepository } from "../projeto/projeto.repository";
-import { UsuarioRepository } from "../usuario/usuario.repository";
-import { DemandaRepository } from "./demanda.repository";
+import { notificacaoService } from "../notificacao/notificacao.service";
+import { projetoRepository } from "../projeto/projeto.repository";
+import { usuarioRepository } from "../usuario/usuario.repository";
+import { demandaRepository } from "./demanda.repository";
 import {
   STATUS_DEMANDA,
   type DemandaComNomes,
@@ -21,25 +22,19 @@ function validarPrazo(prazo: string): string {
   return prazo.slice(0, 10);
 }
 
-export class DemandaService {
-  constructor(
-    private repository: DemandaRepository,
-    private projetoRepository: ProjetoRepository,
-    private usuarioRepository: UsuarioRepository,
-  ) {}
-
+export const demandaService = {
   listar(filtro: FiltroDemanda): DemandaComNomes[] {
     if (filtro.status && filtro.status !== "atrasadas" && !ehStatus(filtro.status)) {
       throw new HttpError(400, "Status inválido");
     }
-    return this.repository.listar(filtro);
-  }
+    return demandaRepository.listar(filtro);
+  },
 
   buscarPorId(id: string): DemandaComNomes {
-    const demanda = this.repository.buscarPorId(id);
+    const demanda = demandaRepository.buscarPorId(id);
     if (!demanda) throw new HttpError(404, "Demanda não encontrada");
     return demanda;
-  }
+  },
 
   criar(dados: NovaDemanda, criadoPorId: string): DemandaComNomes {
     const descricao = dados.descricao?.trim();
@@ -47,15 +42,15 @@ export class DemandaService {
     if (!dados.projeto_id) throw new HttpError(400, "Projeto é obrigatório");
     if (!dados.responsavel_id) throw new HttpError(400, "Responsável é obrigatório");
     if (!ehStatus(dados.status)) throw new HttpError(400, "Status inválido");
-    if (!this.projetoRepository.buscarPorId(dados.projeto_id)) {
+    if (!projetoRepository.buscarPorId(dados.projeto_id)) {
       throw new HttpError(400, "Projeto não encontrado");
     }
-    if (!this.usuarioRepository.buscarPorId(dados.responsavel_id)) {
+    if (!usuarioRepository.buscarPorId(dados.responsavel_id)) {
       throw new HttpError(400, "Responsável não encontrado");
     }
 
     const agora = new Date().toISOString();
-    return this.repository.criar({
+    const criada = demandaRepository.criar({
       id: crypto.randomUUID(),
       descricao,
       projeto_id: dados.projeto_id,
@@ -66,10 +61,19 @@ export class DemandaService {
       criado_em: agora,
       atualizado_em: agora,
     });
-  }
+
+    notificacaoService.notificar({
+      usuario_id: criada.responsavel_id,
+      demanda_id: criada.id,
+      tipo: "demanda_criada",
+      mensagem: `Nova demanda atribuída a você: "${criada.descricao}"`,
+    });
+
+    return criada;
+  },
 
   atualizar(id: string, dados: NovaDemanda): DemandaComNomes {
-    const atual = this.repository.buscarPorId(id);
+    const atual = demandaRepository.buscarPorId(id);
     if (!atual) throw new HttpError(404, "Demanda não encontrada");
 
     const descricao = dados.descricao?.trim();
@@ -77,14 +81,14 @@ export class DemandaService {
     if (!dados.projeto_id) throw new HttpError(400, "Projeto é obrigatório");
     if (!dados.responsavel_id) throw new HttpError(400, "Responsável é obrigatório");
     if (!ehStatus(dados.status)) throw new HttpError(400, "Status inválido");
-    if (!this.projetoRepository.buscarPorId(dados.projeto_id)) {
+    if (!projetoRepository.buscarPorId(dados.projeto_id)) {
       throw new HttpError(400, "Projeto não encontrado");
     }
-    if (!this.usuarioRepository.buscarPorId(dados.responsavel_id)) {
+    if (!usuarioRepository.buscarPorId(dados.responsavel_id)) {
       throw new HttpError(400, "Responsável não encontrado");
     }
 
-    return this.repository.atualizar({
+    const atualizada = demandaRepository.atualizar({
       ...atual,
       descricao,
       projeto_id: dados.projeto_id,
@@ -93,23 +97,60 @@ export class DemandaService {
       status: dados.status,
       atualizado_em: new Date().toISOString(),
     });
-  }
+
+    if (atual.status !== dados.status) {
+      const destinatarios = new Set([atualizada.responsavel_id, atualizada.criado_por_id]);
+      for (const usuarioId of destinatarios) {
+        notificacaoService.notificar({
+          usuario_id: usuarioId,
+          demanda_id: atualizada.id,
+          tipo: "demanda_status_alterado",
+          mensagem: `Demanda "${atualizada.descricao}" mudou para o status "${dados.status}".`,
+        });
+      }
+    }
+
+    if (atual.responsavel_id !== dados.responsavel_id) {
+      notificacaoService.notificar({
+        usuario_id: dados.responsavel_id,
+        demanda_id: atualizada.id,
+        tipo: "demanda_criada",
+        mensagem: `Demanda "${atualizada.descricao}" atribuída a você.`,
+      });
+    }
+
+    return atualizada;
+  },
 
   alterarStatus(id: string, status: string): DemandaComNomes {
-    const atual = this.repository.buscarPorId(id);
+    const atual = demandaRepository.buscarPorId(id);
     if (!atual) throw new HttpError(404, "Demanda não encontrada");
     if (!ehStatus(status)) throw new HttpError(400, "Status inválido");
 
-    return this.repository.atualizar({
+    const atualizada = demandaRepository.atualizar({
       ...atual,
       status,
       atualizado_em: new Date().toISOString(),
     });
-  }
+
+    if (atual.status !== status) {
+      const destinatarios = new Set([atualizada.responsavel_id, atualizada.criado_por_id]);
+      for (const usuarioId of destinatarios) {
+        notificacaoService.notificar({
+          usuario_id: usuarioId,
+          demanda_id: atualizada.id,
+          tipo: "demanda_status_alterado",
+          mensagem: `Demanda "${atualizada.descricao}" mudou para o status "${status}".`,
+        });
+      }
+    }
+
+    return atualizada;
+  },
 
   excluir(id: string): void {
-    const atual = this.repository.buscarPorId(id);
+    const atual = demandaRepository.buscarPorId(id);
     if (!atual) throw new HttpError(404, "Demanda não encontrada");
-    this.repository.excluir(id);
-  }
-}
+    demandaRepository.excluir(id);
+  },
+};

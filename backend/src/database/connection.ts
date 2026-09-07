@@ -41,4 +41,16 @@ db.exec(`
     FOREIGN KEY (responsavel_id) REFERENCES usuarios(id),
     FOREIGN KEY (criado_por_id) REFERENCES usuarios(id)
   );
+
+  CREATE TABLE IF NOT EXISTS notificacoes (
+    id TEXT PRIMARY KEY,
+    usuario_id TEXT NOT NULL,
+    demanda_id TEXT,
+    tipo TEXT NOT NULL,
+    mensagem TEXT NOT NULL,
+    lida INTEGER NOT NULL DEFAULT 0,
+    criado_em TEXT NOT NULL,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    FOREIGN KEY (demanda_id) REFERENCES demandas(id) ON DELETE CASCADE
+  );
 `);
