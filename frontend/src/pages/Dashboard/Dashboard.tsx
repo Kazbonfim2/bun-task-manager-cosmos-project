@@ -38,6 +38,7 @@ export function Dashboard() {
   const [modoVisualizacao, setModoVisualizacao] = useState<"lista" | "cards">("lista");
   const [busca, setBusca] = useState("");
   const [paginaAtual, setPaginaAtual] = useState(1);
+  const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
   const [dialogDemanda, setDialogDemanda] = useState(false);
   const [dialogProjeto, setDialogProjeto] = useState(false);
@@ -123,11 +124,16 @@ export function Dashboard() {
   }
 
   async function carregarDemandas() {
-    const params = new URLSearchParams();
-    if (filtroResponsavel !== "todos") params.set("responsavel_id", filtroResponsavel);
-    const query = params.toString();
-    const dados = await api<Demanda[]>(`/demandas${query ? `?${query}` : ""}`);
-    setDemandas(dados);
+    setCarregando(true);
+    try {
+      const params = new URLSearchParams();
+      if (filtroResponsavel !== "todos") params.set("responsavel_id", filtroResponsavel);
+      const query = params.toString();
+      const dados = await api<Demanda[]>(`/demandas${query ? `?${query}` : ""}`);
+      setDemandas(dados);
+    } finally {
+      setCarregando(false);
+    }
   }
 
   useEffect(() => {
@@ -277,19 +283,35 @@ export function Dashboard() {
           <p className="text-destructive text-sm">{erro}</p>
         ) : null}
 
-        {/* // Exibição em tabela (modo lista) ou grade de cards */}
+        {/* // Exibição: mobile sempre em cards; desktop respeita a alternância entre tabela e cards */}
         {modoVisualizacao === "lista" ? (
-          <DemandasTabela
-            demandas={demandasPaginadas}
-            busca={busca}
-            onVisualizarDemanda={(id) => navigate(`/demandas/${id}`)}
-            onTrocarStatus={trocarStatus}
-            onEditarDemanda={abrirEdicao}
-          />
+          <>
+            <div className="sm:hidden">
+              <DemandasGrid
+                demandas={demandasPaginadas}
+                busca={busca}
+                carregando={carregando}
+                onVisualizarDemanda={(id) => navigate(`/demandas/${id}`)}
+                onTrocarStatus={trocarStatus}
+                onEditarDemanda={abrirEdicao}
+              />
+            </div>
+            <div className="hidden sm:block">
+              <DemandasTabela
+                demandas={demandasPaginadas}
+                busca={busca}
+                carregando={carregando}
+                onVisualizarDemanda={(id) => navigate(`/demandas/${id}`)}
+                onTrocarStatus={trocarStatus}
+                onEditarDemanda={abrirEdicao}
+              />
+            </div>
+          </>
         ) : (
           <DemandasGrid
             demandas={demandasPaginadas}
             busca={busca}
+            carregando={carregando}
             onVisualizarDemanda={(id) => navigate(`/demandas/${id}`)}
             onTrocarStatus={trocarStatus}
             onEditarDemanda={abrirEdicao}

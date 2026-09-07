@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 interface DemandasGridProps {
   demandas: Demanda[];
   busca: string;
+  carregando?: boolean;
   onVisualizarDemanda: (id: string) => void;
   onTrocarStatus: (id: string, status: string) => void;
   onEditarDemanda: (demanda: Demanda) => void;
@@ -22,14 +23,19 @@ interface DemandasGridProps {
 export function DemandasGrid({
   demandas,
   busca,
+  carregando,
   onVisualizarDemanda,
   onTrocarStatus,
   onEditarDemanda,
 }: DemandasGridProps) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {demandas.length === 0 ? (
-        <div className="col-span-full rounded-xl border border-dashed p-8 text-center text-muted-foreground text-sm">
+      {carregando ? (
+        <div className="col-span-full flex min-h-48 items-center justify-center rounded-xl border border-dashed text-center text-muted-foreground text-sm">
+          Carregando demandas...
+        </div>
+      ) : demandas.length === 0 ? (
+        <div className="col-span-full flex min-h-48 items-center justify-center rounded-xl border border-dashed text-center text-muted-foreground text-sm">
           {busca ? "Nenhuma demanda encontrada para a busca." : "Nenhuma demanda nesta lista."}
         </div>
       ) : (
@@ -49,11 +55,14 @@ export function DemandasGrid({
               onClick={() => onVisualizarDemanda(demanda.id)}
             >
               <CardHeader className="gap-2 pb-3">
-                <div className="flex items-start justify-between gap-2">
-                  <span className="text-muted-foreground text-xs font-medium">
+                <div className="flex items-start justify-between gap-2 min-w-0">
+                  <span
+                    className="text-muted-foreground min-w-0 flex-1 truncate text-xs font-medium"
+                    title={demanda.projeto_nome}
+                  >
                     {demanda.projeto_nome}
                   </span>
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex shrink-0 items-center gap-1.5">
                     {statusInfo ? (
                       <span
                         className={cn(
@@ -75,7 +84,7 @@ export function DemandasGrid({
                   </div>
                 </div>
                 <CardTitle
-                  className="line-clamp-2 text-base font-medium leading-snug hover:underline"
+                  className="line-clamp-2 min-h-[2.5rem] break-words text-base font-medium leading-snug hover:underline"
                   title={demanda.descricao}
                 >
                   {demanda.descricao}
@@ -83,7 +92,7 @@ export function DemandasGrid({
               </CardHeader>
               <CardPanel className="flex flex-col gap-3 pt-0">
                 <div className="text-muted-foreground flex flex-col gap-1 text-xs">
-                  <div>
+                  <div className="truncate" title={demanda.responsavel_nome}>
                     <span className="text-foreground font-medium">Responsável:</span>{" "}
                     {demanda.responsavel_nome}
                   </div>
@@ -96,7 +105,7 @@ export function DemandasGrid({
                   className="flex items-center justify-between gap-2 border-t pt-2"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     {/* // Seletor de status dentro do card */}
                     <SelectSimples
                       itens={STATUS_ITENS}

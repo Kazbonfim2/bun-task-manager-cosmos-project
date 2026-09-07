@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 interface DemandasTabelaProps {
   demandas: Demanda[];
   busca: string;
+  carregando?: boolean;
   onVisualizarDemanda: (id: string) => void;
   onTrocarStatus: (id: string, status: string) => void;
   onEditarDemanda: (demanda: Demanda) => void;
@@ -25,28 +26,35 @@ interface DemandasTabelaProps {
 export function DemandasTabela({
   demandas,
   busca,
+  carregando,
   onVisualizarDemanda,
   onTrocarStatus,
   onEditarDemanda,
 }: DemandasTabelaProps) {
   return (
-    <Table variant="card">
+    <Table variant="card" className="min-w-[680px]">
       {/* // Cabeçalho da tabela de demandas */}
       <TableHeader>
         <TableRow>
-          <TableHead>Projeto</TableHead>
-          <TableHead>Descrição</TableHead>
-          <TableHead>Responsável</TableHead>
-          <TableHead>Prazo</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead className="text-end">Ações</TableHead>
+          <TableHead className="w-36">Projeto</TableHead>
+          <TableHead className="min-w-[200px] max-w-xs">Descrição</TableHead>
+          <TableHead className="w-32">Responsável</TableHead>
+          <TableHead className="w-28">Prazo</TableHead>
+          <TableHead className="w-44">Status</TableHead>
+          <TableHead className="w-20 text-end">Ações</TableHead>
         </TableRow>
       </TableHeader>
       {/* // Corpo da tabela de demandas paginadas */}
       <TableBody>
-        {demandas.length === 0 ? (
+        {carregando ? (
           <TableRow>
-            <TableCell colSpan={6} className="text-muted-foreground text-center">
+            <TableCell colSpan={6} className="h-48 text-center text-muted-foreground">
+              Carregando demandas...
+            </TableCell>
+          </TableRow>
+        ) : demandas.length === 0 ? (
+          <TableRow>
+            <TableCell colSpan={6} className="h-48 text-center text-muted-foreground">
               {busca ? "Nenhuma demanda encontrada para a busca." : "Nenhuma demanda nesta lista."}
             </TableCell>
           </TableRow>
@@ -62,7 +70,11 @@ export function DemandasTabela({
                 )}
                 onClick={() => onVisualizarDemanda(demanda.id)}
               >
-                <TableCell className="font-medium">{demanda.projeto_nome}</TableCell>
+                <TableCell className="max-w-[144px]">
+                  <span className="block truncate font-medium" title={demanda.projeto_nome}>
+                    {demanda.projeto_nome}
+                  </span>
+                </TableCell>
                 <TableCell className="max-w-xs md:max-w-sm">
                   <div className="flex flex-col gap-1">
                     {/* // Tooltip com descrição completa ao fazer hover */}
@@ -85,9 +97,13 @@ export function DemandasTabela({
                     ) : null}
                   </div>
                 </TableCell>
-                <TableCell>{demanda.responsavel_nome}</TableCell>
-                <TableCell>{demanda.prazo.slice(0, 10)}</TableCell>
-                <TableCell className="min-w-44" onClick={(e) => e.stopPropagation()}>
+                <TableCell className="max-w-[128px]">
+                  <span className="block truncate" title={demanda.responsavel_nome}>
+                    {demanda.responsavel_nome}
+                  </span>
+                </TableCell>
+                <TableCell className="whitespace-nowrap">{demanda.prazo.slice(0, 10)}</TableCell>
+                <TableCell className="w-44" onClick={(e) => e.stopPropagation()}>
                   {/* // Seletor rápido de status em linha */}
                   <SelectSimples
                     itens={STATUS_ITENS}
@@ -96,7 +112,7 @@ export function DemandasTabela({
                     placeholder="Status"
                   />
                 </TableCell>
-                <TableCell className="text-end" onClick={(e) => e.stopPropagation()}>
+                <TableCell className="w-20 text-end" onClick={(e) => e.stopPropagation()}>
                   {/* // Botão de edição da demanda */}
                   <Button
                     type="button"

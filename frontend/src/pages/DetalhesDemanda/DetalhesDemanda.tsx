@@ -20,11 +20,11 @@ import {
 } from "@/lib/api";
 import { CardDetalhesDemanda } from "./components/CardDetalhesDemanda";
 import {
-  DialogEdicaoDemanda,
-  type FormEdicaoDemandaData,
-} from "./components/DialogEdicaoDemanda";
+  DialogDemanda,
+  type FormDemandaData,
+} from "@/pages/Dashboard/components/DialogDemanda";
 
-const FORM_VAZIO: FormEdicaoDemandaData = {
+const FORM_VAZIO: FormDemandaData = {
   descricao: "",
   projeto_id: "",
   responsavel_id: "",
@@ -212,9 +212,10 @@ export function DetalhesDemanda() {
       />
 
       {/* // Modal de edição de demanda */}
-      <DialogEdicaoDemanda
+      <DialogDemanda
         aberto={dialogEdicao}
         onOpenChange={setDialogEdicao}
+        editando={demanda}
         form={form}
         setForm={setForm}
         itensProjeto={itensProjeto}
