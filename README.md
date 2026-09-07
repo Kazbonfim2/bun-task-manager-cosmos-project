@@ -1,61 +1,122 @@
-# ORION — Controle de Demandas
+# ORION — Sistema de Controle de Demandas
 
-Substitui a planilha compartilhada da equipe: o que está aberto, com quem e o que já venceu.
+Aplicação web desenvolvida para substituir planilhas compartilhadas de equipe, oferecendo visibilidade clara sobre o que está aberto, quem é o responsável e o que já venceu.
 
-## Como rodar
+---
+
+## 👥 Guia do Usuário (Para Usuários Finais)
+
+Esta seção foi feita para você que deseja apenas colocar a aplicação para rodar e gerenciar seus projetos e demandas no dia a dia, sem precisar entender de código.
+
+### 🚀 Como executar em 1 passo
+
+Certifique-se de ter o [Docker Desktop](https://www.docker.com/) instalado e aberto em seu computador. No terminal da pasta do projeto, execute:
 
 ```bash
 docker compose up --build
 ```
 
-Acesse **http://localhost:3005**. A porta 3005 precisa estar livre.
+Após o carregamento, abra o navegador e acesse:
+👉 **[http://localhost:3005](http://localhost:3005)**
 
-Na primeira vez, use **Cadastre-se** (nome completo, e-mail e senha). Depois crie um projeto e as demandas.
+*(Nota: a porta 3005 do seu computador precisa estar livre)*.
 
-Esse modo serve o `frontend/dist` gerado no build. Mudança no React não aparece até `docker compose up --build` de novo.
+---
 
-## Desenvolvimento com hot reload
+### ✨ Funcionalidades e Recursos
 
-Produção (`docker compose up --build`) serve o `dist` na **3005**. Mudança no React não aparece ali.
+1. **Acesso Seguro e Rápido**
+   - **Cadastro Simples:** Crie sua conta informando nome completo, e-mail e senha na tela de cadastro.
+   - **Login Direto:** Autentique-se com facilidade e acesse seu ambiente de trabalho protegido.
 
-Para ver mudança ao salvar, use o compose de dev. Pare o container atual na 3005 antes de trocar.
+2. **Visão Geral no Painel (Dashboard)**
+   - **Métricas no topo:** Veja rapidamente o **Total de Demandas**, quantas estão **Abertas** e quantas estão **Atrasadas**.
+   - **Destaque Visual para Demandas Vencidas:** Qualquer demanda cujo prazo expirou e ainda não foi finalizada recebe destaque visual imediato em vermelho para chamar a atenção da equipe.
+
+3. **Gestão de Projetos e Demandas**
+   - **Criação de Projetos:** Cadastre seus projetos com nome e descrição opcional.
+   - **Cadastro de Demandas:** Crie tarefas informando descrição, prazo, status inicial, projeto vinculado e quem é o responsável pela execução.
+   - **Edição Completa & Exclusão:** Altere prazos, descrições, responsáveis ou exclua tarefas quando necessário.
+   - **Mudança Rápida de Status:** Atualize o progresso da tarefa (`Aberta` ➔ `Em andamento` ➔ `Concluída`) diretamente na listagem.
+
+4. **Filtros Inteligentes**
+   - **Filtro por Responsável:** Veja apenas as tarefas de um colaborador específico.
+   - **Filtro por Status:** Visualize apenas o que está aberto, em andamento ou concluído.
+   - **Filtros Combináveis:** Combine responsável e status para encontrar exatamente o que precisa em segundos.
+
+---
+
+## 💻 Guia Técnico e Arquitetura (Para Desenvolvedores)
+
+Esta seção detalha o funcionamento interno, arquitetura, stack e modos de desenvolvimento.
+
+### 🛠️ Modos de Execução para Desenvolvimento
+
+#### Opção 1: Desenvolvimento com Docker e Hot-Reload (Recomendado)
+Sobe o Express na porta 3005 integrado com o Vite em modo middleware. Qualquer alteração no backend ou frontend reflete instantaneamente:
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 ```
+*(ou execute o atalho: `bun run dev:docker`)*
 
-Ou: `bun run dev:docker`.
-
-Abra **http://localhost:3005**. O Express entrega a API em `/api` e o Vite (middleware) recarrega o React na mesma porta.
-
-Sem Docker:
+#### Opção 2: Desenvolvimento Local sem Docker
+Necessário ter o runtime [Bun](https://bun.sh/) instalado:
 
 ```bash
+# Instalação das dependências
 cd backend && bun install && cd ..
 cd frontend && bun install && cd ..
+
+# Iniciar backend e frontend juntos
 bun run dev
 ```
+Acesse em: **[http://localhost:3005](http://localhost:3005)**.
 
-Mesma URL: **http://localhost:3005**.
+---
 
-O frontend continua um pacote à parte (`cd frontend && bun run build`). Em desenvolvimento, não suba o Vite na 5173 — a entrada é só o backend.
+### 🏛️ Arquitetura e Estrutura de Código
 
-## Decisões técnicas
+A aplicação adota o padrão **MVC em camadas**, com convenção de nomenclatura inspirada no Nest.js, porém **sem decorators, sem reflection e sem containers de injeção de dependência complexos**.
 
-- **Stack:** Bun + Express + TypeScript no backend; SQLite via `bun:sqlite` (arquivo local); Vite + React + TypeScript no frontend; coss UI + Tailwind CSS v4.
-- **Arquitetura:** MVC em camadas (`routes → controller → service → repository → SQLite`). Classes simples, dependências no construtor, sem decorators e sem container de DI. Código do servidor em `backend/`.
-- **Auth:** cadastro e login com JWT (`jsonwebtoken`) no header `Authorization: Bearer <token>`. Senha com `Bun.password.hash()` / `Bun.password.verify()`.
-- **Status da demanda:** enum fixo `aberta` | `em_andamento` | `concluida`. Não é texto livre, para evitar variantes tipo `ok` / `Ok` / `OK`.
-- **Atrasada:** prazo anterior a hoje (data local) e status diferente de `concluida`.
-- **Empacotamento:** um único container. Uma porta pública: **3005**. Produção: Express serve API em `/api` e o `dist`. Dev: Express na 3005 com Vite em middleware (hot reload, sem 5173).
-- **Banco:** arquivo SQLite em `/app/data/orion.db` (volume Docker). Sem Postgres, MySQL ou serviço de banco externo.
+```text
+backend/src/
+├── auth/          # Controller, Service, Middleware JWT e rotas de autenticação
+├── usuario/       # Controller, Service, Repository, rotas e tipos de Usuários
+├── projeto/       # Controller, Service, Repository, rotas e tipos de Projetos
+├── demanda/       # Controller, Service, Repository, rotas e tipos de Demandas
+├── database/      # Conexão SQLite nativa (bun:sqlite) e DDL inicial
+└── server.ts      # Setup do Express, middlewares, rotas /api e integração Vite/SPA
+```
 
-## O que ficou de fora
+- **Fluxo estrito de dados:** `Routes ➔ Controller ➔ Service ➔ Repository ➔ SQLite`.
+- **Injeção de dependências simples:** Feita manualmente via construtor.
+- **Separation of Concerns:** Controllers gerenciam HTTP (`req`/`res`), Services contêm as regras de negócio puras, Repositories isolam o SQL.
 
-- Esqueci minha senha, confirmação por e-mail e login social
-- Paginação server-side, websockets, filas, cache, multi-tenant
-- Testes automatizados (podem entrar depois, se pedido)
+---
 
-## Registro de uso de IA
+### 🧰 Stack Tecnológica & Decisões de Design
+
+- **Backend:** [Bun](https://bun.sh/) + [Express 5](https://expressjs.com/) + TypeScript.
+- **Banco de Dados:** [SQLite](https://sqlite.org/) embarcado via módulo nativo `bun:sqlite` (`journal_mode = WAL`, `PRAGMA foreign_keys = ON`). Mapeamento completo disponível em [SCHEMA.md](SCHEMA.md).
+- **Frontend:** [React 19](https://react.dev/) + [Vite](https://vite.dev/) + TypeScript + [Tailwind CSS v4](https://tailwindcss.com/) + componentes [coss UI](https://coss.com/ui).
+- **Autenticação & Senhas:**
+  - JWT gerado via biblioteca `jsonwebtoken` e validado via `auth.middleware.ts` no header `Authorization: Bearer <token>`.
+  - Hashing seguro nativo com `Bun.password.hash()` e `Bun.password.verify()` (sem dependência externa tipo bcrypt).
+- **Integridade de Status:** Utilização de enum fixo (`aberta` | `em_andamento` | `concluida`) garantido via restrição `CHECK` no SQLite e tipos TypeScript.
+- **Cálculo de Atraso:** Avaliado no momento da consulta (`prazo < hoje` e `status != 'concluida'`), dispensando cron jobs ou colunas redundantes.
+- **Empacotamento Unificado:** Um único container Docker e uma única porta pública (**3005**). Em produção, o Express entrega a API em `/api` e os arquivos estáticos compilados do React em `/`.
+
+---
+
+### 🚫 O que ficou de fora (Decisões de Escopo / YAGNI)
+
+- Recuperação de senha por e-mail, confirmação de conta e OAuth/Login social.
+- Paginação server-side complexa, WebSockets, filas de background, cache distribuído (Redis) ou multi-tenancy.
+- Testes automatizados extensivos (mantido simples conforme requisitos do MVP).
+
+---
+
+## 🤖 Registro de uso de IA
 
 <!-- Preencher manualmente com o uso real. -->
