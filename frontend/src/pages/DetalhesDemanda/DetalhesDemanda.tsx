@@ -44,7 +44,7 @@ export function DetalhesDemanda() {
   const [dialogEdicao, setDialogEdicao] = useState(false);
   const [salvando, setSalvando] = useState(false);
 
-  const [form, setForm] = useState<FormEdicaoDemandaData>(FORM_VAZIO);
+  const [form, setForm] = useState<FormDemandaData>(FORM_VAZIO);
 
   async function carregarDados() {
     if (!id) return;
