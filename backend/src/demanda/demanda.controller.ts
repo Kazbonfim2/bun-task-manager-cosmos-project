@@ -3,10 +3,11 @@ import { demandaService } from "./demanda.service";
 
 export const demandaController = {
   listar: (req: Request, res: Response) => {
-    const { status, responsavel_id } = req.query;
+    const { status, responsavel_id, projeto_id } = req.query;
     const demandas = demandaService.listar({
       status: typeof status === "string" ? status : undefined,
       responsavel_id: typeof responsavel_id === "string" ? responsavel_id : undefined,
+      projeto_id: typeof projeto_id === "string" ? projeto_id : undefined,
     });
     res.json(demandas);
   },

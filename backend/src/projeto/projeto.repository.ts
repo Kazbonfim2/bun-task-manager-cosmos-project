@@ -16,4 +16,17 @@ export const projetoRepository = {
   listar(): Projeto[] {
     return db.query("SELECT * FROM projetos ORDER BY nome ASC").all() as Projeto[];
   },
+
+  atualizar(projeto: Projeto): Projeto {
+    db.query("UPDATE projetos SET nome = ?, descricao = ? WHERE id = ?").run(
+      projeto.nome,
+      projeto.descricao,
+      projeto.id,
+    );
+    return projeto;
+  },
+
+  excluir(id: string): void {
+    db.query("DELETE FROM projetos WHERE id = ?").run(id);
+  },
 };

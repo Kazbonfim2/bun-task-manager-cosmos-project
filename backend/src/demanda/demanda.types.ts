@@ -29,5 +29,6 @@ export type NovaDemanda = {
 
 export type FiltroDemanda = {
   responsavel_id?: string;
+  projeto_id?: string;
   status?: string;
 };

@@ -6,3 +6,5 @@ export const projetoRoutes = Router();
 projetoRoutes.use(authMiddleware);
 projetoRoutes.get("/", projetoController.listar);
 projetoRoutes.post("/", projetoController.criar);
+projetoRoutes.put("/:id", projetoController.atualizar);
+projetoRoutes.delete("/:id", projetoController.excluir);
