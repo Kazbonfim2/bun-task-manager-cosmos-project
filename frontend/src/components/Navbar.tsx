@@ -1,9 +1,11 @@
 import { LogOut, Moon, Snowflake, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { lerUsuario, limparSessao } from "@/lib/auth";
 
 export function Navbar() {
+  useLocation();
   const usuario = lerUsuario();
   const [escuro, setEscuro] = useState(() => {
     return (

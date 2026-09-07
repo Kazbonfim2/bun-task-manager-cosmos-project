@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "bun --watch src/server.ts",
-    "start": "NODE_ENV=production bun src/server.ts"
+    "start": "NODE_ENV=production bun src/server.ts",
+    "seed": "bun src/database/seed.database.ts"
   },
   "dependencies": {
     "cors": "^2.8.5",

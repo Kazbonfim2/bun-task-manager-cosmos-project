@@ -68,10 +68,29 @@ Necessário ter o runtime [Bun](https://bun.sh/) instalado:
 cd backend && bun install && cd ..
 cd frontend && bun install && cd ..
 
+# (Opcional) Popular o banco de dados com dados iniciais (seed)
+bun run seed
+
 # Iniciar backend e frontend juntos
 bun run dev
 ```
 Acesse em: **[http://localhost:3005](http://localhost:3005)**.
+
+#### 🌱 Carga Inicial de Dados (Seed)
+
+Para alimentar o banco de dados com os usuários, projetos e demandas iniciais:
+
+```bash
+# Localmente (na raiz do projeto ou dentro de backend/)
+bun run seed
+
+# Ou via Docker (com o container em execução)
+docker compose exec orion bun run seed
+```
+
+> **Credenciais padrão dos usuários do seed:**
+> - E-mails: `ana.paula.ribeiro@cosmos.com`, `beatriz.nogueira@cosmos.com`, `carlos.menezes@cosmos.com`, etc.
+> - Senha padrão: `novo123456789`
 
 ---
 
@@ -85,7 +104,7 @@ backend/src/
 ├── usuario/       # Controller, Service, Repository, rotas e tipos de Usuários
 ├── projeto/       # Controller, Service, Repository, rotas e tipos de Projetos
 ├── demanda/       # Controller, Service, Repository, rotas e tipos de Demandas
-├── database/      # Conexão SQLite nativa (bun:sqlite) e DDL inicial
+├── database/      # Conexão SQLite nativa (bun:sqlite), DDL inicial e seed
 └── server.ts      # Setup do Express, middlewares, rotas /api e integração Vite/SPA
 ```
 
@@ -119,4 +138,4 @@ backend/src/
 
 ## 🤖 Registro de uso de IA
 
-<!-- Preencher manualmente com o uso real. -->
+Consulte o arquivo [DEVELOPMENT.md](DEVELOPMENT.md) para o registro detalhado de arquitetura, decisões e uso de IA no projeto.
