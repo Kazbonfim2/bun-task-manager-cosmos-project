@@ -56,3 +56,13 @@ export type RespostaAuth = {
   token: string;
   usuario: Usuario;
 };
+
+export type Notificacao = {
+  id: string;
+  usuario_id: string;
+  demanda_id?: string | null;
+  tipo: string;
+  mensagem: string;
+  lida: boolean;
+  criado_em: string;
+};

@@ -90,9 +90,9 @@ export function DropdownMenuSeparator({
 export function DropdownMenuLabel({
   className,
   ...props
-}: MenuPrimitive.GroupLabel.Props): React.ReactElement {
+}: React.ComponentProps<"div">): React.ReactElement {
   return (
-    <MenuPrimitive.GroupLabel
+    <div
       className={cn("px-2.5 py-1.5 text-xs font-medium text-muted-foreground", className)}
       data-slot="dropdown-menu-label"
       {...props}
@@ -100,8 +100,11 @@ export function DropdownMenuLabel({
   );
 }
 
+export const DropdownMenuGroupLabel: typeof MenuPrimitive.GroupLabel = MenuPrimitive.GroupLabel;
+
 export {
   MenuPrimitive,
   DropdownMenu as DropdownMenuRoot,
   DropdownMenuContent as DropdownMenuPopup,
 };
+
