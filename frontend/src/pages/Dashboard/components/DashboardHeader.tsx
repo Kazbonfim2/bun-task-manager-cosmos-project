@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { lerUsuario } from "@/lib/auth";
-import { cn } from "@/lib/utils";
 
 function obterFraseDinamica(nome?: string): string {
   const hora = new Date().getHours();
@@ -43,13 +42,6 @@ export function DashboardHeader() {
     <header className="pt-2">
       <h1 className="font-heading min-h-11 text-4xl font-bold tracking-tight text-foreground">
         {textoDigitado}
-        <span
-          className={cn(
-            "ml-1 inline-block h-8 w-2.5 translate-y-1 bg-primary align-baseline",
-            textoDigitado.length < fraseDinamica.length ? "opacity-100" : "animate-pulse",
-          )}
-          aria-hidden="true"
-        />
       </h1>
     </header>
   );

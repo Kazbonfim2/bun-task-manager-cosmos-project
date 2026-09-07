@@ -1,6 +1,7 @@
 import { Trash2 } from "lucide-react";
 import type { SubmitEvent } from "react";
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Dialog,
   DialogClose,
@@ -12,7 +13,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Field, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { SelectSimples, type ItemSelect } from "@/components/SelectSimples";
 import type { Demanda } from "@/lib/api";
@@ -97,13 +97,12 @@ export function DialogDemanda({
             </Field>
             <Field>
               <FieldLabel>Prazo</FieldLabel>
-              <Input
-                type="date"
+              <DatePicker
                 name="prazo"
                 required
                 value={form.prazo}
-                onChange={(evento) =>
-                  setForm((atual) => ({ ...atual, prazo: evento.target.value }))
+                onChange={(prazo) =>
+                  setForm((atual) => ({ ...atual, prazo }))
                 }
               />
             </Field>
