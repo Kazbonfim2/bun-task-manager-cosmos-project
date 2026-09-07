@@ -1,3 +1,4 @@
+import { Pencil, Plus, Trash2 } from "lucide-react";
 import type { SubmitEvent } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,10 +14,15 @@ import {
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { SelectSimples, type ItemSelect } from "@/components/SelectSimples";
+import type { Projeto } from "@/lib/api";
 
 interface DialogProjetoProps {
   aberto: boolean;
   onOpenChange: (aberto: boolean) => void;
+  projetos: Projeto[];
+  projetoEditando: Projeto | null;
+  onSelecionarParaEditar: (projeto: Projeto | null) => void;
   nome: string;
   setNome: (nome: string) => void;
   descricao: string;
@@ -24,11 +30,15 @@ interface DialogProjetoProps {
   salvando: boolean;
   erro: string;
   onSalvar: (evento: SubmitEvent<HTMLFormElement>) => void;
+  onExcluir: () => void;
 }
 
 export function DialogProjeto({
   aberto,
   onOpenChange,
+  projetos,
+  projetoEditando,
+  onSelecionarParaEditar,
   nome,
   setNome,
   descricao,
@@ -36,14 +46,52 @@ export function DialogProjeto({
   salvando,
   erro,
   onSalvar,
+  onExcluir,
 }: DialogProjetoProps) {
+  const itensSelecao: ItemSelect[] = [
+    { label: "+ Criar novo projeto", value: "__novo__" },
+    ...projetos.map((p) => ({ label: `Editar: ${p.nome}`, value: p.id })),
+  ];
+
+  function aoMudarSelecao(valor: string) {
+    if (valor === "__novo__") {
+      onSelecionarParaEditar(null);
+    } else {
+      const selecionado = projetos.find((p) => p.id === valor) ?? null;
+      onSelecionarParaEditar(selecionado);
+    }
+  }
+
   return (
     <Dialog open={aberto} onOpenChange={onOpenChange}>
       <DialogPopup>
         <DialogHeader>
-          <DialogTitle>Novo projeto</DialogTitle>
-          <DialogDescription>Crie o projeto antes de ligar demandas a ele.</DialogDescription>
+          <DialogTitle>
+            {projetoEditando ? "Editar projeto" : "Novo projeto"}
+          </DialogTitle>
+          <DialogDescription>
+            {projetoEditando
+              ? "Atualize os dados do projeto ou exclua-o se não houver demandas."
+              : "Crie o projeto antes de ligar demandas a ele."}
+          </DialogDescription>
         </DialogHeader>
+
+        {projetos.length > 0 ? (
+          <div className="px-6 pt-2">
+            <Field>
+              <FieldLabel className="text-xs text-muted-foreground">
+                Ação
+              </FieldLabel>
+              <SelectSimples
+                itens={itensSelecao}
+                valor={projetoEditando ? projetoEditando.id : "__novo__"}
+                aoMudar={aoMudarSelecao}
+                placeholder="Selecione..."
+              />
+            </Field>
+          </div>
+        ) : null}
+
         <form className="contents" onSubmit={onSalvar}>
           <DialogPanel className="flex flex-col gap-4">
             <Field>
@@ -68,13 +116,30 @@ export function DialogProjeto({
               <p className="text-destructive text-sm">{erro}</p>
             ) : null}
           </DialogPanel>
-          <DialogFooter>
-            <DialogClose render={<Button type="button" variant="ghost" />}>
-              Cancelar
-            </DialogClose>
-            <Button type="submit" loading={salvando}>
-              Criar
-            </Button>
+          <DialogFooter className="flex items-center justify-between sm:justify-between w-full">
+            <div>
+              {projetoEditando ? (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  onClick={onExcluir}
+                  loading={salvando}
+                  className="gap-1.5"
+                >
+                  <Trash2 className="size-4" />
+                  Excluir
+                </Button>
+              ) : null}
+            </div>
+            <div className="flex items-center gap-2">
+              <DialogClose render={<Button type="button" variant="ghost" />}>
+                Cancelar
+              </DialogClose>
+              <Button type="submit" loading={salvando}>
+                {projetoEditando ? "Salvar alterações" : "Criar"}
+              </Button>
+            </div>
           </DialogFooter>
         </form>
       </DialogPopup>

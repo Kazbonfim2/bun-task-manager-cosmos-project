@@ -18,6 +18,7 @@ import { DialogDemanda, type FormDemandaData } from "./components/DialogDemanda"
 import { DialogProjeto } from "./components/DialogProjeto";
 
 const FILTRO_TODOS: ItemSelect = { label: "Todos os responsáveis", value: "todos" };
+const FILTRO_PROJETO_TODOS: ItemSelect = { label: "Todos os projetos", value: "todos" };
 
 const FORM_VAZIO: FormDemandaData = {
   descricao: "",
@@ -34,6 +35,7 @@ export function Dashboard() {
   const [projetos, setProjetos] = useState<Projeto[]>([]);
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [filtroResponsavel, setFiltroResponsavel] = useState("todos");
+  const [filtroProjeto, setFiltroProjeto] = useState("todos");
   const [filtroStatus, setFiltroStatus] = useState("todos");
   const [modoVisualizacao, setModoVisualizacao] = useState<"lista" | "cards">("lista");
   const [busca, setBusca] = useState("");
@@ -43,6 +45,7 @@ export function Dashboard() {
   const [dialogDemanda, setDialogDemanda] = useState(false);
   const [dialogProjeto, setDialogProjeto] = useState(false);
   const [editando, setEditando] = useState<Demanda | null>(null);
+  const [projetoEditando, setProjetoEditando] = useState<Projeto | null>(null);
   const [form, setForm] = useState<FormDemandaData>(FORM_VAZIO);
   const [projetoNome, setProjetoNome] = useState("");
   const [projetoDescricao, setProjetoDescricao] = useState("");
@@ -108,6 +111,10 @@ export function Dashboard() {
     () => projetos.map((item) => ({ label: item.nome, value: item.id })),
     [projetos],
   );
+  const itensFiltroProjeto = useMemo<ItemSelect[]>(
+    () => [FILTRO_PROJETO_TODOS, ...itensProjeto],
+    [itensProjeto],
+  );
   // Sis. de filtros por Usuário 
   const itensUsuario = useMemo<ItemSelect[]>(
     () => usuarios.map((item) => ({ label: item.nome_completo, value: item.id })),
@@ -128,6 +135,7 @@ export function Dashboard() {
     try {
       const params = new URLSearchParams();
       if (filtroResponsavel !== "todos") params.set("responsavel_id", filtroResponsavel);
+      if (filtroProjeto !== "todos") params.set("projeto_id", filtroProjeto);
       const query = params.toString();
       const dados = await api<Demanda[]>(`/demandas${query ? `?${query}` : ""}`);
       setDemandas(dados);
@@ -147,7 +155,7 @@ export function Dashboard() {
     carregarDemandas().catch((falha: unknown) => {
       setErro(falha instanceof Error ? falha.message : "Falha ao carregar");
     });
-  }, [filtroResponsavel]);
+  }, [filtroResponsavel, filtroProjeto]);
 
   useEffect(() => {
     setPaginaAtual(1);
@@ -213,38 +221,108 @@ export function Dashboard() {
     }
   }
 
+  function abrirModalProjeto(projeto: Projeto | null = null) {
+    setProjetoEditando(projeto);
+    setProjetoNome(projeto ? projeto.nome : "");
+    setProjetoDescricao(projeto ? projeto.descricao || "" : "");
+    setErro("");
+    setDialogProjeto(true);
+  }
+
+  function selecionarProjetoParaEditar(projeto: Projeto | null) {
+    setProjetoEditando(projeto);
+    setProjetoNome(projeto ? projeto.nome : "");
+    setProjetoDescricao(projeto ? projeto.descricao || "" : "");
+    setErro("");
+  }
+
   async function salvarProjeto(evento: SubmitEvent<HTMLFormElement>) {
     evento.preventDefault();
     setSalvando(true);
     setErro("");
     try {
-      await api("/projetos", {
-        method: "POST",
-        body: JSON.stringify({
-          nome: projetoNome,
-          descricao: projetoDescricao || null,
-        }),
-      });
+      if (projetoEditando) {
+        await api(`/projetos/${projetoEditando.id}`, {
+          method: "PUT",
+          body: JSON.stringify({
+            nome: projetoNome,
+            descricao: projetoDescricao || null,
+          }),
+        });
+      } else {
+        await api("/projetos", {
+          method: "POST",
+          body: JSON.stringify({
+            nome: projetoNome,
+            descricao: projetoDescricao || null,
+          }),
+        });
+      }
       setProjetoNome("");
       setProjetoDescricao("");
+      setProjetoEditando(null);
       setDialogProjeto(false);
       await carregarListas();
+      await carregarDemandas();
     } catch (falha) {
-      setErro(falha instanceof Error ? falha.message : "Falha ao criar projeto");
+      setErro(falha instanceof Error ? falha.message : "Falha ao salvar projeto");
     } finally {
       setSalvando(false);
     }
   }
 
+  async function excluirProjeto() {
+    if (!projetoEditando) return;
+    setSalvando(true);
+    setErro("");
+    try {
+      await api(`/projetos/${projetoEditando.id}`, { method: "DELETE" });
+      setProjetoNome("");
+      setProjetoDescricao("");
+      setProjetoEditando(null);
+      setDialogProjeto(false);
+      await carregarListas();
+      await carregarDemandas();
+    } catch (falha) {
+      setErro(falha instanceof Error ? falha.message : "Falha ao excluir projeto");
+    } finally {
+      setSalvando(false);
+    }
+  }
+
+  function exportarCsv() {
+    if (!demandasFiltradas.length) return;
+    const cabecalho = ["ID", "Descrição", "Projeto", "Responsável", "Prazo", "Status"];
+    const linhas = demandasFiltradas.map((d) => [
+      `"${d.id}"`,
+      `"${d.descricao.replace(/"/g, '""')}"`,
+      `"${d.projeto_nome.replace(/"/g, '""')}"`,
+      `"${d.responsavel_nome.replace(/"/g, '""')}"`,
+      `"${d.prazo.slice(0, 10)}"`,
+      `"${d.status}"`,
+    ]);
+    const conteudo = [cabecalho.join(";"), ...linhas.map((l) => l.join(";"))].join("\r\n");
+    const blob = new Blob(["\uFEFF" + conteudo], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `demandas_${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
   async function trocarStatus(id: string, status: string) {
+    setDemandas((anteriores) =>
+      anteriores.map((d) => (d.id === id ? { ...d, status } : d)),
+    );
     try {
       await api(`/demandas/${id}/status`, {
         method: "PATCH",
         body: JSON.stringify({ status }),
       });
-      await carregarDemandas();
     } catch (falha) {
       setErro(falha instanceof Error ? falha.message : "Falha ao alterar status");
+      await carregarDemandas();
     }
   }
 
@@ -268,14 +346,18 @@ export function Dashboard() {
           itensResponsavel={itensResponsavel}
           filtroResponsavel={filtroResponsavel}
           onMudarFiltroResponsavel={setFiltroResponsavel}
+          itensProjeto={itensFiltroProjeto}
+          filtroProjeto={filtroProjeto}
+          onMudarFiltroProjeto={setFiltroProjeto}
           filtroStatus={filtroStatus}
           onMudarFiltroStatus={setFiltroStatus}
           modoVisualizacao={modoVisualizacao}
           onMudarModoVisualizacao={setModoVisualizacao}
           busca={busca}
           onMudarBusca={setBusca}
-          onAbrirNovoProjeto={() => setDialogProjeto(true)}
+          onAbrirNovoProjeto={() => abrirModalProjeto(null)}
           onAbrirNovaDemanda={abrirNovaDemanda}
+          onExportarCsv={exportarCsv}
         />
 
         {/* // Exibição de mensagem de erro global da dashboard */}
@@ -343,10 +425,13 @@ export function Dashboard() {
         onExcluir={excluirDemanda}
       />
 
-      {/* // Diálogo modal para criação de novo projeto */}
+      {/* // Diálogo modal para criação e gestão de projetos */}
       <DialogProjeto
         aberto={dialogProjeto}
         onOpenChange={setDialogProjeto}
+        projetos={projetos}
+        projetoEditando={projetoEditando}
+        onSelecionarParaEditar={selecionarProjetoParaEditar}
         nome={projetoNome}
         setNome={setProjetoNome}
         descricao={projetoDescricao}
@@ -354,6 +439,7 @@ export function Dashboard() {
         salvando={salvando}
         erro={erro}
         onSalvar={salvarProjeto}
+        onExcluir={excluirProjeto}
       />
     </main>
   );

@@ -1,9 +1,18 @@
-import { ChevronDown, FolderPlus, LayoutGrid, List, Plus, Search } from "lucide-react";
+import {
+  ChevronDown,
+  Download,
+  FolderPlus,
+  LayoutGrid,
+  List,
+  Plus,
+  Search,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Field, FieldLabel } from "@/components/ui/field";
@@ -25,6 +34,9 @@ interface DashboardToolbarProps {
   itensResponsavel: readonly ItemSelect[];
   filtroResponsavel: string;
   onMudarFiltroResponsavel: (valor: string) => void;
+  itensProjeto: readonly ItemSelect[];
+  filtroProjeto: string;
+  onMudarFiltroProjeto: (valor: string) => void;
   filtroStatus: string;
   onMudarFiltroStatus: (valor: string) => void;
   modoVisualizacao: "lista" | "cards";
@@ -33,12 +45,16 @@ interface DashboardToolbarProps {
   onMudarBusca: (valor: string) => void;
   onAbrirNovoProjeto: () => void;
   onAbrirNovaDemanda: () => void;
+  onExportarCsv: () => void;
 }
 
 export function DashboardToolbar({
   itensResponsavel,
   filtroResponsavel,
   onMudarFiltroResponsavel,
+  itensProjeto,
+  filtroProjeto,
+  onMudarFiltroProjeto,
   filtroStatus,
   onMudarFiltroStatus,
   modoVisualizacao,
@@ -47,13 +63,25 @@ export function DashboardToolbar({
   onMudarBusca,
   onAbrirNovoProjeto,
   onAbrirNovaDemanda,
+  onExportarCsv,
 }: DashboardToolbarProps) {
   return (
-    <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-      {/* // Grupo 1: Filtros de Responsável e Status */}
-      <div className="flex flex-wrap items-end gap-2.5 sm:gap-3">
+    <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+      {/* // Grupo 1: Filtros de Projeto, Responsável e Status em linha única minimalista */}
+      <div className="flex items-end gap-2 sm:gap-3 flex-nowrap w-full lg:w-auto">
+        {/* // Filtro por projeto */}
+        <Field className="flex-1 sm:flex-initial sm:w-40 min-w-0">
+          <FieldLabel>Projeto</FieldLabel>
+          <SelectSimples
+            itens={itensProjeto}
+            valor={filtroProjeto}
+            aoMudar={onMudarFiltroProjeto}
+            placeholder="Projeto"
+          />
+        </Field>
+
         {/* // Filtro por responsável */}
-        <Field className="flex-1 min-w-[130px] sm:flex-initial sm:w-48">
+        <Field className="flex-1 sm:flex-initial sm:w-40 min-w-0">
           <FieldLabel>Responsável</FieldLabel>
           <SelectSimples
             itens={itensResponsavel}
@@ -64,7 +92,7 @@ export function DashboardToolbar({
         </Field>
 
         {/* // Filtro por status */}
-        <Field className="flex-1 min-w-[120px] sm:flex-initial sm:w-44">
+        <Field className="flex-1 sm:flex-initial sm:w-36 min-w-0">
           <FieldLabel>Status</FieldLabel>
           <SelectSimples
             itens={FILTRO_STATUS_ITENS}
@@ -75,9 +103,9 @@ export function DashboardToolbar({
         </Field>
       </div>
 
-      {/* // Grupo 2: Ações agrupadas (Split Button de criação, ToggleGroup lista/cards) e Busca */}
+      {/* // Grupo 2: Ações agrupadas (Nova demanda + Dropdown com Novo Projeto & Exportar CSV, Toggle lista/cards e Busca) */}
       <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
-        {/* // Split Button: Ação principal (Nova demanda) + Menu secundário (Novo projeto) */}
+        {/* // Split Button: Nova Demanda + Menu suspenso de ações secundárias */}
         <DropdownMenu>
           <Group className="w-full sm:w-auto">
             <Button
@@ -94,7 +122,7 @@ export function DashboardToolbar({
                   type="button"
                   size="icon"
                   className="px-2 border-s border-primary-foreground/20"
-                  aria-label="Mais opções de criação"
+                  aria-label="Mais opções"
                 />
               }
             >
@@ -105,12 +133,17 @@ export function DashboardToolbar({
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={onAbrirNovoProjeto}>
               <FolderPlus aria-hidden="true" className="size-4" />
-              Novo projeto
+              Novo / Gerenciar projetos
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={onExportarCsv}>
+              <Download aria-hidden="true" className="size-4" />
+              Exportar CSV
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* // ToggleGroup de alternância de visualização (pill/segmented control) */}
+        {/* // Alternador de visualização lista/cards */}
         <ToggleGroup
           type="single"
           value={modoVisualizacao}
@@ -137,7 +170,7 @@ export function DashboardToolbar({
         </ToggleGroup>
 
         {/* // Campo de busca em tempo real */}
-        <InputGroup className="w-full sm:w-56 md:w-64">
+        <InputGroup className="w-full sm:w-52 md:w-60">
           <InputGroupAddon>
             <InputGroupText>
               <Search className="size-4" aria-hidden="true" />
