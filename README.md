@@ -26,26 +26,28 @@ docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 
 Ou: `bun run dev:docker`.
 
-Abra **http://localhost:5173** — não a 3005. O Vite recarrega o React. A API fica em `http://localhost:3005/api` (o Vite encaminha `/api`).
+Abra **http://localhost:3005**. O Express entrega a API em `/api` e o Vite (middleware) recarrega o React na mesma porta.
 
 Sem Docker:
 
 ```bash
-bun install
+cd backend && bun install && cd ..
 cd frontend && bun install && cd ..
 bun run dev
 ```
 
-Mesma URL: **http://localhost:5173**.
+Mesma URL: **http://localhost:3005**.
+
+O frontend continua um pacote à parte (`cd frontend && bun run build`). Em desenvolvimento, não suba o Vite na 5173 — a entrada é só o backend.
 
 ## Decisões técnicas
 
 - **Stack:** Bun + Express + TypeScript no backend; SQLite via `bun:sqlite` (arquivo local); Vite + React + TypeScript no frontend; coss UI + Tailwind CSS v4.
-- **Arquitetura:** MVC em camadas (`routes → controller → service → repository → SQLite`). Classes simples, dependências no construtor, sem decorators e sem container de DI.
+- **Arquitetura:** MVC em camadas (`routes → controller → service → repository → SQLite`). Classes simples, dependências no construtor, sem decorators e sem container de DI. Código do servidor em `backend/`.
 - **Auth:** cadastro e login com JWT (`jsonwebtoken`) no header `Authorization: Bearer <token>`. Senha com `Bun.password.hash()` / `Bun.password.verify()`.
 - **Status da demanda:** enum fixo `aberta` | `em_andamento` | `concluida`. Não é texto livre, para evitar variantes tipo `ok` / `Ok` / `OK`.
 - **Atrasada:** prazo anterior a hoje (data local) e status diferente de `concluida`.
-- **Empacotamento:** um único container. Produção: Express serve API em `/api` e o `dist` na porta 3005. Dev: Vite na 5173 com hot reload.
+- **Empacotamento:** um único container. Uma porta pública: **3005**. Produção: Express serve API em `/api` e o `dist`. Dev: Express na 3005 com Vite em middleware (hot reload, sem 5173).
 - **Banco:** arquivo SQLite em `/app/data/orion.db` (volume Docker). Sem Postgres, MySQL ou serviço de banco externo.
 
 ## O que ficou de fora

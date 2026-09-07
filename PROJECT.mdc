@@ -24,7 +24,7 @@ instanciadas diretamente e recebem suas dependências pelo construtor.
 
 Convenção de nomes por sufixo, um arquivo por responsabilidade:
 ```
-src/
+backend/src/
   auth/
     auth.controller.ts      # login e cadastro
     auth.service.ts         # gera/valida JWT, faz hash/verifica senha
