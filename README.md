@@ -76,9 +76,11 @@ bun run dev
 ```
 Acesse em: **[http://localhost:3005](http://localhost:3005)**.
 
-#### 🌱 Carga Inicial de Dados (Seed)
+#### 🌱 Carga Inicial de Dados (Seed Automático & Manual)
 
-Para alimentar o banco de dados com os usuários, projetos e demandas iniciais:
+O sistema executa o **seed automaticamente** no primeiro boot (seja via Docker ou localmente) caso o banco de dados esteja vazio.
+
+Caso queira forçar a execução do seed manualmente:
 
 ```bash
 # Localmente (na raiz do projeto ou dentro de backend/)

@@ -9,6 +9,9 @@ import { HttpError } from "./http-error";
 import { projetoRoutes } from "./projeto/projeto.routes";
 import { usuarioRoutes } from "./usuario/usuario.routes";
 import "./database/connection";
+import { seedDatabaseIfEmpty } from "./database/seed.database";
+
+await seedDatabaseIfEmpty();
 
 const app = express();
 const porta = Number(process.env.PORT ?? 3005);

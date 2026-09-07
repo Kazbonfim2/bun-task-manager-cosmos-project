@@ -22,8 +22,6 @@
 import { db } from "./connection";
 
 const SENHA_PADRAO = "novo123456789";
-const senhaHash = await Bun.password.hash(SENHA_PADRAO);
-
 
 // ---------- usuarios ----------
 const usuarios = [
@@ -36,13 +34,6 @@ const usuarios = [
   { id: 'user-rafael-duarte', nome_completo: 'Rafael Duarte', email: 'rafael.duarte@cosmos.com' },
 ];
 
-const insertUsuario = db.prepare(
-  `INSERT OR IGNORE INTO usuarios (id, nome_completo, email, senha_hash, criado_em) VALUES (?, ?, ?, ?, ?)`
-);
-for (const u of usuarios) {
-  insertUsuario.run(u.id, u.nome_completo, u.email, senhaHash, new Date().toISOString());
-}
-
 // ---------- projetos ----------
 const projetos = [
   { id: 'proj-aurora', nome: 'Projeto Aurora' },
@@ -50,13 +41,6 @@ const projetos = [
   { id: 'proj-cordilheira', nome: 'Projeto Cordilheira' },
   { id: 'proj-delta', nome: 'Projeto Delta' },
 ];
-
-const insertProjeto = db.prepare(
-  `INSERT OR IGNORE INTO projetos (id, nome, descricao, criado_em) VALUES (?, ?, NULL, ?)`
-);
-for (const p of projetos) {
-  insertProjeto.run(p.id, p.nome, new Date().toISOString());
-}
 
 // ---------- demandas ----------
 const demandas = [
@@ -144,16 +128,46 @@ const demandas = [
   { id: 'PEN-037-R2', descricao: 'Detalhamento de despesas com viagens', projeto_id: 'proj-aurora', responsavel_id: 'user-fernanda-lima', criado_por_id: 'user-fernanda-lima', prazo: '2026-08-07', status: 'aberta', criado_em: '2026-07-27T00:00:00' },
 ];
 
-const insertDemanda = db.prepare(
-  `INSERT OR IGNORE INTO demandas
-    (id, descricao, projeto_id, responsavel_id, criado_por_id, prazo, status, criado_em, atualizado_em)
-   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
-);
-for (const d of demandas) {
-  insertDemanda.run(
-    d.id, d.descricao, d.projeto_id, d.responsavel_id, d.criado_por_id,
-    d.prazo, d.status, d.criado_em, d.criado_em
+export async function seedDatabase() {
+  const senhaHash = await Bun.password.hash(SENHA_PADRAO);
+
+  const insertUsuario = db.prepare(
+    `INSERT OR IGNORE INTO usuarios (id, nome_completo, email, senha_hash, criado_em) VALUES (?, ?, ?, ?, ?)`
   );
+  for (const u of usuarios) {
+    insertUsuario.run(u.id, u.nome_completo, u.email, senhaHash, new Date().toISOString());
+  }
+
+  const insertProjeto = db.prepare(
+    `INSERT OR IGNORE INTO projetos (id, nome, descricao, criado_em) VALUES (?, ?, NULL, ?)`
+  );
+  for (const p of projetos) {
+    insertProjeto.run(p.id, p.nome, new Date().toISOString());
+  }
+
+  const insertDemanda = db.prepare(
+    `INSERT OR IGNORE INTO demandas
+      (id, descricao, projeto_id, responsavel_id, criado_por_id, prazo, status, criado_em, atualizado_em)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  );
+  for (const d of demandas) {
+    insertDemanda.run(
+      d.id, d.descricao, d.projeto_id, d.responsavel_id, d.criado_por_id,
+      d.prazo, d.status, d.criado_em, d.criado_em
+    );
+  }
+
+  console.log(`Seed concluído: ${usuarios.length} usuários, ${projetos.length} projetos, ${demandas.length} demandas.`);
 }
 
-console.log(`Seed concluído: ${usuarios.length} usuários, ${projetos.length} projetos, ${demandas.length} demandas.`);
+export async function seedDatabaseIfEmpty() {
+  const row = db.query("SELECT COUNT(*) as count FROM usuarios").get() as { count: number };
+  if (row.count === 0) {
+    console.log("Banco de dados vazio. Executando seed inicial automático...");
+    await seedDatabase();
+  }
+}
+
+if (import.meta.main) {
+  await seedDatabase();
+}
