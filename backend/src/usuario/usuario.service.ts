@@ -37,11 +37,8 @@ export class UsuarioService {
     return this.repository.listar().map(semSenha);
   }
 
-  buscarPorId(id: string): Usuario | null {
-    return this.repository.buscarPorId(id);
-  }
-
   buscarPorEmail(email: string): Usuario | null {
     return this.repository.buscarPorEmail(email);
   }
 }
+

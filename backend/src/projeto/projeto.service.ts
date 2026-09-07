@@ -20,10 +20,5 @@ export class ProjetoService {
   listar(): Projeto[] {
     return this.repository.listar();
   }
-
-  buscarOuFalhar(id: string): Projeto {
-    const projeto = this.repository.buscarPorId(id);
-    if (!projeto) throw new HttpError(404, "Projeto não encontrado");
-    return projeto;
-  }
 }
+
