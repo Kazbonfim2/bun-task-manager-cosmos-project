@@ -1,15 +1,14 @@
 import type { Request, Response } from "express";
-import { ProjetoService } from "./projeto.service";
+import { projetoService } from "./projeto.service";
 
-export class ProjetoController {
-  constructor(private service: ProjetoService) {}
-
-  listar = (_req: Request, res: Response) => {
-    res.json(this.service.listar());
-  };
-
-  criar = (req: Request, res: Response) => {
-    const projeto = this.service.criar(req.body ?? {});
+export const projetoController = {
+  criar: (req: Request, res: Response) => {
+    const { nome, descricao } = req.body ?? {};
+    const projeto = projetoService.criar({ nome, descricao });
     res.status(201).json(projeto);
-  };
-}
+  },
+
+  listar: (_req: Request, res: Response) => {
+    res.json(projetoService.listar());
+  },
+};

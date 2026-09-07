@@ -1,40 +1,40 @@
 import type { Request, Response } from "express";
-import { HttpError } from "../http-error";
-import { DemandaService } from "./demanda.service";
+import { demandaService } from "./demanda.service";
 
-export class DemandaController {
-  constructor(private service: DemandaService) {}
+export const demandaController = {
+  listar: (req: Request, res: Response) => {
+    const { status, responsavel_id } = req.query;
+    const demandas = demandaService.listar({
+      status: typeof status === "string" ? status : undefined,
+      responsavel_id: typeof responsavel_id === "string" ? responsavel_id : undefined,
+    });
+    res.json(demandas);
+  },
 
-  listar = (req: Request, res: Response) => {
-    const responsavel_id =
-      typeof req.query.responsavel_id === "string" ? req.query.responsavel_id : undefined;
-    const status = typeof req.query.status === "string" ? req.query.status : undefined;
-    res.json(this.service.listar({ responsavel_id, status }));
-  };
-
-  buscarPorId = (req: Request, res: Response) => {
-    const demanda = this.service.buscarPorId(req.params.id as string);
+  buscarPorId: (req: Request, res: Response) => {
+    const demanda = demandaService.buscarPorId(req.params.id);
     res.json(demanda);
-  };
+  },
 
-  criar = (req: Request, res: Response) => {
-    if (!req.usuario) throw new HttpError(401, "Token ausente");
-    const demanda = this.service.criar(req.body ?? {}, req.usuario.id);
+  criar: (req: Request, res: Response) => {
+    const criadoPorId = req.usuario?.id ?? "";
+    const demanda = demandaService.criar(req.body, criadoPorId);
     res.status(201).json(demanda);
-  };
+  },
 
-  atualizar = (req: Request, res: Response) => {
-    const demanda = this.service.atualizar(req.params.id as string, req.body ?? {});
+  atualizar: (req: Request, res: Response) => {
+    const demanda = demandaService.atualizar(req.params.id, req.body);
     res.json(demanda);
-  };
+  },
 
-  alterarStatus = (req: Request, res: Response) => {
-    const demanda = this.service.alterarStatus(req.params.id as string, req.body?.status);
+  alterarStatus: (req: Request, res: Response) => {
+    const { status } = req.body ?? {};
+    const demanda = demandaService.alterarStatus(req.params.id, status);
     res.json(demanda);
-  };
+  },
 
-  excluir = (req: Request, res: Response) => {
-    this.service.excluir(req.params.id as string);
+  excluir: (req: Request, res: Response) => {
+    demandaService.excluir(req.params.id);
     res.status(204).send();
-  };
-}
+  },
+};

@@ -11,7 +11,7 @@ const SELECT_COM_NOMES = `
   JOIN usuarios u ON u.id = d.responsavel_id
 `;
 
-export class DemandaRepository {
+export const demandaRepository = {
   criar(demanda: Demanda): DemandaComNomes {
     db.query(
       `INSERT INTO demandas (
@@ -30,13 +30,13 @@ export class DemandaRepository {
       demanda.atualizado_em,
     );
     return this.buscarPorId(demanda.id) as DemandaComNomes;
-  }
+  },
 
   buscarPorId(id: string): DemandaComNomes | null {
     return db
       .query(`${SELECT_COM_NOMES} WHERE d.id = ?`)
       .get(id) as DemandaComNomes | null;
-  }
+  },
 
   listar(filtro: FiltroDemanda): DemandaComNomes[] {
     const condicoes: string[] = [];
@@ -59,7 +59,7 @@ export class DemandaRepository {
     return db
       .query(`${SELECT_COM_NOMES} ${where} ORDER BY d.prazo ASC`)
       .all(...params) as DemandaComNomes[];
-  }
+  },
 
   atualizar(demanda: Demanda): DemandaComNomes {
     db.query(
@@ -77,9 +77,9 @@ export class DemandaRepository {
       demanda.id,
     );
     return this.buscarPorId(demanda.id) as DemandaComNomes;
-  }
+  },
 
   excluir(id: string): void {
     db.query(`DELETE FROM demandas WHERE id = ?`).run(id);
-  }
-}
+  },
+};

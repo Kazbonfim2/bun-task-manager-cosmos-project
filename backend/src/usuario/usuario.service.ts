@@ -1,5 +1,5 @@
 import { HttpError } from "../http-error";
-import { UsuarioRepository } from "./usuario.repository";
+import { usuarioRepository } from "./usuario.repository";
 import type { NovoUsuario, Usuario, UsuarioPublico } from "./usuario.types";
 
 export function semSenha(usuario: Usuario): UsuarioPublico {
@@ -7,9 +7,7 @@ export function semSenha(usuario: Usuario): UsuarioPublico {
   return publico;
 }
 
-export class UsuarioService {
-  constructor(private repository: UsuarioRepository) {}
-
+export const usuarioService = {
   async cadastrar(dados: NovoUsuario): Promise<UsuarioPublico> {
     const nome = dados.nome_completo?.trim();
     const email = dados.email?.trim().toLowerCase();
@@ -18,11 +16,11 @@ export class UsuarioService {
     if (!nome) throw new HttpError(400, "Nome completo é obrigatório");
     if (!email || !email.includes("@")) throw new HttpError(400, "E-mail inválido");
     if (senha.length < 6) throw new HttpError(400, "Senha deve ter pelo menos 6 caracteres");
-    if (this.repository.buscarPorEmail(email)) {
+    if (usuarioRepository.buscarPorEmail(email)) {
       throw new HttpError(409, "E-mail já cadastrado");
     }
 
-    const usuario = this.repository.criar({
+    const usuario = usuarioRepository.criar({
       id: crypto.randomUUID(),
       nome_completo: nome,
       email,
@@ -31,14 +29,13 @@ export class UsuarioService {
     });
 
     return semSenha(usuario);
-  }
+  },
 
   listarPublicos(): UsuarioPublico[] {
-    return this.repository.listar().map(semSenha);
-  }
+    return usuarioRepository.listar().map(semSenha);
+  },
 
   buscarPorEmail(email: string): Usuario | null {
-    return this.repository.buscarPorEmail(email);
-  }
-}
-
+    return usuarioRepository.buscarPorEmail(email);
+  },
+};
