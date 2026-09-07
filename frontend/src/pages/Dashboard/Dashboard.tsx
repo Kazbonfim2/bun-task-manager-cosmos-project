@@ -48,9 +48,16 @@ export function Dashboard() {
   const [salvando, setSalvando] = useState(false);
 
   const demandasFiltradas = useMemo(() => {
+    let lista = demandas;
+    if (filtroStatus === "atrasadas") {
+      lista = lista.filter((d) => demandaAtrasada(d.prazo, d.status));
+    } else if (filtroStatus !== "todos") {
+      lista = lista.filter((d) => d.status === filtroStatus);
+    }
+
     const termo = busca.trim().toLowerCase();
-    if (!termo) return demandas;
-    return demandas.filter((demanda) => {
+    if (!termo) return lista;
+    return lista.filter((demanda) => {
       const statusLabel =
         STATUS_ITENS.find((s) => s.value === demanda.status)?.label ?? "";
       const prazoApenasData = demanda.prazo.slice(0, 10);
@@ -76,7 +83,7 @@ export function Dashboard() {
 
       return texto.includes(termo);
     });
-  }, [demandas, busca]);
+  }, [demandas, filtroStatus, busca]);
 
   // Listagem de conteúdos - número fixo definido como 10, pode ser alterado conforme a necessidade.
   const ITENS_POR_PAGINA = 10;
@@ -118,7 +125,6 @@ export function Dashboard() {
   async function carregarDemandas() {
     const params = new URLSearchParams();
     if (filtroResponsavel !== "todos") params.set("responsavel_id", filtroResponsavel);
-    if (filtroStatus !== "todos") params.set("status", filtroStatus);
     const query = params.toString();
     const dados = await api<Demanda[]>(`/demandas${query ? `?${query}` : ""}`);
     setDemandas(dados);
@@ -135,11 +141,11 @@ export function Dashboard() {
     carregarDemandas().catch((falha: unknown) => {
       setErro(falha instanceof Error ? falha.message : "Falha ao carregar");
     });
-  }, [filtroResponsavel, filtroStatus]);
+  }, [filtroResponsavel]);
 
   useEffect(() => {
     setPaginaAtual(1);
-  }, [busca]);
+  }, [filtroStatus, busca]);
 
   const total = demandas.length;
   const abertas = demandas.filter((item) => item.status !== "concluida").length;
@@ -292,7 +298,7 @@ export function Dashboard() {
 
         {/* // Rodapé fixo de paginação com resumo numérico de itens e controles */}
         <DashboardPagination
-          totalItens={demandas.length}
+          totalItens={demandasFiltradas.length}
           paginaAtual={paginaAtual}
           itensPorPagina={ITENS_POR_PAGINA}
           totalPaginas={totalPaginas}
