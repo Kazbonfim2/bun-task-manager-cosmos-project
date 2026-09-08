@@ -1,0 +1,171 @@
+# Prompt: Sistema de Controle de Demandas (ORION)
+
+## Contexto
+Construir uma aplicação web simples para substituir uma planilha compartilhada
+de controle de demandas de uma equipe de projetos. Cada demanda tem descrição,
+responsável, prazo e status. O sistema precisa deixar claro o que está aberto,
+com quem e o que já venceu.
+
+## Stack obrigatória
+- Backend: Bun + TypeScript + Express.js
+- Banco: SQLite (arquivo local, via `bun:sqlite`) - sem servidor de banco externo
+- Frontend: Vite + React + TypeScript
+- Empacotamento: Docker (um único `docker compose up --build` sobe tudo)
+
+## Arquitetura do backend (MVC, naming estilo Nest.js)
+Organizar por camadas, com classes simples e **sem decorators nem container de
+injeção de dependência** (nada de `@Injectable`, `@Controller`, módulos - isso
+adicionaria complexidade desnecessária para um CRUD). As classes são
+instanciadas diretamente e recebem suas dependências pelo construtor.
+
+Convenção de nomes por sufixo, um arquivo por responsabilidade:
+```
+backend/src/
+  auth/
+    auth.controller.ts      # login e cadastro
+    auth.service.ts         # gera/valida JWT, faz hash/verifica senha
+    auth.middleware.ts       # valida o token no header Authorization
+    auth.routes.ts
+  usuario/
+    usuario.controller.ts
+    usuario.service.ts
+    usuario.repository.ts
+    usuario.routes.ts        # inclui listagem simples p/ popular selects
+    usuario.types.ts
+  projeto/
+    projeto.controller.ts
+    projeto.service.ts
+    projeto.repository.ts
+    projeto.routes.ts
+    projeto.types.ts
+  demanda/
+    demanda.controller.ts   # recebe request/response, chama o service
+    demanda.service.ts      # regra de negócio (validações, enum de status)
+    demanda.repository.ts   # única camada que fala com o SQLite
+    demanda.routes.ts       # mapeia rotas Express para métodos do controller
+    demanda.types.ts        # tipos/interfaces do domínio
+  database/
+    connection.ts           # abre e prepara o banco SQLite
+  server.ts                 # cria o app Express, registra rotas, sobe o servidor
+```
+
+Regra de fluxo: `routes -> controller -> service -> repository -> SQLite`.
+Cada controller é uma classe com um método por endpoint (ex:
+`listar`, `criar`, `atualizar`, `alterarStatus`). O service não conhece
+Express (sem `req`/`res`), só recebe e devolve dados. O repository só executa
+SQL, sem lógica de negócio. As rotas de `demanda` e `projeto` passam pelo
+`auth.middleware` (exigem token válido); as de `auth` (login/cadastro) não.
+
+## Requisitos funcionais (obrigatórios, não pular nenhum)
+1. Cadastro de usuário (nome completo, e-mail, senha) e login com JWT
+2. Cadastrar projeto: nome (obrigatório), descrição (opcional)
+3. Cadastrar demanda: descrição, prazo, status, projeto (obrigatório) e
+   responsável (obrigatório, um usuário cadastrado)
+4. Listar demandas com filtro por responsável E por status (os dois filtros
+   combináveis)
+5. Alterar o status de uma demanda existente
+6. Editar os dados de uma demanda já cadastrada (todos os campos)
+7. Toda ação de criar/editar/listar demanda e projeto exige usuário
+   autenticado (token JWT válido)
+
+## Modelo de dados sugerido
+```
+Usuario {
+  id: string (uuid ou autoincrement)
+  nome_completo: string (obrigatório)
+  email: string (obrigatório, único)
+  senha_hash: string (obrigatório, nunca armazenar em texto puro)
+  criado_em: datetime
+}
+
+Projeto {
+  id: string
+  nome: string (obrigatório)
+  descricao: string (opcional)
+  criado_em: datetime
+}
+
+Demanda {
+  id: string (uuid ou autoincrement)
+  descricao: string (obrigatório)
+  projeto_id: FK -> Projeto (obrigatório)
+  responsavel_id: FK -> Usuario (obrigatório, quem executa a demanda)
+  criado_por_id: FK -> Usuario (obrigatório, preenchido automaticamente com
+    o usuário autenticado que criou o registro, não vem do formulário)
+  prazo: date (obrigatório)
+  status: enum ["aberta", "em_andamento", "concluida"] (obrigatório)
+  criado_em: datetime
+  atualizado_em: datetime
+}
+```
+Um projeto tem várias demandas. Um usuário pode ser responsável por várias
+demandas e pode ter criado várias demandas (são dois papéis diferentes, por
+isso duas foreign keys separadas).
+
+Use um enum fixo de status (não texto livre) para evitar inconsistência tipo
+"ok"/"Ok"/"OK" - isso é decisão de design, deixe explícito no README.
+
+**Senha:** usar `Bun.password.hash()` / `Bun.password.verify()` (API nativa
+do Bun, sem precisar de biblioteca externa tipo bcrypt) para gerar e conferir
+o hash da senha.
+
+**JWT:** usar a lib `jsonwebtoken` para gerar o token no login e validar no
+`auth.middleware`. Token no header `Authorization: Bearer <token>`.
+
+## Frontend
+- Biblioteca visual: **coss.com/ui** (https://coss.com/ui) - componentes React
+  + Tailwind CSS, copiados para o projeto (estilo shadcn/ui, você é dono do
+  código). Configurar Tailwind no Vite e usar os componentes de lá para
+  botões, inputs, selects, cards, badges e modais/dialogs
+- Tela de login e tela de cadastro (nome completo, e-mail, senha), simples,
+  sem "esqueci minha senha" nem confirmação por e-mail
+- Após login, guardar o token e redirecionar para o dashboard. Rotas do
+  dashboard são protegidas: sem token válido, volta para o login
+- Dashboard:
+  - Cards no topo: total de demandas, abertas, atrasadas (prazo < hoje e
+    status != concluida)
+  - Tabela/lista de demandas com os dois filtros (responsável, status) como
+    dropdowns acima da lista (os dois vêm de listas cadastradas: usuários e
+    o enum de status)
+  - Botão "Nova demanda" abre formulário para cadastro, com selects para
+    projeto e responsável (populados a partir dos usuários e projetos
+    cadastrados)
+  - Botão "Novo projeto" simples, para poder criar projetos antes de
+    cadastrar demandas neles
+  - Cada linha da lista permite editar dados e trocar status rapidamente
+  - Demandas atrasadas devem se destacar visualmente (cor ou badge) - é o
+    tipo de detalhe que mostra cuidado sem adicionar complexidade
+
+## Regras de qualidade de código (IMPORTANTE)
+- Código limpo e simples, que um dev júnior consiga ler e entender sem
+  esforço: nomes claros, funções pequenas, sem abstrações desnecessárias
+- Seguir a arquitetura em camadas descrita acima, mas sem exagerar: cada
+  classe faz uma coisa só, sem interfaces genéricas ou generics complexos
+- Não adicionar multi-tenant, filas, cache, DI container ou qualquer coisa
+  não pedida além do login/cadastro e das entidades descritas aqui
+- Comentários apenas onde a lógica não for óbvia (evitar comentário óbvio)
+
+## Restrições de execução (não negociáveis)
+- Nenhuma dependência de serviço externo, credencial ou chave de API
+- Comando único de subida: `docker compose up --build`
+- Porta de acesso fixa e documentada (ex: 3000)
+- Precisa subir do zero, em máquina limpa, em até 10 minutos
+
+## Entregáveis que você deve gerar
+1. Código completo (backend + frontend + Dockerfile/docker-compose.yml)
+2. README.md com:
+   - Comando exato para rodar (`docker compose up --build`)
+   - Porta de acesso
+   - Decisões técnicas tomadas (stack, enum de status, etc.) e o que ficou
+     de fora
+   - Seção "Registro de uso de IA" deixada como placeholder em branco
+     (isso eu preencho manualmente depois, com base no meu uso real - não
+     invente esse conteúdo)
+
+## O que NÃO fazer
+- Não usar Postgres/MySQL ou qualquer banco que precise de serviço rodando
+  separado
+- Não adicionar "esqueci minha senha", confirmação por e-mail ou login
+  social - só cadastro e login simples com JWT
+- Não sofisticar além do pedido (sem paginação server-side complexa, sem
+  websockets, sem testes automatizados a menos que eu peça depois)
