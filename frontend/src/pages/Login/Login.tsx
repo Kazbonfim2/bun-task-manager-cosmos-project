@@ -89,15 +89,15 @@ export function Login() {
   }
 
   return (
-    <main className="grid flex-1 w-full grid-cols-1 lg:grid-cols-[40%_60%] h-[calc(100svh-3.5rem)] max-h-[calc(100svh-3.5rem)] overflow-hidden">
+    <main className="grid flex-1 w-full grid-cols-1 lg:grid-cols-[40%_60%] h-[calc(100svh-3.5rem)] overflow-hidden">
       {/* Painel Esquerdo (40% Desktop, oculto em Mobile) */}
-      <aside className="relative hidden lg:flex flex-col justify-between overflow-hidden border-r border-border/40 bg-gradient-to-br from-muted/50 via-muted/20 to-background p-8 lg:p-12 text-foreground">
+      <aside className="relative hidden lg:flex flex-col justify-between overflow-hidden border-r border-border/40 bg-gradient-to-br from-muted/50 via-muted/20 to-background p-6 lg:p-8 xl:p-10 text-foreground">
         <div className="pointer-events-none absolute -top-24 -left-24 size-96 rounded-full bg-primary/10 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-24 -right-24 size-96 rounded-full bg-primary/5 blur-3xl" />
 
         {/* Topo / Typewriter */}
-        <div className="relative z-10 space-y-3">
-          <h2 className="font-heading min-h-16 text-3xl font-bold tracking-tight text-foreground">
+        <div className="relative z-10 space-y-2">
+          <h2 className="font-heading min-h-14 text-2xl xl:text-3xl font-bold tracking-tight text-foreground">
             {textoDigitado}
             <span
               className="ml-1 inline-block h-6 w-2 translate-y-0.5 bg-primary align-baseline animate-pulse"
@@ -110,7 +110,7 @@ export function Login() {
         </div>
 
         {/* Mockups de Cards Flutuantes */}
-        <div className="relative z-10 my-auto flex flex-col items-center justify-center py-4">
+        <div className="relative z-10 my-auto flex flex-col items-center justify-center py-2">
           {/* Card 1 - Topo */}
           <Card className="pointer-events-none w-full max-w-xs -rotate-3 -translate-x-4 scale-95 border-border/60 bg-card/75 text-card-foreground opacity-80 shadow-xl backdrop-blur-md">
             <CardHeader className="gap-1.5 pb-2">
@@ -192,9 +192,9 @@ export function Login() {
       </aside>
 
       {/* Painel Direito (60% Desktop, 100% Mobile) */}
-      <section className="flex flex-1 flex-col items-center justify-center p-6 sm:p-12">
-        <div className="w-full max-w-sm space-y-6">
-          <div className="flex flex-col items-center text-center gap-2">
+      <section className="flex flex-1 flex-col items-center justify-center p-6 sm:p-8">
+        <div className="w-full max-w-sm space-y-4 sm:space-y-5">
+          <div className="flex flex-col items-center text-center gap-1.5">
             <h1 className="text-xl font-semibold tracking-tight text-foreground">
               Acesse sua conta
             </h1>
@@ -203,7 +203,7 @@ export function Login() {
             </p>
           </div>
 
-          <form onSubmit={enviar} className="space-y-4">
+          <form onSubmit={enviar} className="space-y-3 sm:space-y-3.5">
             <Field>
               <FieldLabel>E-mail</FieldLabel>
               <Input
@@ -234,7 +234,7 @@ export function Login() {
               Entrar
             </Button>
 
-            <p className="text-center text-muted-foreground text-sm pt-2">
+            <p className="text-center text-muted-foreground text-xs sm:text-sm pt-1">
               Sem conta?{" "}
               <Link
                 to="/cadastro"
@@ -244,7 +244,7 @@ export function Login() {
               </Link>
             </p>
 
-            <div className="relative my-2">
+            <div className="relative my-1 sm:my-1.5">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t border-border/50" />
               </div>
