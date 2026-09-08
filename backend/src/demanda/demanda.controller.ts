@@ -13,7 +13,7 @@ export const demandaController = {
   },
 
   buscarPorId: (req: Request, res: Response) => {
-    const demanda = demandaService.buscarPorId(req.params.id);
+    const demanda = demandaService.buscarPorId(String(req.params.id));
     res.json(demanda);
   },
 
@@ -24,18 +24,18 @@ export const demandaController = {
   },
 
   atualizar: (req: Request, res: Response) => {
-    const demanda = demandaService.atualizar(req.params.id, req.body);
+    const demanda = demandaService.atualizar(String(req.params.id), req.body);
     res.json(demanda);
   },
 
   alterarStatus: (req: Request, res: Response) => {
     const { status } = req.body ?? {};
-    const demanda = demandaService.alterarStatus(req.params.id, status);
+    const demanda = demandaService.alterarStatus(String(req.params.id), status);
     res.json(demanda);
   },
 
   excluir: (req: Request, res: Response) => {
-    demandaService.excluir(req.params.id);
+    demandaService.excluir(String(req.params.id));
     res.status(204).send();
   },
 };

@@ -19,12 +19,12 @@ notificacaoRoutes.patch("/ler-todas", (req: Request, res: Response) => {
 
 notificacaoRoutes.patch("/:id/lida", (req: Request, res: Response) => {
   const usuarioId = req.usuario?.id ?? "";
-  notificacaoService.marcarComoLida(req.params.id, usuarioId);
+  notificacaoService.marcarComoLida(String(req.params.id), usuarioId);
   res.status(204).send();
 });
 
 notificacaoRoutes.delete("/:id", (req: Request, res: Response) => {
   const usuarioId = req.usuario?.id ?? "";
-  notificacaoService.marcarComoLida(req.params.id, usuarioId);
+  notificacaoService.marcarComoLida(String(req.params.id), usuarioId);
   res.status(204).send();
 });
