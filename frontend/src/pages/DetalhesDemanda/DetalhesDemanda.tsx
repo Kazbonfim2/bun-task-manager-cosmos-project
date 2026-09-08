@@ -1,16 +1,7 @@
-import { AlertTriangle, ArrowLeft, Pencil, Trash2 } from "lucide-react";
-import { useEffect, useState, type SubmitEvent } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+import { AlertTriangle, ArrowLeft } from "lucide-react";
+import { useCallback, useEffect, useState, type SubmitEvent } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import type { ItemSelect } from "@/components/SelectSimples";
 import {
   api,
@@ -18,11 +9,16 @@ import {
   type Projeto,
   type Usuario,
 } from "@/lib/api";
-import { CardDetalhesDemanda } from "./components/CardDetalhesDemanda";
 import {
   DialogDemanda,
   type FormDemandaData,
 } from "@/pages/Dashboard/components/DialogDemanda";
+import { DemandHeader } from "./components/DemandHeader";
+import { DemandOverview } from "./components/DemandOverview";
+import { DemandSidebar } from "./components/DemandSidebar";
+import { DemandTimeline } from "./components/DemandTimeline";
+import { DetalhesDemandaSkeleton } from "./components/DetalhesDemandaSkeleton";
+import { DialogExcluirDemanda } from "./components/DialogExcluirDemanda";
 
 const FORM_VAZIO: FormDemandaData = {
   descricao: "",
@@ -33,21 +29,32 @@ const FORM_VAZIO: FormDemandaData = {
 };
 
 export function DetalhesDemanda() {
-  const { id } = useParams<{ id: string }>();
+  const params = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+
+  // Suporte flexível para /demandas/:id, /demanda/:id ou /demanda?id=...
+  const id = params.id || searchParams.get("id") || "";
 
   const [demanda, setDemanda] = useState<Demanda | null>(null);
   const [projetos, setProjetos] = useState<Projeto[]>([]);
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
+
   const [dialogEdicao, setDialogEdicao] = useState(false);
+  const [dialogExclusao, setDialogExclusao] = useState(false);
   const [salvando, setSalvando] = useState(false);
+  const [alterandoStatus, setAlterandoStatus] = useState(false);
 
   const [form, setForm] = useState<FormDemandaData>(FORM_VAZIO);
 
-  async function carregarDados() {
-    if (!id) return;
+  const carregarDados = useCallback(async () => {
+    if (!id) {
+      setErro("Identificador da demanda não fornecido.");
+      setCarregando(false);
+      return;
+    }
     setCarregando(true);
     setErro("");
     try {
@@ -64,11 +71,11 @@ export function DetalhesDemanda() {
     } finally {
       setCarregando(false);
     }
-  }
+  }, [id]);
 
   useEffect(() => {
     carregarDados();
-  }, [id]);
+  }, [carregarDados]);
 
   function abrirEdicao() {
     if (!demanda) return;
@@ -102,7 +109,8 @@ export function DetalhesDemanda() {
   }
 
   async function trocarStatus(novoStatus: string) {
-    if (!demanda) return;
+    if (!demanda || demanda.status === novoStatus || alterandoStatus) return;
+    setAlterandoStatus(true);
     try {
       const atualizada = await api<Demanda>(`/demandas/${demanda.id}/status`, {
         method: "PATCH",
@@ -111,14 +119,17 @@ export function DetalhesDemanda() {
       setDemanda(atualizada);
     } catch (falha) {
       setErro(falha instanceof Error ? falha.message : "Falha ao alterar status");
+    } finally {
+      setAlterandoStatus(false);
     }
   }
 
-  async function excluirDemanda() {
+  async function confirmarExclusao() {
     if (!demanda) return;
     setSalvando(true);
     try {
       await api(`/demandas/${demanda.id}`, { method: "DELETE" });
+      setDialogExclusao(false);
       navigate("/");
     } catch (falha) {
       setErro(falha instanceof Error ? falha.message : "Falha ao excluir demanda");
@@ -127,29 +138,22 @@ export function DetalhesDemanda() {
   }
 
   if (carregando) {
-    return (
-      <main className="mx-auto flex w-full max-w-4xl flex-col gap-6 p-4 sm:p-6">
-        <div className="flex items-center gap-2 text-muted-foreground text-sm">
-          <div className="h-4 w-24 animate-pulse rounded bg-muted" />
-        </div>
-        <Card className="p-8 text-center text-muted-foreground">
-          Carregando detalhes da demanda...
-        </Card>
-      </main>
-    );
+    return <DetalhesDemandaSkeleton />;
   }
 
   if (erro || !demanda) {
     return (
-      <main className="mx-auto flex w-full max-w-4xl flex-col items-center gap-6 p-4 pt-12 text-center sm:p-6">
-        <div className="rounded-full bg-destructive/10 p-4 text-destructive">
-          <AlertTriangle className="size-8" />
+      <main className="mx-auto flex w-full max-w-4xl flex-col items-center gap-6 p-4 pt-16 text-center sm:p-6">
+        <div className="rounded-full bg-destructive/10 p-4 text-destructive ring-8 ring-destructive/5">
+          <AlertTriangle className="size-10" />
         </div>
-        <h1 className="text-2xl font-bold">Demanda não encontrada</h1>
-        <p className="text-muted-foreground text-sm max-w-md">
-          {erro || "A demanda solicitada não existe ou foi excluída."}
-        </p>
-        <Button onClick={() => navigate("/")} variant="secondary">
+        <div className="space-y-2">
+          <h1 className="text-2xl font-bold tracking-tight">Demanda não encontrada</h1>
+          <p className="text-muted-foreground text-sm max-w-md mx-auto">
+            {erro || "A demanda solicitada não existe, foi removida ou o código informado está incorreto."}
+          </p>
+        </div>
+        <Button onClick={() => navigate("/")} variant="secondary" className="gap-2">
           <ArrowLeft className="size-4" />
           Voltar para o Dashboard
         </Button>
@@ -157,61 +161,50 @@ export function DetalhesDemanda() {
     );
   }
 
-  const itensProjeto: ItemSelect[] = projetos.map((item) => ({ label: item.nome, value: item.id }));
-  const itensUsuario: ItemSelect[] = usuarios.map((item) => ({ label: item.nome_completo, value: item.id }));
+  const itensProjeto: ItemSelect[] = projetos.map((item) => ({
+    label: item.nome,
+    value: item.id,
+  }));
+  const itensUsuario: ItemSelect[] = usuarios.map((item) => ({
+    label: item.nome_completo,
+    value: item.id,
+  }));
 
   return (
-    <main className="mx-auto flex w-full max-w-4xl flex-col gap-6 p-4 sm:p-6">
-      {/* // Navegação em Breadcrumb */}
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink render={<Link to="/" />}>Dashboard</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbLink render={<Link to="/" />}>Demandas</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage className="max-w-48 truncate sm:max-w-xs">
-              {demanda.projeto_nome}
-            </BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+    <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 p-4 sm:p-6">
+      {/* Cabeçalho de Navegação e Ações */}
+      <DemandHeader
+        demanda={demanda}
+        onEditar={abrirEdicao}
+        onSolicitarExclusao={() => setDialogExclusao(true)}
+        salvando={salvando}
+      />
 
-      {/* // Barra de ações superior */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="gap-2">
-          <ArrowLeft className="size-4" />
-          Voltar
-        </Button>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={abrirEdicao} className="gap-1.5">
-            <Pencil className="size-4" />
-            Editar
-          </Button>
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={excluirDemanda}
-            loading={salvando}
-            className="gap-1.5"
-          >
-            <Trash2 className="size-4" />
-            Excluir
-          </Button>
+      {/* Grid Responsivo de 2 Colunas: Conteúdo Principal e Barra Lateral */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Coluna Principal (8 colunas em desktop) */}
+        <div className="lg:col-span-8 flex flex-col gap-6">
+          <DemandOverview
+            demanda={demanda}
+            alterandoStatus={alterandoStatus}
+            onTrocarStatus={trocarStatus}
+          />
+
+          <DemandTimeline demanda={demanda} />
+        </div>
+
+        {/* Coluna Lateral (4 colunas em desktop) */}
+        <div className="lg:col-span-4 flex flex-col gap-5 lg:sticky lg:top-20">
+          <DemandSidebar
+            demanda={demanda}
+            usuarios={usuarios}
+            alterandoStatus={alterandoStatus}
+            onTrocarStatus={trocarStatus}
+          />
         </div>
       </div>
 
-      {/* // Card principal de detalhes da demanda */}
-      <CardDetalhesDemanda
-        demanda={demanda}
-        onTrocarStatus={trocarStatus}
-      />
-
-      {/* // Modal de edição de demanda */}
+      {/* Modal de Edição de Demanda */}
       <DialogDemanda
         aberto={dialogEdicao}
         onOpenChange={setDialogEdicao}
@@ -223,7 +216,20 @@ export function DetalhesDemanda() {
         salvando={salvando}
         erro={erro}
         onSalvar={salvarEdicao}
-        onExcluir={excluirDemanda}
+        onExcluir={() => {
+          setDialogEdicao(false);
+          setDialogExclusao(true);
+        }}
+      />
+
+      {/* Modal de Confirmação de Exclusão */}
+      <DialogExcluirDemanda
+        aberto={dialogExclusao}
+        onOpenChange={setDialogExclusao}
+        demandaId={demanda.id}
+        demandaDescricao={demanda.descricao}
+        excluindo={salvando}
+        onConfirmar={confirmarExclusao}
       />
     </main>
   );
