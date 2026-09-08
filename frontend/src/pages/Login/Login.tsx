@@ -244,32 +244,6 @@ export function Login() {
               </Link>
             </p>
 
-            <div className="relative my-1 sm:my-1.5">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border/50" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-[10px] tracking-wider text-muted-foreground">
-                  Portfólio & Desenvolvedor
-                </span>
-              </div>
-            </div>
-
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full gap-2 text-xs sm:text-sm"
-              render={
-                <a
-                  href="https://github.com/Kazbonfim2"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                />
-              }
-            >
-              <GithubIcon className="size-4" />
-              GitHub @Kazbonfim2
-            </Button>
           </form>
         </div>
       </section>
