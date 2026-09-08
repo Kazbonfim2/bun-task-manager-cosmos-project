@@ -16,18 +16,21 @@ export function SelectSimples({
   aoMudar,
   placeholder,
   className,
+  disabled,
 }: {
   itens: readonly ItemSelect[];
   valor: string;
   aoMudar: (valor: string) => void;
   placeholder: string;
   className?: string;
+  disabled?: boolean;
 }) {
   const selecionado = itens.find((item) => item.value === valor) ?? null;
   const IconeSelecionado = selecionado?.icone;
 
   return (
     <Select
+      disabled={disabled}
       items={[...itens]}
       value={selecionado}
       isItemEqualToValue={(a, b) => a.value === b.value}
