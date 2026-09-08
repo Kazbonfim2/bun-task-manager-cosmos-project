@@ -11,6 +11,7 @@
     --animate-toast-error-even: toast-error-even 0.28s cubic-bezier(0.5, 1, 0.89, 1);
     --animate-caret-blink: 1s ease-out infinite caret-blink;
     --animate-sway: sway 3.5s ease-in-out infinite;
+    --animate-bell: bell-vibrate 2.5s ease-in-out infinite;
     --font-heading: 'Inter', sans-serif;
     --font-mono: 'Geist Mono', monospace;
     --font-sans: 'Inter', sans-serif;
@@ -148,6 +149,32 @@
     transform: rotate(12deg);
         }
     }
+  @keyframes bell-vibrate {
+    0%, 100% {
+      transform: rotate(0deg);
+    }
+    10% {
+      transform: rotate(-14deg);
+    }
+    20% {
+      transform: rotate(14deg);
+    }
+    30% {
+      transform: rotate(-10deg);
+    }
+    40% {
+      transform: rotate(10deg);
+    }
+    50% {
+      transform: rotate(-5deg);
+    }
+    60% {
+      transform: rotate(5deg);
+    }
+    70% {
+      transform: rotate(0deg);
+    }
+  }
 }
 
 :root {
