@@ -8,18 +8,47 @@ Aplicação web desenvolvida para substituir planilhas compartilhadas de equipe,
 
 Esta seção foi feita para você que deseja apenas colocar a aplicação para rodar e gerenciar seus projetos e demandas no dia a dia, sem precisar entender de código.
 
-### 🚀 Como executar em 1 passo
+### 🚀 Como executar a aplicação
 
-Certifique-se de ter o [Docker Desktop](https://www.docker.com/) instalado e aberto em seu computador. No terminal da pasta do projeto, execute:
+Você pode escolher entre duas formas simples de rodar o ORION:
+
+#### Opção 1: Com Docker (Mais Rápido)
+Se já possui o [Docker Desktop](https://www.docker.com/) instalado e aberto:
 
 ```bash
 docker compose up --build
 ```
+> Acesse no navegador: 👉 **[http://localhost:3005](http://localhost:3005)**
 
-Após o carregamento, abra o navegador e acesse:
-👉 **[http://localhost:3005](http://localhost:3005)**
+---
 
-*(Nota: a porta 3005 do seu computador precisa estar livre)*.
+#### Opção 2: Sem Docker (Usando Bun — Windows, Linux e macOS)
+
+Se você não usa Docker, basta ter o runtime **[Bun](https://bun.sh/)** instalado.
+
+**1. Instalar o Bun (caso ainda não tenha):**
+* **Windows** (no PowerShell):
+  ```powershell
+  powershell -c "irm bun.sh/install.ps1 | iex"
+  ```
+* **Linux / macOS** (no Terminal):
+  ```bash
+  curl -fsSL https://bun.sh/install | bash
+  ```
+
+**2. Instalar as dependências e iniciar:**
+No terminal, dentro da pasta do projeto:
+
+```bash
+# Instala as dependências do backend e frontend de uma só vez
+bun run setup
+
+# Inicia a aplicação (Frontend + Backend integrados)
+bun run dev
+```
+
+> Pronto! Acesse no navegador: 👉 **[http://localhost:3005](http://localhost:3005)**
+> *(O banco de dados SQLite e os dados de exemplo são criados automaticamente no primeiro acesso).*
 
 ---
 
@@ -64,14 +93,10 @@ docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 Necessário ter o runtime [Bun](https://bun.sh/) instalado:
 
 ```bash
-# Instalação das dependências
-cd backend && bun install && cd ..
-cd frontend && bun install && cd ..
+# Instalação rápida das dependências (raiz do projeto)
+bun run setup
 
-# (Opcional) Popular o banco de dados com dados iniciais (seed)
-bun run seed
-
-# Iniciar backend e frontend juntos
+# Iniciar backend e frontend integrados
 bun run dev
 ```
 Acesse em: **[http://localhost:3005](http://localhost:3005)**.
