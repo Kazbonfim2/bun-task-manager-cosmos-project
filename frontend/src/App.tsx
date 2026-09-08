@@ -29,6 +29,8 @@ export default function App() {
         <Route element={<RotaProtegida />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/demandas/:id" element={<DetalhesDemanda />} />
+          <Route path="/demanda/:id" element={<DetalhesDemanda />} />
+          <Route path="/demanda" element={<DetalhesDemanda />} />
         </Route>
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
