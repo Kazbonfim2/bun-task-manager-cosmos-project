@@ -58,14 +58,14 @@ export const notificacaoService = {
 
   marcarComoLida(id: string, usuarioId: string): void {
     db.prepare(`
-      UPDATE notificacoes SET lida = 1
+      DELETE FROM notificacoes
       WHERE id = ? AND usuario_id = ?
     `).run(id, usuarioId);
   },
 
   marcarTodasComoLidas(usuarioId: string): void {
     db.prepare(`
-      UPDATE notificacoes SET lida = 1
+      DELETE FROM notificacoes
       WHERE usuario_id = ?
     `).run(usuarioId);
   },

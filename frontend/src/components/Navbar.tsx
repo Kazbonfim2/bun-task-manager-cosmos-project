@@ -1,4 +1,4 @@
-import { Bell, CheckCheck, LogOut, Moon, Snowflake, Sun } from "lucide-react";
+import { Bell, Check, CheckCheck, LogOut, Moon, Snowflake, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
@@ -37,7 +37,7 @@ function formatarTempo(iso: string): string {
 }
 
 export function Navbar() {
-  useLocation();
+  const location = useLocation();
   const navigate = useNavigate();
   const usuario = lerUsuario();
   const [notificacoes, setNotificacoes] = useState<Notificacao[]>([]);
@@ -62,39 +62,44 @@ export function Navbar() {
   useEffect(() => {
     if (!usuario) return;
     carregarNotificacoes();
-    const intervalo = setInterval(carregarNotificacoes, 30_000);
-    return () => clearInterval(intervalo);
-  }, [usuario?.id]);
+    const onFocus = () => carregarNotificacoes();
+    window.addEventListener("focus", onFocus);
+    window.addEventListener("visibilitychange", onFocus);
+    const intervalo = setInterval(carregarNotificacoes, 15_000);
+    return () => {
+      clearInterval(intervalo);
+      window.removeEventListener("focus", onFocus);
+      window.removeEventListener("visibilitychange", onFocus);
+    };
+  }, [usuario?.id, location.key]);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", escuro);
     localStorage.setItem("tema", escuro ? "dark" : "light");
   }, [escuro]);
 
-  const naoLidas = notificacoes.filter((n) => !n.lida).length;
+  const naoLidas = notificacoes.length;
 
   async function marcarTodasLidas() {
+    setNotificacoes([]);
     try {
       await api("/notificacoes/ler-todas", { method: "PATCH" });
-      setNotificacoes((anteriores) =>
-        anteriores.map((n) => ({ ...n, lida: true }))
-      );
+    } catch {
+      // Ignorar falha
+    }
+  }
+
+  async function marcarComoLida(id: string) {
+    setNotificacoes((anteriores) => anteriores.filter((n) => n.id !== id));
+    try {
+      await api(`/notificacoes/${id}`, { method: "DELETE" });
     } catch {
       // Ignorar falha
     }
   }
 
   async function abrirNotificacao(notificacao: Notificacao) {
-    if (!notificacao.lida) {
-      setNotificacoes((anteriores) =>
-        anteriores.map((n) =>
-          n.id === notificacao.id ? { ...n, lida: true } : n
-        )
-      );
-      api(`/notificacoes/${notificacao.id}/lida`, { method: "PATCH" }).catch(
-        () => {}
-      );
-    }
+    marcarComoLida(notificacao.id);
     if (notificacao.demanda_id) {
       navigate(`/demandas/${notificacao.demanda_id}`);
     }
@@ -106,12 +111,12 @@ export function Navbar() {
         <div className="flex items-center gap-2.5 min-w-0">
           <Snowflake className="size-6 text-primary shrink-0 animate-sway" aria-hidden="true" />
           <div className="min-w-0">
-            <h1 className="font-heading text-lg sm:text-xl font-semibold leading-none truncate">
-              PolarisTasks
-            </h1>
-            {/* <p className="text-muted-foreground text-xs hidden sm:block">
-              Sistema Gerenciador de Demandas v0.1
-            </p> */}
+            <span className="text-sm font-semibold tracking-tight text-foreground block truncate">
+              Orion
+            </span>
+            <span className="text-[11px] text-muted-foreground hidden sm:block">
+              Gestão de Demandas
+            </span>
           </div>
         </div>
 
@@ -142,75 +147,85 @@ export function Navbar() {
           <div className="flex items-center gap-1.5 sm:gap-2">
             {usuario ? (
               <DropdownMenu>
-                <DropdownMenuTrigger
-                  render={
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label={`Notificações (${naoLidas} não lidas)`}
+                    title="Notificações"
+                  />
+                }
+              >
+                <Bell
+                  className={`size-4 origin-top transition-colors ${
+                    naoLidas > 0
+                      ? "text-yellow-500 fill-yellow-500/20 dark:text-yellow-400 dark:fill-yellow-400/20 animate-bell"
+                      : ""
+                  }`}
+                  aria-hidden="true"
+                />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-80 max-w-[calc(100vw-2rem)] p-0">
+                <div className="flex items-center justify-between p-3 border-b">
+                  <DropdownMenuLabel className="p-0 text-sm font-semibold text-foreground">
+                    Notificações
+                  </DropdownMenuLabel>
+                  {notificacoes.length > 0 ? (
                     <Button
                       type="button"
                       variant="ghost"
-                      size="icon-sm"
-                      className="relative"
-                      aria-label={`Notificações (${naoLidas} não lidas)`}
-                      title="Notificações"
-                    />
-                  }
-                >
-                  <Bell className="size-4" aria-hidden="true" />
-                  {naoLidas > 0 ? (
-                    <span className="absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground animate-pulse">
-                      {naoLidas > 9 ? "9+" : naoLidas}
-                    </span>
+                      size="xs"
+                      onClick={marcarTodasLidas}
+                      className="text-xs text-muted-foreground hover:text-foreground gap-1 h-7 px-2"
+                    >
+                      <CheckCheck className="size-3.5" />
+                      Ler todas
+                    </Button>
                   ) : null}
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-80 max-w-[calc(100vw-2rem)] p-0">
-                  <div className="flex items-center justify-between p-3 border-b">
-                    <DropdownMenuLabel className="p-0 text-sm font-semibold text-foreground">
-                      Notificações
-                    </DropdownMenuLabel>
-                    {naoLidas > 0 ? (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="xs"
-                        onClick={marcarTodasLidas}
-                        className="text-xs text-muted-foreground hover:text-foreground gap-1 h-7 px-2"
+                </div>
+                <div className="max-h-72 overflow-y-auto divide-y divide-border/50">
+                  {notificacoes.length === 0 ? (
+                    <div className="p-4 text-center text-xs text-muted-foreground">
+                      Nenhuma notificação por enquanto.
+                    </div>
+                  ) : (
+                    notificacoes.map((n) => (
+                      <div
+                        key={n.id}
+                        className="flex items-start justify-between gap-2 p-3 hover:bg-muted/50 transition-colors"
                       >
-                        <CheckCheck className="size-3.5" />
-                        Ler todas
-                      </Button>
-                    ) : null}
-                  </div>
-                  <div className="max-h-72 overflow-y-auto divide-y divide-border/50">
-                    {notificacoes.length === 0 ? (
-                      <div className="p-4 text-center text-xs text-muted-foreground">
-                        Nenhuma notificação por enquanto.
-                      </div>
-                    ) : (
-                      notificacoes.map((n) => (
-                        <DropdownMenuItem
-                          key={n.id}
+                        <button
+                          type="button"
                           onClick={() => abrirNotificacao(n)}
-                          className={`flex flex-col items-start gap-1 p-3 cursor-pointer text-left ${
-                            !n.lida ? "bg-primary/5 font-medium" : "opacity-80"
-                          }`}
+                          className="flex flex-col items-start gap-1 min-w-0 flex-1 text-left cursor-pointer"
                         >
-                          <div className="flex w-full items-start justify-between gap-2">
-                            <span className="text-xs text-foreground leading-snug">
-                              {n.mensagem}
-                            </span>
-                            {!n.lida ? (
-                              <span className="size-2 shrink-0 rounded-full bg-primary mt-1" />
-                            ) : null}
-                          </div>
+                          <span className="text-xs text-foreground leading-snug">
+                            {n.mensagem}
+                          </span>
                           <span className="text-[10px] text-muted-foreground">
                             {formatarTempo(n.criado_em)}
                           </span>
-                        </DropdownMenuItem>
-                      ))
-                    )}
-                  </div>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : null}
+                        </button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-xs"
+                          onClick={() => marcarComoLida(n.id)}
+                          className="text-muted-foreground hover:text-foreground shrink-0 mt-0.5"
+                          title="Marcar como lida"
+                          aria-label="Marcar como lida"
+                        >
+                          <Check className="size-3.5" />
+                        </Button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : null}
 
             <Button
               type="button"
