@@ -179,11 +179,11 @@ export function DashboardProjects({
                     />
                   }
                   className={cn(
-                    "flex flex-col justify-between p-4 text-start transition-all cursor-pointer",
+                    "flex flex-col justify-between p-4 text-start transition-all duration-200 cursor-pointer",
                     "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
                     filtroProjeto === "todos"
-                      ? "border-primary bg-primary/5 ring-1 ring-primary shadow-xs"
-                      : "hover:border-primary/40 hover:bg-muted/30",
+                      ? "opacity-100 shadow-xs border-border bg-card"
+                      : "opacity-50 hover:opacity-100 hover:bg-muted/30 border-border/60 hover:border-border",
                   )}
                 >
                   <div className="flex flex-col gap-1">
@@ -271,11 +271,11 @@ export function DashboardProjects({
                         />
                       }
                       className={cn(
-                        "flex flex-col justify-between p-4 text-start transition-all cursor-pointer",
+                        "flex flex-col justify-between p-4 text-start transition-all duration-200 cursor-pointer",
                         "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
                         selecionado
-                          ? "border-primary bg-primary/5 ring-1 ring-primary shadow-xs"
-                          : "hover:border-primary/40 hover:bg-muted/30",
+                          ? "opacity-100 shadow-xs border-border bg-card"
+                          : "opacity-50 hover:opacity-100 hover:bg-muted/30 border-border/60 hover:border-border",
                       )}
                     >
                       <div className="flex flex-col gap-1">
