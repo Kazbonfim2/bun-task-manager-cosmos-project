@@ -14,7 +14,23 @@ export const projetoRepository = {
   },
 
   listar(): Projeto[] {
-    return db.query("SELECT * FROM projetos ORDER BY nome ASC").all() as Projeto[];
+    return db
+      .query(`
+        SELECT
+          p.id,
+          p.nome,
+          p.descricao,
+          p.criado_em,
+          COUNT(d.id) AS total_demandas,
+          SUM(CASE WHEN d.status = 'aberta' THEN 1 ELSE 0 END) AS demandas_abertas,
+          SUM(CASE WHEN d.status = 'em_andamento' THEN 1 ELSE 0 END) AS demandas_em_andamento,
+          SUM(CASE WHEN d.status = 'concluida' THEN 1 ELSE 0 END) AS demandas_concluidas
+        FROM projetos p
+        LEFT JOIN demandas d ON d.projeto_id = p.id
+        GROUP BY p.id
+        ORDER BY p.nome ASC
+      `)
+      .all() as Projeto[];
   },
 
   atualizar(projeto: Projeto): Projeto {

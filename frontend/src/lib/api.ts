@@ -36,6 +36,11 @@ export type Projeto = {
   id: string;
   nome: string;
   descricao: string | null;
+  criado_em?: string;
+  total_demandas?: number;
+  demandas_abertas?: number;
+  demandas_em_andamento?: number;
+  demandas_concluidas?: number;
 };
 
 export type Demanda = {
