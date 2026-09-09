@@ -40,55 +40,55 @@ export function DemandTimeline({ demanda }: DemandTimelineProps) {
       </CardHeader>
 
       <CardPanel className="pt-5 pb-6">
-        <div className="relative pl-6 space-y-6 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-border">
+        <div className="relative space-y-6 before:absolute before:left-3.5 before:top-3 before:bottom-3 before:w-px before:bg-border">
           {/* Evento 1: Criação da Demanda */}
-          <div className="relative group">
-            <div className="absolute -left-6 top-0.5 flex size-5 items-center justify-center rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/30">
-              <CircleDot className="size-3" />
+          <div className="relative flex items-start gap-3 sm:gap-4">
+            <div className="relative z-10 flex size-7 shrink-0 items-center justify-center rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-600 dark:text-blue-400 shadow-xs ring-4 ring-card">
+              <CircleDot className="size-3.5" />
             </div>
-            <div className="flex flex-col gap-0.5">
-              <div className="flex flex-wrap items-center justify-between gap-1">
+            <div className="flex-1 min-w-0 pt-0.5 flex flex-col gap-1">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-0.5 sm:gap-2">
                 <span className="text-xs font-semibold text-foreground">
                   Demanda Registrada no Sistema
                 </span>
-                <span className="text-[11px] text-muted-foreground">
+                <span className="text-[11px] text-muted-foreground shrink-0">
                   {formatarDataCompleta(demanda.criado_em)}
                 </span>
               </div>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground leading-relaxed">
                 Cadastrada para o projeto <strong className="text-foreground">{demanda.projeto_nome}</strong> com responsabilidade atribuída a <strong className="text-foreground">{demanda.responsavel_nome}</strong>.
               </p>
             </div>
           </div>
 
           {/* Evento 2: Status do Ciclo de Vida */}
-          <div className="relative group">
+          <div className="relative flex items-start gap-3 sm:gap-4">
             <div
               className={cn(
-                "absolute -left-6 top-0.5 flex size-5 items-center justify-center rounded-full border",
+                "relative z-10 flex size-7 shrink-0 items-center justify-center rounded-full border shadow-xs ring-4 ring-card",
                 statusInfo?.corBg || "bg-muted",
                 statusInfo?.corTexto || "text-foreground",
                 statusInfo?.corBorda || "border-border"
               )}
             >
               {demanda.status === "concluida" ? (
-                <CheckCircle2 className="size-3" />
+                <CheckCircle2 className="size-3.5" />
               ) : demanda.status === "em_andamento" ? (
-                <Clock className="size-3" />
+                <Clock className="size-3.5" />
               ) : (
-                <CircleDot className="size-3" />
+                <CircleDot className="size-3.5" />
               )}
             </div>
-            <div className="flex flex-col gap-0.5">
-              <div className="flex flex-wrap items-center justify-between gap-1">
+            <div className="flex-1 min-w-0 pt-0.5 flex flex-col gap-1">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-0.5 sm:gap-2">
                 <span className="text-xs font-semibold text-foreground">
                   Status Atual: {statusInfo?.label}
                 </span>
-                <span className="text-[11px] text-muted-foreground">
+                <span className="text-[11px] text-muted-foreground shrink-0">
                   {formatarDataCompleta(demanda.atualizado_em)}
                 </span>
               </div>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground leading-relaxed">
                 {demanda.status === "concluida"
                   ? "A demanda foi marcada como concluída e finalizada no fluxo de trabalho."
                   : demanda.status === "em_andamento"
@@ -99,10 +99,10 @@ export function DemandTimeline({ demanda }: DemandTimelineProps) {
           </div>
 
           {/* Evento 3: Prazo Acordado / SLA */}
-          <div className="relative group">
+          <div className="relative flex items-start gap-3 sm:gap-4">
             <div
               className={cn(
-                "absolute -left-6 top-0.5 flex size-5 items-center justify-center rounded-full border",
+                "relative z-10 flex size-7 shrink-0 items-center justify-center rounded-full border shadow-xs ring-4 ring-card",
                 infoPrazo.tipo === "atrasada"
                   ? "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/30"
                   : infoPrazo.tipo === "concluida"
@@ -111,28 +111,28 @@ export function DemandTimeline({ demanda }: DemandTimelineProps) {
               )}
             >
               {infoPrazo.tipo === "atrasada" ? (
-                <AlertTriangle className="size-3" />
+                <AlertTriangle className="size-3.5" />
               ) : infoPrazo.tipo === "concluida" ? (
-                <FileCheck className="size-3" />
+                <FileCheck className="size-3.5" />
               ) : (
-                <Calendar className="size-3" />
+                <Calendar className="size-3.5" />
               )}
             </div>
-            <div className="flex flex-col gap-0.5">
-              <div className="flex flex-wrap items-center justify-between gap-1">
+            <div className="flex-1 min-w-0 pt-0.5 flex flex-col gap-1">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-2">
                 <span className="text-xs font-semibold text-foreground">
                   Prazo de Conclusão Acordado
                 </span>
                 <span
                   className={cn(
-                    "text-[10px] font-semibold px-2 py-0.5 rounded-full border",
+                    "text-[10px] font-semibold px-2 py-0.5 rounded-full border w-fit shrink-0",
                     infoPrazo.badgeClasse
                   )}
                 >
                   {infoPrazo.badgeTexto}
                 </span>
               </div>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground leading-relaxed">
                 Data estipulada para entrega: <strong className="text-foreground">{formatarPrazoExtenso(demanda.prazo)}</strong> ({infoPrazo.texto}).
               </p>
             </div>
