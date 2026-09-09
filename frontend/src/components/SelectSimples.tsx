@@ -40,7 +40,7 @@ export function SelectSimples({
         }
       }}
     >
-      <SelectTrigger className={className}>
+      <SelectTrigger className={cn("w-full min-w-0", className)}>
         <div className="flex items-center gap-1.5 truncate">
           {IconeSelecionado ? (
             <IconeSelecionado
@@ -53,19 +53,19 @@ export function SelectSimples({
           </SelectValue>
         </div>
       </SelectTrigger>
-      <SelectPopup>
+      <SelectPopup className="max-w-[calc(100vw-2rem)]">
         {itens.map((item) => {
           const Icone = item.icone;
           return (
             <SelectItem key={item.value} value={item}>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 truncate">
                 {Icone ? (
                   <Icone
                     className={cn("size-3.5 shrink-0", item.corTexto)}
                     aria-hidden="true"
                   />
                 ) : null}
-                <span>{item.label}</span>
+                <span className="truncate">{item.label}</span>
               </div>
             </SelectItem>
           );
