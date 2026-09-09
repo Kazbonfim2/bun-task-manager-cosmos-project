@@ -46,10 +46,7 @@ export function DemandOverview({
   return (
     <div className="flex flex-col gap-6">
       {/* Card Principal da Demanda */}
-      <Card className={cn("overflow-hidden border shadow-xs transition-colors", {
-        "border-red-500/30 dark:border-red-500/20": infoPrazo.tipo === "atrasada",
-        "border-emerald-500/30 dark:border-emerald-500/20": demanda.status === "concluida",
-      })}>
+      <Card className="overflow-hidden border shadow-xs">
         {/* Faixa decorativa no topo de acordo com o status */}
         <div
           className={cn("h-1.5 w-full", {
@@ -224,7 +221,7 @@ export function DemandOverview({
                     size="sm"
                     onClick={() => onTrocarStatus("concluida")}
                     loading={alterandoStatus}
-                    className="gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white"
+                    className="gap-1.5"
                   >
                     <CheckCircle2 className="size-3.5" />
                     Marcar como Concluída

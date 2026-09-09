@@ -47,7 +47,7 @@ export function StatusPipeline({
   const indiceAtual = ETAPAS.findIndex((e) => e.id === statusAtual);
 
   return (
-    <div className="w-full rounded-xl border bg-card/80 p-3 sm:p-4 shadow-xs" role="region" aria-label="Pipeline de Status">
+    <div className="w-full rounded-xl border border-border bg-card p-3 sm:p-4 shadow-xs" role="region" aria-label="Pipeline de Status">
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-xs font-semibold text-foreground uppercase tracking-wider">
@@ -78,13 +78,13 @@ export function StatusPipeline({
                 disabled={alterando}
                 onClick={() => onTrocarStatus(etapa.id)}
                 className={cn(
-                  "group relative z-10 flex flex-1 flex-col items-start gap-1 rounded-lg p-2 sm:p-2.5 text-left transition-all cursor-pointer select-none",
-                  "hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  "group relative z-10 flex flex-1 flex-col items-start gap-1 rounded-lg border p-2 sm:p-2.5 text-left transition-all cursor-pointer select-none",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                   isAtivo
-                    ? "bg-primary/5 border border-primary/20 shadow-xs"
+                    ? "border-primary bg-primary/5 shadow-xs"
                     : isPassado
-                    ? "opacity-90 hover:opacity-100"
-                    : "opacity-60 hover:opacity-90",
+                    ? "border-border bg-card hover:bg-muted/50"
+                    : "border-transparent hover:border-border hover:bg-muted/40 opacity-70 hover:opacity-100",
                   alterando ? "pointer-events-none opacity-50" : ""
                 )}
                 title={`Alterar para status: ${etapa.label}`}
@@ -92,12 +92,12 @@ export function StatusPipeline({
                 <div className="flex items-center gap-2 w-full">
                   <div
                     className={cn(
-                      "flex size-6 sm:size-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold transition-all",
+                      "flex size-6 sm:size-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold transition-all border",
                       isAtivo
-                        ? "bg-primary text-primary-foreground shadow-xs ring-4 ring-primary/15"
+                        ? "border-primary bg-primary text-primary-foreground shadow-xs"
                         : isPassado
-                        ? "bg-emerald-500 text-white"
-                        : "bg-muted text-muted-foreground group-hover:bg-muted-foreground/20 group-hover:text-foreground"
+                        ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                        : "border-border bg-muted text-muted-foreground group-hover:text-foreground"
                     )}
                   >
                     {isPassado ? (
@@ -132,10 +132,10 @@ export function StatusPipeline({
                   aria-hidden="true"
                   className={cn(
                     "hidden sm:block h-0.5 w-6 sm:w-10 lg:w-16 shrink-0 transition-colors duration-300",
-                    isPassado || (isAtivo && idx < indiceAtual)
-                      ? "bg-emerald-500"
-                      : indiceAtual > idx
-                      ? "bg-primary"
+                    isPassado
+                      ? "bg-emerald-500/40"
+                      : isAtivo
+                      ? "bg-primary/30"
                       : "bg-border"
                   )}
                 />
