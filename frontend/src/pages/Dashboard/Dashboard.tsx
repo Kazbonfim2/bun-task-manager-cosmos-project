@@ -11,6 +11,7 @@ import { demandaAtrasada, STATUS_ITENS } from "@/lib/status";
 import { DashboardCards } from "./components/DashboardCards";
 import { DashboardHeader } from "./components/DashboardHeader";
 import { DashboardPagination } from "./components/DashboardPagination";
+import { DashboardProjects } from "./components/DashboardProjects";
 import { DashboardToolbar } from "./components/DashboardToolbar";
 import { DemandasGrid } from "./components/DemandasGrid";
 import { DemandasTabela } from "./components/DemandasTabela";
@@ -165,6 +166,10 @@ export function Dashboard() {
   const abertas = demandas.filter((item) => item.status !== "concluida").length;
   const atrasadas = demandas.filter((item) => demandaAtrasada(item.prazo, item.status)).length;
 
+  function selecionarProjeto(id: string) {
+    setFiltroProjeto((anterior) => (anterior === id ? "todos" : id));
+  }
+
   function abrirNovaDemanda() {
     setEditando(null);
     setForm(FORM_VAZIO);
@@ -197,7 +202,7 @@ export function Dashboard() {
         await api("/demandas", { method: "POST", body: corpo });
       }
       setDialogDemanda(false);
-      await carregarDemandas();
+      await Promise.all([carregarDemandas(), carregarListas()]);
     } catch (falha) {
       setErro(falha instanceof Error ? falha.message : "Falha ao salvar demanda");
     } finally {
@@ -213,7 +218,7 @@ export function Dashboard() {
       await api(`/demandas/${editando.id}`, { method: "DELETE" });
       setDialogDemanda(false);
       setEditando(null);
-      await carregarDemandas();
+      await Promise.all([carregarDemandas(), carregarListas()]);
     } catch (falha) {
       setErro(falha instanceof Error ? falha.message : "Falha ao excluir demanda");
     } finally {
@@ -276,7 +281,11 @@ export function Dashboard() {
     setSalvando(true);
     setErro("");
     try {
-      await api(`/projetos/${projetoEditando.id}`, { method: "DELETE" });
+      const idExcluido = projetoEditando.id;
+      await api(`/projetos/${idExcluido}`, { method: "DELETE" });
+      if (filtroProjeto === idExcluido) {
+        setFiltroProjeto("todos");
+      }
       setProjetoNome("");
       setProjetoDescricao("");
       setProjetoEditando(null);
@@ -320,6 +329,7 @@ export function Dashboard() {
         method: "PATCH",
         body: JSON.stringify({ status }),
       });
+      await carregarListas();
     } catch (falha) {
       setErro(falha instanceof Error ? falha.message : "Falha ao alterar status");
       await carregarDemandas();
@@ -337,6 +347,13 @@ export function Dashboard() {
         abertas={abertas}
         atrasadas={atrasadas}
         onFiltrarStatus={setFiltroStatus}
+      />
+
+      {/* // Nova seção visual colapsável de Projetos */}
+      <DashboardProjects
+        projetos={projetos}
+        filtroProjeto={filtroProjeto}
+        onSelecionarProjeto={selecionarProjeto}
       />
 
       {/* // Seção principal de listagem de demandas, filtros e ações */}
