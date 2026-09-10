@@ -4,14 +4,15 @@ services:
       context: .
       target: prod
     ports:
-      - "3005:3005"
+      - "${PORT:-3005}:${PORT:-3005}"
     environment:
       NODE_ENV: production
-      PORT: "3005"
-      JWT_SECRET: orion-local-secret
-      SQLITE_PATH: /app/data/orion.db
+      PORT: "${PORT:-3005}"
+      JWT_SECRET: ${JWT_SECRET:-orion-local-secret}
+      SQLITE_PATH: ${SQLITE_PATH:-/app/data/orion.db}
     volumes:
       - orion-data:/app/data
 
 volumes:
   orion-data:
+
