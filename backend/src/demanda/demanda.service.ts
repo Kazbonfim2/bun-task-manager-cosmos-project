@@ -1,4 +1,5 @@
 import { HttpError } from "../http-error";
+import { extrairMencoes } from "../notificacao/mencao.util";
 import { notificacaoService } from "../notificacao/notificacao.service";
 import { projetoRepository } from "../projeto/projeto.repository";
 import { usuarioRepository } from "../usuario/usuario.repository";
@@ -37,8 +38,9 @@ export const demandaService = {
   },
 
   criar(dados: NovaDemanda, criadoPorId: string): DemandaComNomes {
-    const descricao = dados.descricao?.trim();
-    if (!descricao) throw new HttpError(400, "Descrição é obrigatória");
+    const titulo = dados.titulo?.trim();
+    if (!titulo) throw new HttpError(400, "Título é obrigatório");
+    const descricao = dados.descricao?.trim() || null;
     if (!dados.projeto_id) throw new HttpError(400, "Projeto é obrigatório");
     if (!dados.responsavel_id) throw new HttpError(400, "Responsável é obrigatório");
     if (!ehStatus(dados.status)) throw new HttpError(400, "Status inválido");
@@ -52,6 +54,7 @@ export const demandaService = {
     const agora = new Date().toISOString();
     const criada = demandaRepository.criar({
       id: crypto.randomUUID(),
+      titulo,
       descricao,
       projeto_id: dados.projeto_id,
       responsavel_id: dados.responsavel_id,
@@ -66,8 +69,24 @@ export const demandaService = {
       usuario_id: criada.responsavel_id,
       demanda_id: criada.id,
       tipo: "demanda_criada",
-      mensagem: `Nova demanda atribuída a você: "${criada.descricao}"`,
+      mensagem: `Nova demanda atribuída a você: "${criada.titulo}"`,
     });
+
+    if (descricao) {
+      const usuarios = usuarioRepository.listar();
+      const idsMencionados = extrairMencoes(descricao, usuarios).filter(
+        (id) => id !== criadoPorId && id !== criada.responsavel_id
+      );
+
+      for (const destId of idsMencionados) {
+        notificacaoService.notificar({
+          usuario_id: destId,
+          demanda_id: criada.id,
+          tipo: "mencao",
+          mensagem: `Você foi mencionado na descrição da demanda "${criada.titulo}".`,
+        });
+      }
+    }
 
     return criada;
   },
@@ -76,8 +95,9 @@ export const demandaService = {
     const atual = demandaRepository.buscarPorId(id);
     if (!atual) throw new HttpError(404, "Demanda não encontrada");
 
-    const descricao = dados.descricao?.trim();
-    if (!descricao) throw new HttpError(400, "Descrição é obrigatória");
+    const titulo = dados.titulo?.trim();
+    if (!titulo) throw new HttpError(400, "Título é obrigatório");
+    const descricao = dados.descricao !== undefined ? (dados.descricao?.trim() || null) : atual.descricao;
     if (!dados.projeto_id) throw new HttpError(400, "Projeto é obrigatório");
     if (!dados.responsavel_id) throw new HttpError(400, "Responsável é obrigatório");
     if (!ehStatus(dados.status)) throw new HttpError(400, "Status inválido");
@@ -90,6 +110,7 @@ export const demandaService = {
 
     const atualizada = demandaRepository.atualizar({
       ...atual,
+      titulo,
       descricao,
       projeto_id: dados.projeto_id,
       responsavel_id: dados.responsavel_id,
@@ -105,7 +126,7 @@ export const demandaService = {
           usuario_id: usuarioId,
           demanda_id: atualizada.id,
           tipo: "demanda_status_alterado",
-          mensagem: `Demanda "${atualizada.descricao}" mudou para o status "${dados.status}".`,
+          mensagem: `Demanda "${atualizada.titulo}" mudou para o status "${dados.status}".`,
         });
       }
     }
@@ -115,8 +136,26 @@ export const demandaService = {
         usuario_id: dados.responsavel_id,
         demanda_id: atualizada.id,
         tipo: "demanda_criada",
-        mensagem: `Demanda "${atualizada.descricao}" atribuída a você.`,
+        mensagem: `Demanda "${atualizada.titulo}" atribuída a você.`,
       });
+    }
+
+    if (descricao && descricao !== atual.descricao) {
+      const usuarios = usuarioRepository.listar();
+      const mencoesAtuais = extrairMencoes(descricao, usuarios);
+      const mencoesAntigas = atual.descricao ? extrairMencoes(atual.descricao, usuarios) : [];
+      const novasMencoes = mencoesAtuais.filter(
+        (id) => !mencoesAntigas.includes(id) && id !== atualizada.responsavel_id
+      );
+
+      for (const destId of novasMencoes) {
+        notificacaoService.notificar({
+          usuario_id: destId,
+          demanda_id: atualizada.id,
+          tipo: "mencao",
+          mensagem: `Você foi mencionado na descrição da demanda "${atualizada.titulo}".`,
+        });
+      }
     }
 
     return atualizada;
@@ -140,7 +179,7 @@ export const demandaService = {
           usuario_id: usuarioId,
           demanda_id: atualizada.id,
           tipo: "demanda_status_alterado",
-          mensagem: `Demanda "${atualizada.descricao}" mudou para o status "${status}".`,
+          mensagem: `Demanda "${atualizada.titulo}" mudou para o status "${status}".`,
         });
       }
     }

@@ -4,7 +4,7 @@ import { db } from "../database/connection";
 export interface EventoNotificacao {
   usuario_id: string;
   demanda_id?: string;
-  tipo: "demanda_criada" | "demanda_status_alterado" | string;
+  tipo: "demanda_criada" | "demanda_status_alterado" | "demanda_comentario" | string;
   mensagem: string;
 }
 
