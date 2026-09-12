@@ -4,6 +4,7 @@ import { join } from "node:path";
 import cors from "cors";
 import express, { type NextFunction, type Request, type Response } from "express";
 import { authRoutes } from "./auth/auth.routes";
+import { comentarioRoutes } from "./comentario/comentario.routes";
 import { demandaRoutes } from "./demanda/demanda.routes";
 import { HttpError } from "./http-error";
 import { notificacaoRoutes } from "./notificacao/notificacao.routes";
@@ -26,6 +27,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/usuarios", usuarioRoutes);
 app.use("/api/projetos", projetoRoutes);
 app.use("/api/demandas", demandaRoutes);
+app.use("/api/comentarios", comentarioRoutes);
 app.use("/api/notificacoes", notificacaoRoutes);
 app.use("/api", (_req, res) => {
   res.status(404).json({ erro: "Não encontrado" });
