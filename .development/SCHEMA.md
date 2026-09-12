@@ -28,6 +28,7 @@ erDiagram
 
     demandas {
         TEXT id PK
+        TEXT titulo
         TEXT descricao
         TEXT projeto_id FK
         TEXT responsavel_id FK
@@ -74,7 +75,8 @@ Armazena as tarefas/demandas associadas a um projeto e aos usuários.
 | Coluna | Tipo | Restrições | Descrição |
 |---|---|---|---|
 | `id` | `TEXT` | `PRIMARY KEY` | Identificador único da demanda |
-| `descricao` | `TEXT` | `NOT NULL` | Descrição da demanda |
+| `titulo` | `TEXT` | `NOT NULL` | Título da demanda |
+| `descricao` | `TEXT` | `NULLABLE` | Descrição da demanda |
 | `projeto_id` | `TEXT` | `NOT NULL`, `FK -> projetos(id)` | ID do projeto relacionado |
 | `responsavel_id` | `TEXT` | `NOT NULL`, `FK -> usuarios(id)` | ID do usuário responsável |
 | `criado_por_id` | `TEXT` | `NOT NULL`, `FK -> usuarios(id)` | ID do usuário criador |
