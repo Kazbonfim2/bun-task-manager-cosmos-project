@@ -85,10 +85,18 @@ export function DemandasGrid({
                 </div>
                 <CardTitle
                   className="line-clamp-2 min-h-[2.5rem] break-words text-base font-medium leading-snug hover:underline"
-                  title={demanda.descricao}
+                  title={demanda.titulo}
                 >
-                  {demanda.descricao}
+                  {demanda.titulo}
                 </CardTitle>
+                {demanda.descricao ? (
+                  <p
+                    className="line-clamp-2 text-xs text-muted-foreground"
+                    title={demanda.descricao}
+                  >
+                    {demanda.descricao}
+                  </p>
+                ) : null}
               </CardHeader>
               <CardPanel className="flex flex-col gap-3 pt-0">
                 <div className="text-muted-foreground flex flex-col gap-1 text-xs">

@@ -13,12 +13,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Field, FieldLabel } from "@/components/ui/field";
-import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { TextareaMencoes } from "@/components/TextareaMencoes";
 import { SelectSimples, type ItemSelect } from "@/components/SelectSimples";
-import type { Demanda } from "@/lib/api";
+import type { Demanda, Usuario } from "@/lib/api";
 import { STATUS_ITENS } from "@/lib/status";
 
 export interface FormDemandaData {
+  titulo: string;
   descricao: string;
   projeto_id: string;
   responsavel_id: string;
@@ -34,6 +36,7 @@ interface DialogDemandaProps {
   setForm: React.Dispatch<React.SetStateAction<FormDemandaData>>;
   itensProjeto: readonly ItemSelect[];
   itensUsuario: readonly ItemSelect[];
+  usuarios?: Usuario[];
   salvando: boolean;
   erro: string;
   onSalvar: (evento: SubmitEvent<HTMLFormElement>) => void;
@@ -48,11 +51,20 @@ export function DialogDemanda({
   setForm,
   itensProjeto,
   itensUsuario,
+  usuarios,
   salvando,
   erro,
   onSalvar,
   onExcluir,
 }: DialogDemandaProps) {
+  const listaUsuarios: Usuario[] =
+    usuarios ??
+    itensUsuario.map((item) => ({
+      id: item.value,
+      nome_completo: item.label,
+      email: "",
+    }));
+
   return (
     <Dialog open={aberto} onOpenChange={onOpenChange}>
       <DialogPopup>
@@ -65,14 +77,27 @@ export function DialogDemanda({
         <form className="contents" onSubmit={onSalvar}>
           <DialogPanel className="flex flex-col gap-4">
             <Field>
-              <FieldLabel>Descrição</FieldLabel>
-              <Textarea
-                name="descricao"
+              <FieldLabel>Título</FieldLabel>
+              <Input
+                name="titulo"
                 required
-                value={form.descricao}
+                placeholder="Título da demanda"
+                value={form.titulo}
                 onChange={(evento) =>
-                  setForm((atual) => ({ ...atual, descricao: evento.target.value }))
+                  setForm((atual) => ({ ...atual, titulo: evento.target.value }))
                 }
+              />
+            </Field>
+            <Field>
+              <FieldLabel>Descrição (opcional)</FieldLabel>
+              <TextareaMencoes
+                name="descricao"
+                placeholder="Descrição detalhada da demanda (digite @ para mencionar)"
+                value={form.descricao}
+                onChange={(descricao) =>
+                  setForm((atual) => ({ ...atual, descricao }))
+                }
+                usuarios={listaUsuarios}
               />
             </Field>
             <Field>

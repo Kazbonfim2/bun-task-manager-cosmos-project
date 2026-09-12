@@ -37,7 +37,7 @@ export function DemandasTabela({
       <TableHeader>
         <TableRow>
           <TableHead className="w-36">Projeto</TableHead>
-          <TableHead className="min-w-[200px] max-w-xs">Descrição</TableHead>
+          <TableHead className="min-w-[200px] max-w-xs">Título</TableHead>
           <TableHead className="w-32">Responsável</TableHead>
           <TableHead className="w-28">Prazo</TableHead>
           <TableHead className="w-44">Status</TableHead>
@@ -76,22 +76,30 @@ export function DemandasTabela({
                   </span>
                 </TableCell>
                 <TableCell className="max-w-xs md:max-w-sm">
-                  <div className="flex flex-col gap-1">
-                    {/* // Tooltip com descrição completa ao fazer hover */}
+                  <div className="flex flex-col gap-0.5">
+                    {/* // Tooltip com título e descrição completos ao fazer hover */}
                     <Tooltip>
                       <TooltipTrigger
                         render={
                           <span className="block truncate cursor-pointer font-medium hover:underline">
-                            {demanda.descricao}
+                            {demanda.titulo}
                           </span>
                         }
                       />
                       <TooltipPopup className="max-w-xs sm:max-w-sm whitespace-normal break-words">
-                        {demanda.descricao}
+                        <div className="font-semibold">{demanda.titulo}</div>
+                        {demanda.descricao ? (
+                          <div className="text-xs text-muted-foreground mt-1">{demanda.descricao}</div>
+                        ) : null}
                       </TooltipPopup>
                     </Tooltip>
+                    {demanda.descricao ? (
+                      <span className="block truncate text-xs text-muted-foreground" title={demanda.descricao}>
+                        {demanda.descricao}
+                      </span>
+                    ) : null}
                     {atrasada ? (
-                      <Badge variant="destructive" className="w-fit">
+                      <Badge variant="destructive" className="w-fit mt-0.5">
                         Atrasada
                       </Badge>
                     ) : null}

@@ -15,7 +15,8 @@ interface DialogExcluirDemandaProps {
   aberto: boolean;
   onOpenChange: (aberto: boolean) => void;
   demandaId: string;
-  demandaDescricao: string;
+  demandaTitulo: string;
+  demandaDescricao?: string;
   excluindo: boolean;
   onConfirmar: () => void;
 }
@@ -24,6 +25,7 @@ export function DialogExcluirDemanda({
   aberto,
   onOpenChange,
   demandaId,
+  demandaTitulo,
   demandaDescricao,
   excluindo,
   onConfirmar,
@@ -54,8 +56,8 @@ export function DialogExcluirDemanda({
               </code>
             </div>
             <p className="text-muted-foreground line-clamp-2">
-              <span className="font-semibold text-foreground">Descrição: </span>
-              {demandaDescricao}
+              <span className="font-semibold text-foreground">Título: </span>
+              {demandaTitulo}
             </p>
           </div>
           <p className="text-xs text-muted-foreground mt-3">

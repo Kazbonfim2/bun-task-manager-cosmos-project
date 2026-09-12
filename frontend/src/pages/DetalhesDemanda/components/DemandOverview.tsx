@@ -9,6 +9,8 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useState } from "react";
+import { TextoComMencoes } from "@/components/TextoComMencoes";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardPanel } from "@/components/ui/card";
 import type { Demanda } from "@/lib/api";
@@ -37,8 +39,8 @@ export function DemandOverview({
   const StatusIcone = statusInfo?.icone;
   const infoPrazo = calcularStatusPrazo(demanda.prazo, demanda.status);
 
-  function copiarTextoDescricao() {
-    navigator.clipboard.writeText(demanda.descricao);
+  function copiarTextoTitulo() {
+    navigator.clipboard.writeText(demanda.titulo);
     setCopiadoTexto(true);
     setTimeout(() => setCopiadoTexto(false), 2000);
   }
@@ -100,19 +102,19 @@ export function DemandOverview({
             </span>
           </div>
 
-          {/* Título Principal / Descrição da Demanda */}
+          {/* Título Principal da Demanda */}
           <div className="flex items-start justify-between gap-4 pt-1">
             <h1 className="font-heading text-xl sm:text-2xl font-bold tracking-tight text-foreground leading-snug">
-              {demanda.descricao}
+              {demanda.titulo}
             </h1>
             <Button
               type="button"
               variant="ghost"
               size="icon-sm"
-              onClick={copiarTextoDescricao}
+              onClick={copiarTextoTitulo}
               className="shrink-0 text-muted-foreground hover:text-foreground"
-              title="Copiar descrição da demanda"
-              aria-label="Copiar descrição"
+              title="Copiar título da demanda"
+              aria-label="Copiar título"
             >
               {copiadoTexto ? (
                 <Check className="size-4 text-emerald-500" />
@@ -124,6 +126,18 @@ export function DemandOverview({
         </CardHeader>
 
         <CardPanel className="flex flex-col gap-6 pt-2">
+          {/* Descrição Detalhada da Demanda */}
+          {demanda.descricao ? (
+            <div className="rounded-lg border bg-muted/30 p-4">
+              <h2 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
+                Descrição Detalhada
+              </h2>
+              <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
+                <TextoComMencoes texto={demanda.descricao} />
+              </p>
+            </div>
+          ) : null}
+
           {/* Banner Contextual Inteligente */}
           {infoPrazo.tipo === "atrasada" && (
             <div className="flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-500/8 p-3.5 text-xs text-red-700 dark:text-red-300">

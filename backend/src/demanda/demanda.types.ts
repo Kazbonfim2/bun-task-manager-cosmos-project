@@ -4,7 +4,8 @@ export type StatusDemanda = (typeof STATUS_DEMANDA)[number];
 
 export type Demanda = {
   id: string;
-  descricao: string;
+  titulo: string;
+  descricao: string | null;
   projeto_id: string;
   responsavel_id: string;
   criado_por_id: string;
@@ -20,7 +21,8 @@ export type DemandaComNomes = Demanda & {
 };
 
 export type NovaDemanda = {
-  descricao: string;
+  titulo: string;
+  descricao?: string | null;
   projeto_id: string;
   responsavel_id: string;
   prazo: string;

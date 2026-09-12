@@ -17,10 +17,12 @@ import { DemandHeader } from "./components/DemandHeader";
 import { DemandOverview } from "./components/DemandOverview";
 import { DemandSidebar } from "./components/DemandSidebar";
 import { DemandTimeline } from "./components/DemandTimeline";
+import { DemandComments } from "./components/DemandComments";
 import { DetalhesDemandaSkeleton } from "./components/DetalhesDemandaSkeleton";
 import { DialogExcluirDemanda } from "./components/DialogExcluirDemanda";
 
 const FORM_VAZIO: FormDemandaData = {
+  titulo: "",
   descricao: "",
   projeto_id: "",
   responsavel_id: "",
@@ -80,7 +82,8 @@ export function DetalhesDemanda() {
   function abrirEdicao() {
     if (!demanda) return;
     setForm({
-      descricao: demanda.descricao,
+      titulo: demanda.titulo,
+      descricao: demanda.descricao || "",
       projeto_id: demanda.projeto_id,
       responsavel_id: demanda.responsavel_id,
       prazo: demanda.prazo.slice(0, 10),
@@ -191,6 +194,8 @@ export function DetalhesDemanda() {
           />
 
           <DemandTimeline demanda={demanda} />
+
+          <DemandComments demandaId={demanda.id} />
         </div>
 
         {/* Coluna Lateral (4 colunas em desktop) */}
@@ -213,6 +218,7 @@ export function DetalhesDemanda() {
         setForm={setForm}
         itensProjeto={itensProjeto}
         itensUsuario={itensUsuario}
+        usuarios={usuarios}
         salvando={salvando}
         erro={erro}
         onSalvar={salvarEdicao}
@@ -227,7 +233,8 @@ export function DetalhesDemanda() {
         aberto={dialogExclusao}
         onOpenChange={setDialogExclusao}
         demandaId={demanda.id}
-        demandaDescricao={demanda.descricao}
+        demandaTitulo={demanda.titulo}
+        demandaDescricao={demanda.descricao || ""}
         excluindo={salvando}
         onConfirmar={confirmarExclusao}
       />

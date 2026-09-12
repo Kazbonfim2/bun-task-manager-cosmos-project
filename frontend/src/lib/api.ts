@@ -45,7 +45,8 @@ export type Projeto = {
 
 export type Demanda = {
   id: string;
-  descricao: string;
+  titulo: string;
+  descricao: string | null;
   projeto_id: string;
   responsavel_id: string;
   criado_por_id: string;
@@ -71,3 +72,15 @@ export type Notificacao = {
   lida: boolean;
   criado_em: string;
 };
+
+export type Comentario = {
+  id: string;
+  demanda_id: string;
+  usuario_id: string;
+  texto: string;
+  criado_em: string;
+  atualizado_em: string;
+  usuario_nome: string;
+  usuario_email: string;
+};
+

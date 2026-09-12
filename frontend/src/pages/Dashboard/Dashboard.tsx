@@ -22,6 +22,7 @@ const FILTRO_TODOS: ItemSelect = { label: "Todos os responsáveis", value: "todo
 const FILTRO_PROJETO_TODOS: ItemSelect = { label: "Todos os projetos", value: "todos" };
 
 const FORM_VAZIO: FormDemandaData = {
+  titulo: "",
   descricao: "",
   projeto_id: "",
   responsavel_id: "",
@@ -73,6 +74,7 @@ export function Dashboard() {
           : "";
 
       const texto = [
+        demanda.titulo,
         demanda.descricao,
         demanda.projeto_nome,
         demanda.responsavel_nome,
@@ -180,7 +182,8 @@ export function Dashboard() {
   function abrirEdicao(demanda: Demanda) {
     setEditando(demanda);
     setForm({
-      descricao: demanda.descricao,
+      titulo: demanda.titulo,
+      descricao: demanda.descricao || "",
       projeto_id: demanda.projeto_id,
       responsavel_id: demanda.responsavel_id,
       prazo: demanda.prazo.slice(0, 10),
@@ -301,10 +304,11 @@ export function Dashboard() {
 
   function exportarCsv() {
     if (!demandasFiltradas.length) return;
-    const cabecalho = ["ID", "Descrição", "Projeto", "Responsável", "Prazo", "Status"];
+    const cabecalho = ["ID", "Título", "Descrição", "Projeto", "Responsável", "Prazo", "Status"];
     const linhas = demandasFiltradas.map((d) => [
       `"${d.id}"`,
-      `"${d.descricao.replace(/"/g, '""')}"`,
+      `"${d.titulo.replace(/"/g, '""')}"`,
+      `"${(d.descricao || "").replace(/"/g, '""')}"`,
       `"${d.projeto_nome.replace(/"/g, '""')}"`,
       `"${d.responsavel_nome.replace(/"/g, '""')}"`,
       `"${d.prazo.slice(0, 10)}"`,
@@ -436,6 +440,7 @@ export function Dashboard() {
         setForm={setForm}
         itensProjeto={itensProjeto}
         itensUsuario={itensUsuario}
+        usuarios={usuarios}
         salvando={salvando}
         erro={erro}
         onSalvar={salvarDemanda}

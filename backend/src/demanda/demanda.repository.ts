@@ -15,11 +15,12 @@ export const demandaRepository = {
   criar(demanda: Demanda): DemandaComNomes {
     db.query(
       `INSERT INTO demandas (
-        id, descricao, projeto_id, responsavel_id, criado_por_id,
+        id, titulo, descricao, projeto_id, responsavel_id, criado_por_id,
         prazo, status, criado_em, atualizado_em
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     ).run(
       demanda.id,
+      demanda.titulo,
       demanda.descricao,
       demanda.projeto_id,
       demanda.responsavel_id,
@@ -68,10 +69,11 @@ export const demandaRepository = {
   atualizar(demanda: Demanda): DemandaComNomes {
     db.query(
       `UPDATE demandas SET
-        descricao = ?, projeto_id = ?, responsavel_id = ?,
+        titulo = ?, descricao = ?, projeto_id = ?, responsavel_id = ?,
         prazo = ?, status = ?, atualizado_em = ?
       WHERE id = ?`,
     ).run(
+      demanda.titulo,
       demanda.descricao,
       demanda.projeto_id,
       demanda.responsavel_id,
