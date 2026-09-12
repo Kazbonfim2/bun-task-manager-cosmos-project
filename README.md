@@ -1,168 +1,178 @@
-# ORION — Sistema de Controle de Demandas
+# ORION — Sistema de Gestão e Controle de Demandas
 
-Aplicação web desenvolvida para substituir planilhas compartilhadas de equipe, oferecendo visibilidade clara sobre o que está aberto, quem é o responsável e o que já venceu.
+[![CI](https://github.com/Kazbonfim2/bun-task-manager-cosmos-project/actions/workflows/ci.yml/badge.svg)](https://github.com/Kazbonfim2/bun-task-manager-cosmos-project/actions/workflows/ci.yml)
+![Bun](https://img.shields.io/badge/Bun-1.3+-000?logo=bun)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-5+-3178C6?logo=typescript)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?logo=tailwindcss)
+![SQLite](https://img.shields.io/badge/SQLite-WAL-003B57?logo=sqlite)
+
+Aplicação web moderna desenvolvida para substituir planilhas compartilhadas de equipe, oferecendo visibilidade em tempo real sobre demandas em aberto, responsáveis, prazos, histórico de discussões e notificações.
 
 ---
 
-## 👥 Guia do Usuário (Para Usuários Finais)
+## 👥 Guia Rápido de Uso (Para Usuários Finais)
 
-Esta seção foi feita para você que deseja apenas colocar a aplicação para rodar e gerenciar seus projetos e demandas no dia a dia, sem precisar entender de código.
+Se você quer apenas rodar a aplicação e gerenciar projetos e demandas da sua equipe no dia a dia, siga os passos abaixo.
 
-### 🚀 Como executar a aplicação
+### 🚀 Como colocar para rodar em 1 minuto
 
-Você pode escolher entre duas formas simples de rodar o ORION:
-
-#### Opção 1: Com Docker (Mais Rápido)
-Se já possui o [Docker Desktop](https://www.docker.com/) instalado e aberto:
+#### Opção 1: Com Docker (Recomendado — mais rápido)
+Se você tem o [Docker Desktop](https://www.docker.com/) instalado:
 
 ```bash
 docker compose up --build
 ```
-> Acesse no navegador: 👉 **[http://localhost:3005](http://localhost:3005)**
+> Acesse no seu navegador: 👉 **[http://localhost:3005](http://localhost:3005)**
 
 ---
 
-#### Opção 2: Sem Docker (Usando Bun — Windows, Linux e macOS)
+#### Opção 2: Sem Docker (Usando Bun)
+Se preferir rodar direto no seu computador (Windows, Linux ou Mac):
 
-Se você não usa Docker, basta ter o runtime **[Bun](https://bun.sh/)** instalado.
-
-**1. Instalar o Bun (caso ainda não tenha):**
-* **Windows** (no PowerShell):
-  ```powershell
-  powershell -c "irm bun.sh/install.ps1 | iex"
-  ```
-* **Linux / macOS** (no Terminal):
-  ```bash
-  curl -fsSL https://bun.sh/install | bash
-  ```
-
-**2. Instalar as dependências e iniciar:**
-No terminal, dentro da pasta do projeto:
-
-```bash
-# Instala as dependências do backend e frontend de uma só vez
-bun run setup
-
-# Inicia a aplicação (Frontend + Backend integrados)
-bun run dev
-```
-
-> Pronto! Acesse no navegador: 👉 **[http://localhost:3005](http://localhost:3005)**
-> *(O banco de dados SQLite e os dados de exemplo são criados automaticamente no primeiro acesso).*
+1. **Instale o Bun** (se ainda não tiver):
+   - **Windows** (PowerShell): `powershell -c "irm bun.sh/install.ps1 | iex"`
+   - **Linux / macOS** (Terminal): `curl -fsSL https://bun.sh/install | bash`
+2. **Instale e inicie:**
+   ```bash
+   bun run setup   # Instala tudo de uma vez
+   bun run dev     # Inicia o sistema
+   ```
+> Acesse no seu navegador: 👉 **[http://localhost:3005](http://localhost:3005)**
+> *(O banco de dados e dados de exemplo são criados automaticamente no primeiro acesso).*
 
 ---
 
-### ✨ Funcionalidades e Recursos
+### ✨ O que você pode fazer no ORION
 
-1. **Acesso Seguro e Rápido**
-   - **Cadastro Simples:** Crie sua conta informando nome completo, e-mail e senha na tela de cadastro.
-   - **Login Direto:** Autentique-se com facilidade e acesse seu ambiente de trabalho protegido.
+#### 1. 🔐 Acesso e Perfil
+- **Cadastro e Login:** Crie sua conta com nome, e-mail e senha e acesse seu ambiente de trabalho seguro.
+- **Tema Claro / Escuro:** Alterne entre os modos claro e escuro no cabeçalho conforme sua preferência visual.
 
-2. **Visão Geral no Painel (Dashboard)**
-   - **Métricas no topo:** Veja rapidamente o **Total de Demandas**, quantas estão **Abertas** e quantas estão **Atrasadas**.
-   - **Destaque Visual para Demandas Vencidas:** Qualquer demanda cujo prazo expirou e ainda não foi finalizada recebe destaque visual imediato em vermelho para chamar a atenção da equipe.
+#### 2. 📊 Painel de Controle (Dashboard)
+- **Métricas em Destaque:** Acompanhe o total de demandas, quantas estão abertas e quantas estão em atraso.
+- **Alerta de Atraso Inteligente:** Demandas com prazo vencido ganham destaque visual imediato em vermelho com contador de dias em atraso.
+- **Visão em Lista ou Grade (Cards):** Alterne a exibição das demandas entre tabela detalhada ou cards visuais.
+- **Filtros Combinados:** Filtre tarefas por responsável, por projeto e por status simultaneamente.
+- **Busca Rápida:** Encontre qualquer demanda digitando palavras do título ou descrição.
+- **Exportação para Planilha (CSV):** Baixe a lista de demandas com um clique para relatórios externos.
 
-3. **Gestão de Projetos e Demandas**
-   - **Criação de Projetos:** Cadastre seus projetos com nome e descrição opcional.
-   - **Cadastro de Demandas:** Crie tarefas informando descrição, prazo, status inicial, projeto vinculado e quem é o responsável pela execução.
-   - **Edição Completa & Exclusão:** Altere prazos, descrições, responsáveis ou exclua tarefas quando necessário.
-   - **Mudança Rápida de Status:** Atualize o progresso da tarefa (`Aberta` ➔ `Em andamento` ➔ `Concluída`) diretamente na listagem.
+#### 3. 📁 Projetos e Demandas
+- **Gestão de Projetos:** Crie novos projetos com nome e descrição para organizar o trabalho da equipe.
+- **Cadastro Detalhado:** Cadastre demandas com **Título claro**, **Descrição detalhada**, projeto vinculado, prazo de entrega e responsável.
+- **Mudança Rápida de Status:** Atualize o fluxo de trabalho (`Aberta` ➔ `Em andamento` ➔ `Concluída`) direto na listagem ou na tela de detalhes.
+- **Edição e Exclusão Segura:** Modifique prazos, descrições e responsáveis a qualquer momento.
 
-4. **Filtros Inteligentes**
-   - **Filtro por Responsável:** Veja apenas as tarefas de um colaborador específico.
-   - **Filtro por Status:** Visualize apenas o que está aberto, em andamento ou concluído.
-   - **Filtros Combináveis:** Combine responsável e status para encontrar exatamente o que precisa em segundos.
+#### 4. 💬 Discussão e Comentários nas Demandas
+- **Página de Detalhes da Demanda:** Clique em qualquer demanda para acessar a linha do tempo e o espaço de discussão.
+- **Comentários da Equipe:** Compartilhe atualizações, tire dúvidas e registre o histórico da tarefa.
+- **Edição pelo Autor:** Você pode editar ou excluir comentários que você mesmo enviou.
+
+#### 5. 🔔 Notificações e Menções (`@usuario`)
+- **Central de Notificações (Sino):** Receba avisos instantâneos quando uma tarefa for atribuída a você, quando o status mudar ou quando comentarem em sua demanda.
+- **Marcação com `@`:** Digite `@` em um comentário ou descrição para abrir a lista de membros e marcar um colega.
+- **Notificação Direta por Menção:** O usuário mencionado recebe um alerta específico indicando onde foi marcado.
+- **Leitura Rápida:** Marque notificações individuais como lidas ou clique em "Ler todas".
 
 ---
 
 ## 💻 Guia Técnico e Arquitetura (Para Desenvolvedores)
 
-Esta seção detalha o funcionamento interno, arquitetura, stack e modos de desenvolvimento.
+Esta seção documenta a arquitetura, convenções, stack e como contribuir tecnicamente com o projeto.
 
-### 🛠️ Modos de Execução para Desenvolvimento
-
-#### Opção 1: Desenvolvimento com Docker e Hot-Reload (Recomendado)
-Sobe o Express na porta 3005 integrado com o Vite em modo middleware. Qualquer alteração no backend ou frontend reflete instantaneamente:
+### 🛠️ Modos de Desenvolvimento
 
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
-```
-*(ou execute o atalho: `bun run dev:docker`)*
+# 1. Desenvolvimento com Docker e Hot-Reload (Express + Vite integrados)
+bun run dev:docker
+# (equivalente a: docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build)
 
-#### Opção 2: Desenvolvimento Local sem Docker
-Necessário ter o runtime [Bun](https://bun.sh/) instalado:
+# 2. Desenvolvimento Local com Bun
+bun run setup    # instala dependências da raiz, backend e frontend
+bun run dev      # sobe o servidor unificado em modo desenvolvimento
 
-```bash
-# Instalação rápida das dependências (raiz do projeto)
-bun run setup
-
-# Iniciar backend e frontend integrados
-bun run dev
-```
-Acesse em: **[http://localhost:3005](http://localhost:3005)**.
-
-#### 🌱 Carga Inicial de Dados (Seed Automático & Manual)
-
-O sistema executa o **seed automaticamente** no primeiro boot (seja via Docker ou localmente) caso o banco de dados esteja vazio.
-
-Caso queira forçar a execução do seed manualmente:
-
-```bash
-# Localmente (na raiz do projeto ou dentro de backend/)
-bun run seed
-
-# Ou via Docker (com o container em execução)
-docker compose exec orion bun run seed
+# 3. Rodar Testes Automatizados
+bun run test     # executa a suíte de testes unitários e de integração
 ```
 
-> **Credenciais padrão dos usuários do seed:**
-> - E-mails: `ana.paula.ribeiro@cosmos.com`, `beatriz.nogueira@cosmos.com`, `carlos.menezes@cosmos.com`, etc.
-> - Senha padrão: `novo123456789`
+#### 🌱 Dados Iniciais (Seed)
+- O seed é executado automaticamente na inicialização se o banco estiver vazio.
+- Para rodar manualmente: `bun run seed` (ou `docker compose exec orion bun run seed`).
+- **Credenciais padrão:** E-mails no formato `nome.sobrenome@cosmos.com` (ex: `ana.paula.ribeiro@cosmos.com`) com a senha `novo123456789`.
 
 ---
 
-### 🏛️ Arquitetura e Estrutura de Código
+### 🏛️ Estrutura do Projeto & Arquitetura
 
-A aplicação adota o padrão **MVC em camadas**, com convenção de nomenclatura inspirada no Nest.js, porém **sem decorators, sem reflection e sem containers de injeção de dependência complexos**.
+O backend segue a arquitetura **MVC em camadas** (estilo Nest.js, mas sem injeção de dependência complexa ou decorators — apenas classes/objetos com injeção manual simples e TypeScript estrito).
 
 ```text
-backend/src/
-├── auth/          # Controller, Service, Middleware JWT e rotas de autenticação
-├── usuario/       # Controller, Service, Repository, rotas e tipos de Usuários
-├── projeto/       # Controller, Service, Repository, rotas e tipos de Projetos
-├── demanda/       # Controller, Service, Repository, rotas e tipos de Demandas
-├── database/      # Conexão SQLite nativa (bun:sqlite), DDL inicial e seed
-└── server.ts      # Setup do Express, middlewares, rotas /api e integração Vite/SPA
+├── .github/workflows/ci.yml # Pipeline de CI (Bun test + Vite build)
+├── backend/
+│   ├── src/
+│   │   ├── auth/           # Login, cadastro, geração/validação JWT
+│   │   ├── usuario/        # CRUD e listagem pública de membros da equipe
+│   │   ├── projeto/        # Gestão de projetos
+│   │   ├── demanda/        # Regras de negócio, prazos e status de demandas
+│   │   ├── comentario/     # CRUD de comentários e discussões em demandas
+│   │   ├── notificacao/    # Serviço de eventos, utilitário de menções e alertas
+│   │   ├── database/       # Conexão SQLite (bun:sqlite, WAL, FKs) e migrações
+│   │   └── server.ts       # Setup do Express 5, rotas /api e SPA Vite
+│   └── data/               # Arquivo de banco de dados orion.db
+└── frontend/
+    ├── src/
+    │   ├── components/     # UI (Navbar, Dialogs, TextareaMencoes, TextoComMencoes)
+    │   ├── pages/
+    │   │   ├── Dashboard/        # Visão geral, filtros, grid/tabela, modais
+    │   │   ├── DetalhesDemanda/  # Timeline, overview, comentários e menções
+    │   │   ├── Login/ e Cadastro/# Telas de autenticação
+    │   └── lib/            # Cliente HTTP (api.ts), sessão e status helpers
+    └── index.html
 ```
 
-- **Fluxo estrito de dados:** `Routes ➔ Controller ➔ Service ➔ Repository ➔ SQLite`.
-- **Injeção de dependências simples:** Feita manualmente via construtor.
-- **Separation of Concerns:** Controllers gerenciam HTTP (`req`/`res`), Services contêm as regras de negócio puras, Repositories isolam o SQL.
+---
+
+### 🧰 Stack Tecnológica & Decisões Técnicas
+
+| Camada | Tecnologia | Decisão Técnica / Motivação |
+|---|---|---|
+| **Runtime** | [Bun](https://bun.sh/) 1.3+ | Alta performance, inicialização ultrarrápida e runtime all-in-one para TS. |
+| **Backend** | [Express 5](https://expressjs.com/) + TS | Roteamento simples, robusto e compatível com o ecossistema Node/Bun. |
+| **Banco de Dados** | [SQLite](https://sqlite.org/) via `bun:sqlite` | Zero configuração de servidor externo, persistência local em arquivo único, modo `WAL` habilitado e foreign keys ativas. |
+| **Frontend** | [React 19](https://react.dev/) + [Vite](https://vite.dev/) | Renderização rápida, bundle otimizado e tipagem completa. |
+| **Estilização** | [Tailwind CSS v4](https://tailwindcss.com/) + coss UI | Componentes utilitários leves estilo shadcn/ui, sem runtime CSS pesado. |
+| **Autenticação** | JWT + `Bun.password` | Hashes nativos ultra seguros (`Bun.password.hash`) sem precisar de `bcrypt` externo. |
+| **Menções & Texto** | Regex nativa + parsing local | Detecção rápida de `@usuario` sem dependência de editores rich-text pesados (YAGNI). |
+| **CI / CD** | GitHub Actions | Validação contínua de testes e compilação do build a cada push e PR. |
 
 ---
 
-### 🧰 Stack Tecnológica & Decisões de Design
+### ⚙️ Variáveis de Ambiente
 
-- **Backend:** [Bun](https://bun.sh/) + [Express 5](https://expressjs.com/) + TypeScript.
-- **Banco de Dados:** [SQLite](https://sqlite.org/) embarcado via módulo nativo `bun:sqlite` (`journal_mode = WAL`, `PRAGMA foreign_keys = ON`). Mapeamento completo disponível em [SCHEMA.md](SCHEMA.md).
-- **Frontend:** [React 19](https://react.dev/) + [Vite](https://vite.dev/) + TypeScript + [Tailwind CSS v4](https://tailwindcss.com/) + componentes [coss UI](https://coss.com/ui).
-- **Autenticação & Senhas:**
-  - JWT gerado via biblioteca `jsonwebtoken` e validado via `auth.middleware.ts` no header `Authorization: Bearer <token>`.
-  - Hashing seguro nativo com `Bun.password.hash()` e `Bun.password.verify()` (sem dependência externa tipo bcrypt).
-- **Integridade de Status:** Utilização de enum fixo (`aberta` | `em_andamento` | `concluida`) garantido via restrição `CHECK` no SQLite e tipos TypeScript.
-- **Cálculo de Atraso:** Avaliado no momento da consulta (`prazo < hoje` e `status != 'concluida'`), dispensando cron jobs ou colunas redundantes.
-- **Empacotamento Unificado:** Um único container Docker e uma única porta pública (**3005**). Em produção, o Express entrega a API em `/api` e os arquivos estáticos compilados do React em `/`.
+Crie um arquivo `.env` na raiz se desejar customizar as portas ou caminho do banco:
 
----
+```env
+# Porta da aplicação (padrão: 3005)
+PORT=3005
 
-### 🚫 O que ficou de fora (Decisões de Escopo / YAGNI)
+# Caminho do banco SQLite (padrão: ./data/orion.db)
+SQLITE_PATH=./data/orion.db
 
-- Recuperação de senha por e-mail, confirmação de conta e OAuth/Login social.
-- Paginação server-side complexa, WebSockets, filas de background, cache distribuído (Redis) ou multi-tenancy.
-- Testes automatizados extensivos (mantido simples conforme requisitos do MVP).
+# Segredo para assinatura de JWTs
+JWT_SECRET=orion_secret_key_change_in_production
+```
 
 ---
 
-## 🤖 Registro de uso de IA
+### 🚫 Decisões de Escopo e Simplificações (YAGNI)
 
-Consulte o arquivo [DEVELOPMENT.md](DEVELOPMENT.md) para o registro detalhado de arquitetura, decisões e uso de IA no projeto.
+- **Sem Broker de Mensagens (Kafka/RabbitMQ):** Inserção de notificações e eventos síncronos no SQLite local levam `< 1ms`.
+- **Sem Editores WYSIWYG complexos (Quill/Draft.js):** `<textarea>` com autocomplete flutuante atende 100% das menções com menos de 200 linhas de código.
+- **Sem WebSockets pesados:** Polling inteligente com revalidação no foco da janela atualiza notificações de forma leve e resiliente.
+- **Sem Reset de Senha por E-mail:** Autenticação enxuta focada no fluxo corporativo fechado de demandas.
+
+---
+
+## 🤖 Registro de Uso de IA
+
+O registro de decisões técnicas e prompts arquiteturais encontra-se documentado no histórico de engenharia do repositório.
