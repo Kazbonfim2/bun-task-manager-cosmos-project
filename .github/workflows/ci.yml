@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: [main, "feat/**"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Backend - Instalar dependências e rodar testes
+        working-directory: ./backend
+        run: |
+          bun install --frozen-lockfile
+          bun test
+
+      - name: Frontend - Instalar dependências e build
+        working-directory: ./frontend
+        run: |
+          bun install --frozen-lockfile
+          bun run build
