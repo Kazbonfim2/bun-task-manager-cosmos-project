@@ -5,9 +5,9 @@ import {
   LayoutGrid,
   List,
   Plus,
-  RotateCcw,
   Search,
   SlidersHorizontal,
+  Trash2,
   X,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -31,6 +31,7 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@/components/ui/toggle-group";
+import { Tooltip, TooltipPopup, TooltipTrigger } from "@/components/ui/tooltip";
 import { SelectSimples, type ItemSelect } from "@/components/SelectSimples";
 import { FILTRO_STATUS_ITENS } from "@/lib/status";
 
@@ -108,13 +109,13 @@ export function DashboardToolbar({
               <Button
                 type="button"
                 variant="ghost"
-                size="xs"
+                size="icon-xs"
                 onClick={limparTodosFiltros}
-                className="h-6 px-1.5 text-[11px] text-muted-foreground hover:text-foreground gap-1 cursor-pointer"
+                className="text-muted-foreground hover:text-foreground cursor-pointer"
+                title="Limpar filtros"
                 aria-label="Limpar todos os filtros"
               >
-                <RotateCcw className="size-3" aria-hidden="true" />
-                Limpar
+                <Trash2 className="size-3.5" aria-hidden="true" />
               </Button>
             ) : null}
           </div>
@@ -156,19 +157,24 @@ export function DashboardToolbar({
 
             {/* // Botão de limpar filtros em desktop/tablet */}
             {temFiltroAtivo ? (
-              <div className="hidden sm:flex sm:items-center sm:pb-0.5">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={limparTodosFiltros}
-                  className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground gap-1.5 cursor-pointer"
-                  title="Limpar todos os filtros e busca"
-                  aria-label="Limpar todos os filtros e busca"
-                >
-                  <RotateCcw className="size-3.5" aria-hidden="true" />
-                  <span className="hidden xl:inline">Limpar filtros</span>
-                </Button>
+              <div className="hidden sm:flex sm:items-center">
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={limparTodosFiltros}
+                        className="text-muted-foreground hover:text-foreground cursor-pointer"
+                        aria-label="Limpar todos os filtros"
+                      />
+                    }
+                  >
+                    <Trash2 className="size-4" aria-hidden="true" />
+                  </TooltipTrigger>
+                  <TooltipPopup>Limpar filtros</TooltipPopup>
+                </Tooltip>
               </div>
             ) : null}
           </div>

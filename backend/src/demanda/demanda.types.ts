@@ -33,4 +33,5 @@ export type FiltroDemanda = {
   responsavel_id?: string;
   projeto_id?: string;
   status?: string;
+  grupo_id?: string;
 };

@@ -148,9 +148,22 @@ export function Dashboard() {
   }
 
   useEffect(() => {
-    carregarListas().catch((falha: unknown) => {
-      setErro(falha instanceof Error ? falha.message : "Falha ao carregar");
-    });
+    function recarregar() {
+      setFiltroResponsavel("todos");
+      setFiltroProjeto("todos");
+      carregarListas().catch((falha: unknown) => {
+        setErro(falha instanceof Error ? falha.message : "Falha ao carregar");
+      });
+      carregarDemandas().catch((falha: unknown) => {
+        setErro(falha instanceof Error ? falha.message : "Falha ao carregar");
+      });
+    }
+
+    recarregar();
+    window.addEventListener("orion:grupo-alterado", recarregar);
+    return () => {
+      window.removeEventListener("orion:grupo-alterado", recarregar);
+    };
   }, []);
 
   useEffect(() => {

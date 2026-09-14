@@ -4,20 +4,23 @@ import { projetoRepository } from "./projeto.repository";
 import type { NovoProjeto, Projeto } from "./projeto.types";
 
 export const projetoService = {
-  criar(dados: NovoProjeto): Projeto {
+  criar(dados: NovoProjeto, grupoId?: string): Projeto {
     const nome = dados.nome?.trim();
     if (!nome) throw new HttpError(400, "Nome do projeto é obrigatório");
+
+    const finalGrupoId = dados.grupo_id || grupoId || null;
 
     return projetoRepository.criar({
       id: crypto.randomUUID(),
       nome,
       descricao: dados.descricao?.trim() || null,
+      grupo_id: finalGrupoId,
       criado_em: new Date().toISOString(),
     });
   },
 
-  listar(): Projeto[] {
-    return projetoRepository.listar();
+  listar(grupoId?: string): Projeto[] {
+    return projetoRepository.listar(grupoId);
   },
 
   atualizar(id: string, dados: NovoProjeto): Projeto {

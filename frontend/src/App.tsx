@@ -5,6 +5,7 @@ import { Cadastro } from "@/pages/Cadastro";
 import { Dashboard } from "@/pages/Dashboard";
 import { DetalhesDemanda } from "@/pages/DetalhesDemanda";
 import { Login } from "@/pages/Login";
+import { RecuperarSenha } from "@/pages/RecuperarSenha";
 
 function LayoutGlobal() {
   return (
@@ -26,6 +27,8 @@ export default function App() {
       <Route element={<LayoutGlobal />}>
         <Route path="/login" element={<Login />} />
         <Route path="/cadastro" element={<Cadastro />} />
+        <Route path="/recuperar-senha" element={<RecuperarSenha />} />
+        <Route path="/esqueci-senha" element={<Navigate to="/recuperar-senha" replace />} />
         <Route element={<RotaProtegida />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/demandas/:id" element={<DetalhesDemanda />} />

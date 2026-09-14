@@ -1,4 +1,4 @@
-import { lerToken, limparSessao } from "./auth";
+import { lerGrupoAtivo, lerToken, limparSessao } from "./auth";
 
 type ErroApi = { erro?: string };
 
@@ -9,6 +9,11 @@ export async function api<T>(path: string, opcoes: RequestInit = {}): Promise<T>
   }
   const token = lerToken();
   if (token) headers.set("Authorization", `Bearer ${token}`);
+
+  const grupoId = lerGrupoAtivo();
+  if (grupoId && !headers.has("X-Grupo-Id")) {
+    headers.set("X-Grupo-Id", grupoId);
+  }
 
   const resposta = await fetch(`/api${path}`, { ...opcoes, headers });
   const corpo = (await resposta.json().catch(() => ({}))) as ErroApi & T;
@@ -32,10 +37,44 @@ export type Usuario = {
   email: string;
 };
 
+export type Grupo = {
+  id: string;
+  nome: string;
+  dono_id: string;
+  dono_nome?: string;
+  criado_em: string;
+  total_membros?: number;
+  total_projetos?: number;
+  total_demandas?: number;
+  convites_disponiveis?: number;
+};
+
+export type MembroGrupo = {
+  usuario_id: string;
+  nome_completo: string;
+  email: string;
+  entrou_em: string;
+  eh_dono: boolean;
+};
+
+export type Convite = {
+  id: string;
+  grupo_id: string;
+  grupo_nome?: string;
+  codigo: string;
+  criado_por_id: string;
+  usado_por_id: string | null;
+  usado_por_nome?: string | null;
+  criado_em: string;
+  usado_em: string | null;
+  status: "disponivel" | "usado";
+};
+
 export type Projeto = {
   id: string;
   nome: string;
   descricao: string | null;
+  grupo_id?: string | null;
   criado_em?: string;
   total_demandas?: number;
   demandas_abertas?: number;
@@ -61,6 +100,8 @@ export type Demanda = {
 export type RespostaAuth = {
   token: string;
   usuario: Usuario;
+  grupo?: Grupo;
+  convites?: Convite[];
 };
 
 export type Notificacao = {
@@ -83,4 +124,5 @@ export type Comentario = {
   usuario_nome: string;
   usuario_email: string;
 };
+
 

@@ -1,9 +1,15 @@
 import { useState, type SubmitEvent } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
+import { AlertCircle, ArrowRight, Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { AuthLayout } from "@/components/AuthLayout";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupText,
+} from "@/components/ui/input-group";
 import { api, type RespostaAuth } from "@/lib/api";
 import { lerToken, salvarSessao } from "@/lib/auth";
 
@@ -11,6 +17,7 @@ export function Login() {
   const navegar = useNavigate();
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [mostrarSenha, setMostrarSenha] = useState(false);
   const [erro, setErro] = useState("");
   const [enviando, setEnviando] = useState(false);
 
@@ -39,42 +46,106 @@ export function Login() {
       titulo="Acesse sua conta"
       subtitulo="Entre para visualizar e gerenciar demandas em aberto."
     >
-      <form onSubmit={enviar} className="space-y-3 sm:space-y-3.5">
+      <form onSubmit={enviar} className="space-y-4">
+        {/* Campo E-mail */}
         <Field>
-          <FieldLabel>E-mail</FieldLabel>
-          <Input
-            type="email"
-            name="email"
-            required
-            autoComplete="email"
-            placeholder="nome@empresa.com"
-            value={email}
-            onChange={(evento) => setEmail(evento.target.value)}
-          />
+          <FieldLabel htmlFor="login-email">E-mail</FieldLabel>
+          <InputGroup className="w-full">
+            <InputGroupAddon>
+              <InputGroupText>
+                <Mail className="size-4" aria-hidden="true" />
+              </InputGroupText>
+            </InputGroupAddon>
+            <InputGroupInput
+              id="login-email"
+              type="email"
+              name="email"
+              required
+              autoComplete="email"
+              placeholder="nome@empresa.com"
+              value={email}
+              onChange={(evento) => setEmail(evento.target.value)}
+            />
+          </InputGroup>
         </Field>
-        <Field>
-          <FieldLabel>Senha</FieldLabel>
-          <Input
-            type="password"
-            name="senha"
-            required
-            autoComplete="current-password"
-            placeholder="••••••••"
-            value={senha}
-            onChange={(evento) => setSenha(evento.target.value)}
-          />
-        </Field>
-        {erro ? <p className="text-destructive text-sm font-medium">{erro}</p> : null}
 
-        <Button type="submit" className="w-full" loading={enviando}>
+        {/* Campo Senha com Toggle de Visualização e link de Recuperação posicionado abaixo */}
+        <Field>
+          <FieldLabel htmlFor="login-senha">Senha</FieldLabel>
+          <InputGroup className="w-full">
+            <InputGroupAddon>
+              <InputGroupText>
+                <Lock className="size-4" aria-hidden="true" />
+              </InputGroupText>
+            </InputGroupAddon>
+            <InputGroupInput
+              id="login-senha"
+              type={mostrarSenha ? "text" : "password"}
+              name="senha"
+              required
+              autoComplete="current-password"
+              placeholder="••••••••"
+              value={senha}
+              onChange={(evento) => setSenha(evento.target.value)}
+            />
+            <InputGroupAddon align="inline-end">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                onClick={() => setMostrarSenha((prev) => !prev)}
+                className="text-muted-foreground hover:text-foreground cursor-pointer"
+                aria-label={mostrarSenha ? "Ocultar senha" : "Exibir senha"}
+                title={mostrarSenha ? "Ocultar senha" : "Exibir senha"}
+              >
+                {mostrarSenha ? (
+                  <EyeOff className="size-3.5" aria-hidden="true" />
+                ) : (
+                  <Eye className="size-3.5" aria-hidden="true" />
+                )}
+              </Button>
+            </InputGroupAddon>
+          </InputGroup>
+
+          {/* Posicionamento UX ideal: abaixo do input alinhado à direita */}
+          <div className="flex w-full justify-end pt-1">
+            <Link
+              to="/recuperar-senha"
+              className="text-xs font-medium text-muted-foreground hover:text-foreground underline underline-offset-4 transition-colors"
+            >
+              Esqueci minha senha?
+            </Link>
+          </div>
+        </Field>
+
+        {/* Feedback visual de erro */}
+        {erro ? (
+          <div
+            role="alert"
+            className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2.5 text-xs font-medium text-destructive animate-in fade-in duration-200"
+          >
+            <AlertCircle className="size-4 shrink-0" aria-hidden="true" />
+            <span>{erro}</span>
+          </div>
+        ) : null}
+
+        {/* Botão de envio */}
+        <Button
+          type="submit"
+          size="lg"
+          className="w-full font-medium shadow-xs"
+          loading={enviando}
+        >
           Entrar
+          <ArrowRight className="size-4" aria-hidden="true" />
         </Button>
 
-        <p className="text-center text-muted-foreground text-xs sm:text-sm pt-1">
-          Sem conta?{" "}
+        {/* Link para cadastro */}
+        <p className="text-center text-muted-foreground text-xs sm:text-sm pt-2">
+          Não possui uma conta?{" "}
           <Link
             to="/cadastro"
-            className="text-foreground font-medium underline underline-offset-4 hover:text-primary"
+            className="text-foreground font-semibold underline underline-offset-4 hover:text-primary transition-colors"
           >
             Cadastre-se
           </Link>

@@ -4,10 +4,12 @@ import { demandaService } from "./demanda.service";
 export const demandaController = {
   listar: (req: Request, res: Response) => {
     const { status, responsavel_id, projeto_id } = req.query;
+    const grupoId = (req.query.grupo_id as string) || (req.headers["x-grupo-id"] as string) || undefined;
     const demandas = demandaService.listar({
       status: typeof status === "string" ? status : undefined,
       responsavel_id: typeof responsavel_id === "string" ? responsavel_id : undefined,
       projeto_id: typeof projeto_id === "string" ? projeto_id : undefined,
+      grupo_id: grupoId,
     });
     res.json(demandas);
   },

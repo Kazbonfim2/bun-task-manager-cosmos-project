@@ -7,6 +7,7 @@ import { authRoutes } from "./auth/auth.routes";
 import { comentarioRoutes } from "./comentario/comentario.routes";
 import { demandaRoutes } from "./demanda/demanda.routes";
 import { HttpError } from "./http-error";
+import { grupoRoutes } from "./grupo/grupo.routes";
 import { notificacaoRoutes } from "./notificacao/notificacao.routes";
 import { projetoRoutes } from "./projeto/projeto.routes";
 import { usuarioRoutes } from "./usuario/usuario.routes";
@@ -24,6 +25,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
+app.use("/api/grupos", grupoRoutes);
 app.use("/api/usuarios", usuarioRoutes);
 app.use("/api/projetos", projetoRoutes);
 app.use("/api/demandas", demandaRoutes);

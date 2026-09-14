@@ -4,3 +4,7 @@ import { authController } from "./auth.controller";
 export const authRoutes = Router();
 authRoutes.post("/cadastro", authController.cadastrar);
 authRoutes.post("/login", authController.login);
+authRoutes.post("/recuperar-pergunta", authController.recuperarPergunta);
+authRoutes.post("/validar-resposta", authController.validarResposta);
+authRoutes.post("/redefinir-senha", authController.redefinirSenha);
+

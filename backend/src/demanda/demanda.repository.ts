@@ -51,6 +51,10 @@ export const demandaRepository = {
       condicoes.push("d.projeto_id = ?");
       params.push(filtro.projeto_id);
     }
+    if (filtro.grupo_id) {
+      condicoes.push("p.grupo_id = ?");
+      params.push(filtro.grupo_id);
+    }
     if (filtro.status === "atrasadas") {
       const hoje = new Date().toISOString().slice(0, 10);
       condicoes.push("d.status != 'concluida' AND d.prazo < ?");
