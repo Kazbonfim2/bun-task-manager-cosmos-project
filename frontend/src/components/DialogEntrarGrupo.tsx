@@ -5,7 +5,9 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
+  DialogPanel,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
@@ -66,49 +68,63 @@ export function DialogEntrarGrupo({
 
   return (
     <Dialog open={aberto} onOpenChange={(abertoState) => !abertoState && fecharDialog()}>
-      <DialogContent className="max-w-md w-full p-6 sm:p-7">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <div className="flex items-center gap-2">
-            <span className="p-2 rounded-lg bg-primary/10 text-primary">
+          <div className="flex items-center gap-2.5">
+            <span className="p-2 rounded-lg bg-primary/10 text-primary shrink-0">
               <Ticket className="size-5" />
             </span>
             <div>
-              <DialogTitle className="text-xl font-bold">
+              <DialogTitle>
                 Entrar com Convite
               </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+              <DialogDescription>
                 Digite o código de convite que você recebeu de outro usuário
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
-        <form onSubmit={handleEntrar} className="mt-4 space-y-4">
-          <Field className="space-y-1.5">
-            <FieldLabel htmlFor="codigo_convite" className="text-xs font-semibold">
-              Código de Convite
-            </FieldLabel>
-            <Input
-              id="codigo_convite"
-              placeholder="Ex: ORION-A83F-9BC2"
-              value={codigo}
-              onChange={(e) => setCodigo(e.target.value.toUpperCase())}
-              className="font-mono tracking-wider uppercase text-center text-sm font-semibold"
-              autoFocus
-              required
-            />
-            {erro && <FieldError>{erro}</FieldError>}
-          </Field>
+        <form onSubmit={handleEntrar} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+          <DialogPanel className="flex flex-col gap-4">
+            <Field className="space-y-1.5">
+              <FieldLabel htmlFor="codigo_convite" className="text-xs font-semibold">
+                Código de Convite
+              </FieldLabel>
+              <Input
+                id="codigo_convite"
+                placeholder="Ex: ORION-A83F-9BC2"
+                value={codigo}
+                onChange={(e) => setCodigo(e.target.value.toUpperCase())}
+                className="font-mono tracking-wider uppercase text-center text-sm font-semibold h-10"
+                autoFocus
+                required
+              />
+              {erro && <FieldError>{erro}</FieldError>}
+            </Field>
+          </DialogPanel>
 
-          <div className="flex justify-end gap-2 pt-3 border-t">
-            <Button type="button" variant="outline" size="sm" onClick={fecharDialog} disabled={salvando}>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={fecharDialog}
+              disabled={salvando}
+              className="w-full sm:w-auto"
+            >
               Cancelar
             </Button>
-            <Button type="submit" size="sm" disabled={salvando} className="gap-1.5">
+            <Button
+              type="submit"
+              size="sm"
+              disabled={salvando}
+              className="gap-1.5 w-full sm:w-auto"
+            >
               {salvando ? <Spinner className="size-3.5" /> : <LogIn className="size-3.5" />}
               {salvando ? "Entrando..." : "Entrar no Grupo"}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

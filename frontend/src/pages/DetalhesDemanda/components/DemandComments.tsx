@@ -413,7 +413,7 @@ export function DemandComments({ demandaId }: DemandCommentsProps) {
 
       {/* Modal de Confirmação de Exclusão de Comentário */}
       <Dialog open={dialogExcluirAberto} onOpenChange={setDialogExcluirAberto}>
-        <DialogPopup className="max-w-md">
+        <DialogPopup variant="centered" className="max-w-md">
           <DialogHeader>
             <div className="flex items-center gap-3">
               <div className="flex size-10 items-center justify-center rounded-full bg-destructive/10 text-destructive shrink-0">
@@ -442,7 +442,7 @@ export function DemandComments({ demandaId }: DemandCommentsProps) {
           </DialogPanel>
 
           <DialogFooter className="gap-2 sm:justify-end">
-            <DialogClose render={<Button type="button" variant="outline" size="sm" />}>
+            <DialogClose render={<Button type="button" variant="outline" size="sm" className="w-full sm:w-auto" />}>
               Cancelar
             </DialogClose>
             <Button
@@ -451,7 +451,7 @@ export function DemandComments({ demandaId }: DemandCommentsProps) {
               size="sm"
               loading={excluindo}
               onClick={handleConfirmarExclusao}
-              className="gap-1.5"
+              className="gap-1.5 w-full sm:w-auto"
             >
               <Trash2 className="size-4" />
               Confirmar Exclusão

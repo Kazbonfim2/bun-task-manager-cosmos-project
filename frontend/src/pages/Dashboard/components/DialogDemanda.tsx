@@ -74,7 +74,7 @@ export function DialogDemanda({
             Projeto e responsável vêm das listas cadastradas.
           </DialogDescription>
         </DialogHeader>
-        <form className="contents" onSubmit={onSalvar}>
+        <form className="flex flex-col flex-1 min-h-0 overflow-hidden" onSubmit={onSalvar}>
           <DialogPanel className="flex flex-col gap-4">
             <Field>
               <FieldLabel>Título</FieldLabel>
@@ -151,16 +151,17 @@ export function DialogDemanda({
                 variant="destructive"
                 loading={salvando}
                 onClick={onExcluir}
+                className="w-full sm:w-auto"
               >
                 <Trash2 className="size-4" aria-hidden="true" />
                 Excluir
               </Button>
             ) : null}
-            <div className="flex items-center gap-2 sm:ms-auto">
-              <DialogClose render={<Button type="button" variant="ghost" />}>
+            <div className="flex items-center gap-2 w-full sm:w-auto sm:ms-auto">
+              <DialogClose render={<Button type="button" variant="ghost" className="flex-1 sm:flex-initial" />}>
                 Cancelar
               </DialogClose>
-              <Button type="submit" loading={salvando}>
+              <Button type="submit" loading={salvando} className="flex-1 sm:flex-initial">
                 Salvar
               </Button>
             </div>

@@ -6,7 +6,9 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
+  DialogPanel,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
@@ -80,17 +82,17 @@ export function DialogCriarGrupo({
 
   return (
     <Dialog open={aberto} onOpenChange={(abertoState) => !abertoState && fecharDialog()}>
-      <DialogContent className="max-w-md w-full p-6 sm:p-7">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <div className="flex items-center gap-2">
-            <span className="p-2 rounded-lg bg-primary/10 text-primary">
+          <div className="flex items-center gap-2.5">
+            <span className="p-2 rounded-lg bg-primary/10 text-primary shrink-0">
               <Sparkles className="size-5" />
             </span>
             <div>
-              <DialogTitle className="text-xl font-bold">
+              <DialogTitle>
                 {resultadoCriacao ? "Grupo Criado com Sucesso!" : "Criar Novo Grupo"}
               </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+              <DialogDescription>
                 {resultadoCriacao
                   ? "Seu grupo foi criado e você recebeu 05 códigos de convite."
                   : "Cadastre um grupo de trabalho e receba 05 convites para sua equipe."}
@@ -100,92 +102,108 @@ export function DialogCriarGrupo({
         </DialogHeader>
 
         {resultadoCriacao ? (
-          <div className="mt-4 space-y-4">
-            <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-xs text-emerald-700 dark:text-emerald-400">
-              <p className="font-semibold">
-                Grupo: {resultadoCriacao.grupo.nome}
-              </p>
-              <p className="text-[11px] mt-0.5">
-                Compartilhe esses códigos com seus colegas para que eles participem do mesmo espaço.
-              </p>
-            </div>
+          <>
+            <DialogPanel className="flex flex-col gap-4">
+              <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-xs text-emerald-700 dark:text-emerald-400">
+                <p className="font-semibold">
+                  Grupo: {resultadoCriacao.grupo.nome}
+                </p>
+                <p className="text-[11px] mt-0.5">
+                  Compartilhe esses códigos com seus colegas para que eles participem do mesmo espaço.
+                </p>
+              </div>
 
-            <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
-              {resultadoCriacao.convites.map((c, i) => (
-                <div
-                  key={c.id}
-                  className="flex items-center justify-between p-2.5 rounded-lg border bg-card text-xs"
-                >
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-[10px] font-mono">
-                      #{i + 1}
-                    </Badge>
-                    <span className="font-mono font-bold tracking-wider text-foreground">
-                      {c.codigo}
-                    </span>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="xs"
-                    onClick={() => copiarCodigo(c)}
-                    className="gap-1 text-xs"
+              <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                {resultadoCriacao.convites.map((c, i) => (
+                  <div
+                    key={c.id}
+                    className="flex items-center justify-between p-2.5 rounded-lg border bg-card text-xs gap-2"
                   >
-                    {copiadoId === c.id ? (
-                      <>
-                        <Check className="size-3 text-emerald-500" />
-                        Copiado
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="size-3" />
-                        Copiar
-                      </>
-                    )}
-                  </Button>
-                </div>
-              ))}
-            </div>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Badge variant="outline" className="text-[10px] font-mono shrink-0">
+                        #{i + 1}
+                      </Badge>
+                      <span className="font-mono font-bold tracking-wider text-foreground truncate">
+                        {c.codigo}
+                      </span>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="xs"
+                      onClick={() => copiarCodigo(c)}
+                      className="gap-1 text-xs shrink-0"
+                    >
+                      {copiadoId === c.id ? (
+                        <>
+                          <Check className="size-3 text-emerald-500" />
+                          Copiado
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="size-3" />
+                          Copiar
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </DialogPanel>
 
-            <div className="flex justify-end pt-3 border-t">
-              <Button type="button" onClick={fecharDialog} className="w-full">
+            <DialogFooter>
+              <Button type="button" onClick={fecharDialog} className="w-full sm:w-auto">
                 Começar a Usar
               </Button>
-            </div>
-          </div>
+            </DialogFooter>
+          </>
         ) : (
-          <form onSubmit={handleCriar} className="mt-4 space-y-4">
-            <div className="p-3 bg-primary/5 border border-primary/15 rounded-lg flex items-center gap-2.5 text-xs text-muted-foreground">
-              <Ticket className="size-4 text-primary shrink-0" />
-              <span>
-                Ao criar este grupo, você receberá <strong>05 convites únicos</strong> para adicionar colegas de equipe.
-              </span>
-            </div>
+          <form onSubmit={handleCriar} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+            <DialogPanel className="flex flex-col gap-4">
+              <div className="p-3 bg-primary/5 border border-primary/15 rounded-lg flex items-center gap-2.5 text-xs text-muted-foreground">
+                <Ticket className="size-4 text-primary shrink-0" />
+                <span>
+                  Ao criar este grupo, você receberá <strong>05 convites únicos</strong> para adicionar colegas de equipe.
+                </span>
+              </div>
 
-            <Field className="space-y-1.5">
-              <FieldLabel htmlFor="nome_grupo" className="text-xs font-semibold">
-                Nome do Grupo / Empresa / Squad
-              </FieldLabel>
-              <Input
-                id="nome_grupo"
-                placeholder="Ex: Engenharia Orion, Equipe Alpha, Financeiro"
-                value={nome}
-                onChange={(e) => setNome(e.target.value)}
-                autoFocus
-                required
-              />
-              {erro && <FieldError>{erro}</FieldError>}
-            </Field>
+              <Field className="space-y-1.5">
+                <FieldLabel htmlFor="nome_grupo" className="text-xs font-semibold">
+                  Nome do Grupo / Empresa / Squad
+                </FieldLabel>
+                <Input
+                  id="nome_grupo"
+                  placeholder="Ex: Engenharia Orion, Equipe Alpha, Financeiro"
+                  value={nome}
+                  onChange={(e) => setNome(e.target.value)}
+                  autoFocus
+                  required
+                />
+                {erro && <FieldError>{erro}</FieldError>}
+              </Field>
+            </DialogPanel>
 
-            <div className="flex justify-end gap-2 pt-3 border-t">
-              <Button type="button" variant="outline" size="sm" onClick={fecharDialog} disabled={salvando}>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={fecharDialog}
+                disabled={salvando}
+                className="w-full sm:w-auto"
+              >
                 Cancelar
               </Button>
-              <Button type="submit" size="sm" disabled={salvando} className="gap-1.5">
+              <Button
+                type="submit"
+                size="sm"
+                disabled={salvando}
+                className="gap-1.5 w-full sm:w-auto"
+              >
                 {salvando ? <Spinner className="size-3.5" /> : <Plus className="size-3.5" />}
                 {salvando ? "Criando..." : "Criar Grupo (+5 Convites)"}
               </Button>
-            </div>
+            </DialogFooter>
           </form>
         )}
       </DialogContent>

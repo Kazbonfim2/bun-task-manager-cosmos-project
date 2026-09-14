@@ -77,7 +77,7 @@ export function DialogProjeto({
         </DialogHeader>
 
         {projetos.length > 0 ? (
-          <div className="px-6 pt-2">
+          <div className="px-4 pt-2 sm:px-6">
             <Field>
               <FieldLabel className="text-xs text-muted-foreground">
                 Ação
@@ -92,7 +92,7 @@ export function DialogProjeto({
           </div>
         ) : null}
 
-        <form className="contents" onSubmit={onSalvar}>
+        <form className="flex flex-col flex-1 min-h-0 overflow-hidden" onSubmit={onSalvar}>
           <DialogPanel className="flex flex-col gap-4">
             <Field>
               <FieldLabel>Nome</FieldLabel>
@@ -116,27 +116,25 @@ export function DialogProjeto({
               <p className="text-destructive text-sm">{erro}</p>
             ) : null}
           </DialogPanel>
-          <DialogFooter className="flex items-center justify-between sm:justify-between w-full">
-            <div>
-              {projetoEditando ? (
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="sm"
-                  onClick={onExcluir}
-                  loading={salvando}
-                  className="gap-1.5"
-                >
-                  <Trash2 className="size-4" />
-                  Excluir
-                </Button>
-              ) : null}
-            </div>
-            <div className="flex items-center gap-2">
-              <DialogClose render={<Button type="button" variant="ghost" />}>
+          <DialogFooter className="sm:justify-between">
+            {projetoEditando ? (
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                onClick={onExcluir}
+                loading={salvando}
+                className="gap-1.5 w-full sm:w-auto"
+              >
+                <Trash2 className="size-4" />
+                Excluir
+              </Button>
+            ) : null}
+            <div className="flex items-center gap-2 w-full sm:w-auto sm:ms-auto">
+              <DialogClose render={<Button type="button" variant="ghost" className="flex-1 sm:flex-initial" />}>
                 Cancelar
               </DialogClose>
-              <Button type="submit" loading={salvando}>
+              <Button type="submit" loading={salvando} className="flex-1 sm:flex-initial">
                 {projetoEditando ? "Salvar alterações" : "Criar"}
               </Button>
             </div>

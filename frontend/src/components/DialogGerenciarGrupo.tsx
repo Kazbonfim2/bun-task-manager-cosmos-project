@@ -1,4 +1,4 @@
-import { Check, Copy, Crown, Share2, Ticket, Users } from "lucide-react";
+import { Check, Copy, Crown, Ticket, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,9 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
+  DialogPanel,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { api, type Convite, type Grupo, type MembroGrupo } from "@/lib/api";
@@ -54,39 +56,32 @@ export function DialogGerenciarGrupo({
     setTimeout(() => setCopiadoId(null), 2000);
   }
 
-  function copiarConviteCompleto(convite: Convite) {
-    const texto = `Participe do grupo "${grupo?.nome}" no Orion!\nCódigo de convite: ${convite.codigo}`;
-    navigator.clipboard.writeText(texto);
-    setCopiadoId(`full-${convite.id}`);
-    setTimeout(() => setCopiadoId(null), 2000);
-  }
-
   const disponiveis = convites.filter((c) => c.status === "disponivel").length;
 
   return (
     <Dialog open={aberto} onOpenChange={(abertoState) => !abertoState && onFechar()}>
-      <DialogContent className="max-w-xl w-full p-6 sm:p-7">
+      <DialogContent className="sm:max-w-xl">
         <DialogHeader>
-          <div className="flex items-center gap-2">
-            <span className="p-2 rounded-lg bg-primary/10 text-primary">
+          <div className="flex items-center gap-2.5">
+            <span className="p-2 rounded-lg bg-primary/10 text-primary shrink-0">
               <Users className="size-5" />
             </span>
             <div>
-              <DialogTitle className="text-xl font-bold">
+              <DialogTitle>
                 {grupo?.nome ?? "Grupo de Trabalho"}
               </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+              <DialogDescription>
                 Gerencie membros da equipe e compartilhe os códigos de convite
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
-        <div className="flex gap-2 border-b mt-3 pb-2">
+        <div className="flex gap-2 border-b px-4 sm:px-6 pb-2 shrink-0">
           <button
             type="button"
             onClick={() => setAbaAtiva("convites")}
-            className={`text-xs font-semibold px-3 py-1.5 rounded-md transition-colors flex items-center gap-1.5 ${
+            className={`text-xs font-semibold px-3 py-1.5 rounded-md transition-colors flex items-center gap-1.5 cursor-pointer ${
               abaAtiva === "convites"
                 ? "bg-primary text-primary-foreground shadow-xs"
                 : "text-muted-foreground hover:bg-muted"
@@ -98,7 +93,7 @@ export function DialogGerenciarGrupo({
           <button
             type="button"
             onClick={() => setAbaAtiva("membros")}
-            className={`text-xs font-semibold px-3 py-1.5 rounded-md transition-colors flex items-center gap-1.5 ${
+            className={`text-xs font-semibold px-3 py-1.5 rounded-md transition-colors flex items-center gap-1.5 cursor-pointer ${
               abaAtiva === "membros"
                 ? "bg-primary text-primary-foreground shadow-xs"
                 : "text-muted-foreground hover:bg-muted"
@@ -109,37 +104,37 @@ export function DialogGerenciarGrupo({
           </button>
         </div>
 
-        <div className="mt-4 min-h-60 max-h-80 overflow-y-auto pr-1">
+        <DialogPanel className="pt-3">
           {carregando ? (
             <div className="py-12 text-center text-xs text-muted-foreground">
               Carregando informações do grupo...
             </div>
           ) : abaAtiva === "convites" ? (
             <div className="space-y-3">
-              <div className="bg-muted/40 p-3 rounded-lg border text-xs text-muted-foreground flex items-center justify-between">
+              <div className="bg-muted/40 p-3 rounded-lg border text-xs text-muted-foreground flex items-center justify-between gap-2">
                 <span>
-                  Cada grupo recebe <strong>05 convites</strong> exclusivos. Os convites usados não podem ser reutilizados.
+                  Cada grupo recebe <strong>05 convites</strong> exclusivos.
                 </span>
-                <Badge variant={disponiveis > 0 ? "default" : "secondary"} className="shrink-0 ml-2">
+                <Badge variant={disponiveis > 0 ? "default" : "secondary"} className="shrink-0">
                   {disponiveis}/5 disponíveis
                 </Badge>
               </div>
 
               {convites.map((c, index) => {
-                const ehCopiado = copiadoId === c.id || copiadoId === `full-${c.id}`;
+                const ehCopiado = copiadoId === c.id;
                 const usado = c.status === "usado";
 
                 return (
                   <div
                     key={c.id}
-                    className={`flex items-center justify-between p-3 rounded-lg border transition-all ${
+                    className={`flex items-center justify-between p-3 rounded-lg border transition-all gap-2 ${
                       usado
                         ? "bg-muted/30 border-dashed border-border/80 opacity-70"
                         : "bg-card border-border hover:border-primary/40 shadow-xs"
                     }`}
                   >
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-mono text-sm font-bold tracking-wider text-foreground">
                           {c.codigo}
                         </span>
@@ -153,7 +148,7 @@ export function DialogGerenciarGrupo({
                           </Badge>
                         )}
                       </div>
-                      <p className="text-[11px] text-muted-foreground mt-0.5">
+                      <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
                         {usado
                           ? `Usado por ${c.usado_por_nome || "Membro"} em ${new Date(c.usado_em || c.criado_em).toLocaleDateString("pt-BR")}`
                           : `Convite #${index + 1} para novo integrante`}
@@ -170,7 +165,7 @@ export function DialogGerenciarGrupo({
                           className="gap-1 text-xs"
                           title="Copiar apenas o código"
                         >
-                          {copiadoId === c.id ? (
+                          {ehCopiado ? (
                             <>
                               <Check className="size-3 text-emerald-500" />
                               Copiado!
@@ -181,15 +176,6 @@ export function DialogGerenciarGrupo({
                               Copiar
                             </>
                           )}
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon-xs"
-                          onClick={() => copiarConviteCompleto(c)}
-                          title="Copiar mensagem completa de convite"
-                        >
-                          <Share2 className="size-3.5" />
                         </Button>
                       </div>
                     )}
@@ -202,15 +188,15 @@ export function DialogGerenciarGrupo({
               {membros.map((m) => (
                 <div
                   key={m.usuario_id}
-                  className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-muted/30 transition-colors"
+                  className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-muted/30 transition-colors gap-2"
                 >
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-semibold text-foreground truncate">
                         {m.nome_completo}
                       </span>
                       {m.eh_dono && (
-                        <Badge variant="default" className="text-[10px] gap-1 px-1.5 py-0 h-4 bg-amber-500 hover:bg-amber-600">
+                        <Badge variant="default" className="text-[10px] gap-1 px-1.5 py-0 h-4 bg-amber-500 hover:bg-amber-600 shrink-0">
                           <Crown className="size-2.5" />
                           Dono
                         </Badge>
@@ -225,13 +211,13 @@ export function DialogGerenciarGrupo({
               ))}
             </div>
           )}
-        </div>
+        </DialogPanel>
 
-        <div className="flex justify-end pt-3 border-t mt-4">
-          <Button type="button" variant="outline" size="sm" onClick={onFechar}>
+        <DialogFooter>
+          <Button type="button" variant="outline" size="sm" onClick={onFechar} className="w-full sm:w-auto">
             Fechar
           </Button>
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
