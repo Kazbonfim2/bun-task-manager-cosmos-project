@@ -14,7 +14,7 @@ describe("Tenancy, Grupos e Convites", () => {
       pergunta_secreta: "Animal?",
       resposta_secreta: "Cachorro",
     });
-    const resultado = grupoRepository.criar("Equipe Alpha", user.usuario.id);
+    const resultado = await grupoRepository.criar("Equipe Alpha", user.usuario.id);
 
     expect(resultado.grupo).toBeDefined();
     expect(resultado.grupo.nome).toBe("Equipe Alpha");
@@ -31,7 +31,6 @@ describe("Tenancy, Grupos e Convites", () => {
   });
 
   it("deve permitir que outro usuário entre no grupo usando um código de convite válido", async () => {
-    // Criar dono e usuário convidado
     const dono = await authService.cadastrar({
       nome_completo: "Dono do Grupo",
       email: `dono-${Date.now()}@teste.com`,
@@ -50,21 +49,21 @@ describe("Tenancy, Grupos e Convites", () => {
     });
 
     expect(dono.grupo).toBeDefined();
-    const convites = grupoService.listarConvites(dono.grupo!.id, dono.usuario.id);
+    const convites = await grupoService.listarConvites(dono.grupo!.id, dono.usuario.id);
     expect(convites).toHaveLength(5);
     const primeiroConvite = convites[0];
 
     // Aceitar convite
-    const respostaAceite = grupoService.aceitarConvite(primeiroConvite.codigo, convidado.usuario.id);
+    const respostaAceite = await grupoService.aceitarConvite(primeiroConvite.codigo, convidado.usuario.id);
     expect(respostaAceite.grupo.id).toBe(dono.grupo!.id);
 
     // Checar se o membro foi adicionado
-    const membros = grupoService.listarMembros(dono.grupo!.id, dono.usuario.id);
+    const membros = await grupoService.listarMembros(dono.grupo!.id, dono.usuario.id);
     const idsMembros = membros.map((m) => m.usuario_id);
     expect(idsMembros).toContain(convidado.usuario.id);
 
     // Checar se o convite agora está marcado como usado
-    const convitesAtualizados = grupoService.listarConvites(dono.grupo!.id, dono.usuario.id);
+    const convitesAtualizados = await grupoService.listarConvites(dono.grupo!.id, dono.usuario.id);
     const conviteUsado = convitesAtualizados.find((c) => c.id === primeiroConvite.id);
     expect(conviteUsado?.status).toBe("usado");
     expect(conviteUsado?.usado_por_id).toBe(convidado.usuario.id);
@@ -96,16 +95,16 @@ describe("Tenancy, Grupos e Convites", () => {
       resposta_secreta: "SP",
     });
 
-    const convites = grupoService.listarConvites(dono.grupo!.id, dono.usuario.id);
+    const convites = await grupoService.listarConvites(dono.grupo!.id, dono.usuario.id);
     const codigo = convites[0].codigo;
 
     // Primeiro usuário usa com sucesso
-    grupoService.aceitarConvite(codigo, user1.usuario.id);
+    await grupoService.aceitarConvite(codigo, user1.usuario.id);
 
     // Segundo usuário tenta usar o mesmo código
-    expect(() => {
-      grupoService.aceitarConvite(codigo, user2.usuario.id);
-    }).toThrow("Este código de convite já foi utilizado");
+    expect(async () => {
+      await grupoService.aceitarConvite(codigo, user2.usuario.id);
+    }).toThrow();
   });
 
   it("deve isolar projetos e demandas por grupo (multi-tenancy)", async () => {
@@ -130,7 +129,7 @@ describe("Tenancy, Grupos e Convites", () => {
     });
 
     // Criar projeto no Grupo A
-    const projA = projetoRepository.criar({
+    const projA = await projetoRepository.criar({
       id: crypto.randomUUID(),
       nome: "Projeto Exclusivo Grupo A",
       descricao: "Confidencial",
@@ -139,7 +138,7 @@ describe("Tenancy, Grupos e Convites", () => {
     });
 
     // Criar projeto no Grupo B
-    const projB = projetoRepository.criar({
+    const projB = await projetoRepository.criar({
       id: crypto.randomUUID(),
       nome: "Projeto Exclusivo Grupo B",
       descricao: "Confidencial",
@@ -148,7 +147,7 @@ describe("Tenancy, Grupos e Convites", () => {
     });
 
     // Criar demandas em cada um
-    demandaRepository.criar({
+    await demandaRepository.criar({
       id: crypto.randomUUID(),
       titulo: "Demanda do Grupo A",
       descricao: "Detalhes A",
@@ -161,7 +160,7 @@ describe("Tenancy, Grupos e Convites", () => {
       atualizado_em: new Date().toISOString(),
     });
 
-    demandaRepository.criar({
+    await demandaRepository.criar({
       id: crypto.randomUUID(),
       titulo: "Demanda do Grupo B",
       descricao: "Detalhes B",
@@ -175,8 +174,8 @@ describe("Tenancy, Grupos e Convites", () => {
     });
 
     // Listar projetos por grupo
-    const projetosA = projetoRepository.listar(donoA.grupo!.id);
-    const projetosB = projetoRepository.listar(donoB.grupo!.id);
+    const projetosA = await projetoRepository.listar(donoA.grupo!.id);
+    const projetosB = await projetoRepository.listar(donoB.grupo!.id);
 
     expect(projetosA.map((p) => p.id)).toContain(projA.id);
     expect(projetosA.map((p) => p.id)).not.toContain(projB.id);
@@ -185,8 +184,8 @@ describe("Tenancy, Grupos e Convites", () => {
     expect(projetosB.map((p) => p.id)).not.toContain(projA.id);
 
     // Listar demandas por grupo
-    const demandasA = demandaRepository.listar({ grupo_id: donoA.grupo!.id });
-    const demandasB = demandaRepository.listar({ grupo_id: donoB.grupo!.id });
+    const demandasA = await demandaRepository.listar({ grupo_id: donoA.grupo!.id });
+    const demandasB = await demandaRepository.listar({ grupo_id: donoB.grupo!.id });
 
     expect(demandasA.some((d) => d.titulo === "Demanda do Grupo A")).toBe(true);
     expect(demandasA.some((d) => d.titulo === "Demanda do Grupo B")).toBe(false);

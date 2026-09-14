@@ -8,6 +8,7 @@
     "seed": "bun src/database/seed.database.ts"
   },
   "dependencies": {
+    "@libsql/client": "^0.18.0",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2"

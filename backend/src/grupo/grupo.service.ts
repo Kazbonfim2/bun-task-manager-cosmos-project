@@ -5,45 +5,45 @@ import { grupoRepository } from "./grupo.repository";
 import type { Convite, Grupo, GrupoComDetalhes, MembroGrupo, NovoGrupo } from "./grupo.types";
 
 export const grupoService = {
-  criar(dados: NovoGrupo, donoId: string): { grupo: Grupo; convites: Convite[] } {
+  async criar(dados: NovoGrupo, donoId: string): Promise<{ grupo: Grupo; convites: Convite[] }> {
     const nome = dados.nome?.trim();
     if (!nome) throw new HttpError(400, "Nome do grupo é obrigatório");
 
-    const usuario = usuarioRepository.buscarPorId(donoId);
+    const usuario = await usuarioRepository.buscarPorId(donoId);
     if (!usuario) throw new HttpError(404, "Usuário não encontrado");
 
     return grupoRepository.criar(nome, donoId);
   },
 
-  listarPorUsuario(usuarioId: string): GrupoComDetalhes[] {
+  async listarPorUsuario(usuarioId: string): Promise<GrupoComDetalhes[]> {
     return grupoRepository.listarPorUsuario(usuarioId);
   },
 
-  buscarPorId(id: string, usuarioId: string): GrupoComDetalhes {
-    if (!grupoRepository.ehMembro(id, usuarioId)) {
+  async buscarPorId(id: string, usuarioId: string): Promise<GrupoComDetalhes> {
+    if (!(await grupoRepository.ehMembro(id, usuarioId))) {
       throw new HttpError(403, "Você não tem acesso a este grupo");
     }
-    const grupo = grupoRepository.buscarPorId(id);
+    const grupo = await grupoRepository.buscarPorId(id);
     if (!grupo) throw new HttpError(404, "Grupo não encontrado");
     return grupo;
   },
 
-  listarMembros(grupoId: string, usuarioId: string): MembroGrupo[] {
-    if (!grupoRepository.ehMembro(grupoId, usuarioId)) {
+  async listarMembros(grupoId: string, usuarioId: string): Promise<MembroGrupo[]> {
+    if (!(await grupoRepository.ehMembro(grupoId, usuarioId))) {
       throw new HttpError(403, "Você não tem acesso a este grupo");
     }
     return grupoRepository.listarMembros(grupoId);
   },
 
-  listarConvites(grupoId: string, usuarioId: string): Convite[] {
-    if (!grupoRepository.ehMembro(grupoId, usuarioId)) {
+  async listarConvites(grupoId: string, usuarioId: string): Promise<Convite[]> {
+    if (!(await grupoRepository.ehMembro(grupoId, usuarioId))) {
       throw new HttpError(403, "Você não tem acesso a este grupo");
     }
     return grupoRepository.listarConvites(grupoId);
   },
 
-  validarConvite(codigo: string): { codigo: string; grupo_nome: string; valido: boolean } {
-    const convite = grupoRepository.buscarConvitePorCodigo(codigo);
+  async validarConvite(codigo: string): Promise<{ codigo: string; grupo_nome: string; valido: boolean }> {
+    const convite = await grupoRepository.buscarConvitePorCodigo(codigo);
     if (!convite || convite.usado_por_id) {
       throw new HttpError(404, "Convite inválido ou já utilizado");
     }
@@ -54,11 +54,11 @@ export const grupoService = {
     };
   },
 
-  aceitarConvite(codigo: string, usuarioId: string): { grupo: GrupoComDetalhes; mensagem: string } {
+  async aceitarConvite(codigo: string, usuarioId: string): Promise<{ grupo: GrupoComDetalhes; mensagem: string }> {
     const codigoNormalizado = codigo?.trim().toUpperCase();
     if (!codigoNormalizado) throw new HttpError(400, "Código de convite é obrigatório");
 
-    const convite = grupoRepository.buscarConvitePorCodigo(codigoNormalizado);
+    const convite = await grupoRepository.buscarConvitePorCodigo(codigoNormalizado);
     if (!convite) {
       throw new HttpError(404, "Código de convite não encontrado");
     }
@@ -66,22 +66,22 @@ export const grupoService = {
       throw new HttpError(400, "Este código de convite já foi utilizado");
     }
 
-    if (grupoRepository.ehMembro(convite.grupo_id, usuarioId)) {
+    if (await grupoRepository.ehMembro(convite.grupo_id, usuarioId)) {
       throw new HttpError(400, "Você já faz parte deste grupo de trabalho");
     }
 
-    const usuario = usuarioRepository.buscarPorId(usuarioId);
+    const usuario = await usuarioRepository.buscarPorId(usuarioId);
     if (!usuario) throw new HttpError(404, "Usuário não encontrado");
 
-    grupoRepository.usarConvite(convite.id, usuarioId);
-    grupoRepository.adicionarMembro(convite.grupo_id, usuarioId);
+    await grupoRepository.usarConvite(convite.id, usuarioId);
+    await grupoRepository.adicionarMembro(convite.grupo_id, usuarioId);
 
-    const grupo = grupoRepository.buscarPorId(convite.grupo_id);
+    const grupo = await grupoRepository.buscarPorId(convite.grupo_id);
     if (!grupo) throw new HttpError(500, "Erro ao recuperar dados do grupo");
 
     // Notificar o dono do grupo
     if (grupo.dono_id !== usuarioId) {
-      notificacaoService.notificar({
+      await notificacaoService.notificar({
         usuario_id: grupo.dono_id,
         tipo: "novo_membro_grupo",
         mensagem: `${usuario.nome_completo} entrou no grupo "${grupo.nome}" usando um convite.`,

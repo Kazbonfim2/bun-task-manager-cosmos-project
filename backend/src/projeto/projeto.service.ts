@@ -4,7 +4,7 @@ import { projetoRepository } from "./projeto.repository";
 import type { NovoProjeto, Projeto } from "./projeto.types";
 
 export const projetoService = {
-  criar(dados: NovoProjeto, grupoId?: string): Projeto {
+  async criar(dados: NovoProjeto, grupoId?: string): Promise<Projeto> {
     const nome = dados.nome?.trim();
     if (!nome) throw new HttpError(400, "Nome do projeto é obrigatório");
 
@@ -19,12 +19,12 @@ export const projetoService = {
     });
   },
 
-  listar(grupoId?: string): Projeto[] {
+  async listar(grupoId?: string): Promise<Projeto[]> {
     return projetoRepository.listar(grupoId);
   },
 
-  atualizar(id: string, dados: NovoProjeto): Projeto {
-    const atual = projetoRepository.buscarPorId(id);
+  async atualizar(id: string, dados: NovoProjeto): Promise<Projeto> {
+    const atual = await projetoRepository.buscarPorId(id);
     if (!atual) throw new HttpError(404, "Projeto não encontrado");
 
     const nome = dados.nome?.trim();
@@ -37,21 +37,23 @@ export const projetoService = {
     });
   },
 
-  excluir(id: string): void {
-    const atual = projetoRepository.buscarPorId(id);
+  async excluir(id: string): Promise<void> {
+    const atual = await projetoRepository.buscarPorId(id);
     if (!atual) throw new HttpError(404, "Projeto não encontrado");
 
-    const vinculadas = db
-      .query("SELECT COUNT(*) as total FROM demandas WHERE projeto_id = ?")
-      .get(id) as { total: number };
+    const res = await db.execute({
+      sql: "SELECT COUNT(*) as total FROM demandas WHERE projeto_id = ?",
+      args: [id],
+    });
+    const vinculadas = res.rows[0] as { total: number } | undefined;
 
-    if (vinculadas && vinculadas.total > 0) {
+    if (vinculadas && Number(vinculadas.total) > 0) {
       throw new HttpError(
         400,
         `Não é possível excluir: existem ${vinculadas.total} demanda(s) vinculada(s) a este projeto.`,
       );
     }
 
-    projetoRepository.excluir(id);
+    await projetoRepository.excluir(id);
   },
 };

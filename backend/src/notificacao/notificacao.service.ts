@@ -18,7 +18,7 @@ export interface Notificacao extends EventoNotificacao {
 export const notificacaoEvents = new EventEmitter();
 
 export const notificacaoService = {
-  notificar(evento: EventoNotificacao): Notificacao {
+  async notificar(evento: EventoNotificacao): Promise<Notificacao> {
     const agora = new Date().toISOString();
     const notificacao: Notificacao = {
       id: crypto.randomUUID(),
@@ -27,17 +27,20 @@ export const notificacaoService = {
       criado_em: agora,
     };
 
-    db.prepare(`
-      INSERT INTO notificacoes (id, usuario_id, demanda_id, tipo, mensagem, lida, criado_em)
-      VALUES (?, ?, ?, ?, ?, 0, ?)
-    `).run(
-      notificacao.id,
-      notificacao.usuario_id,
-      notificacao.demanda_id ?? null,
-      notificacao.tipo,
-      notificacao.mensagem,
-      notificacao.criado_em
-    );
+    await db.execute({
+      sql: `
+        INSERT INTO notificacoes (id, usuario_id, demanda_id, tipo, mensagem, lida, criado_em)
+        VALUES (?, ?, ?, ?, ?, 0, ?)
+      `,
+      args: [
+        notificacao.id,
+        notificacao.usuario_id,
+        notificacao.demanda_id ?? null,
+        notificacao.tipo,
+        notificacao.mensagem,
+        notificacao.criado_em,
+      ],
+    });
 
     notificacaoEvents.emit("notificacao", notificacao);
     notificacaoEvents.emit(notificacao.tipo, notificacao);
@@ -45,28 +48,40 @@ export const notificacaoService = {
     return notificacao;
   },
 
-  listarPorUsuario(usuarioId: string): Notificacao[] {
-    const rows = db.prepare(`
-      SELECT id, usuario_id, demanda_id, tipo, mensagem, lida, criado_em
-      FROM notificacoes
-      WHERE usuario_id = ?
-      ORDER BY criado_em DESC
-    `).all(usuarioId) as Array<Omit<Notificacao, "lida"> & { lida: number }>;
+  async listarPorUsuario(usuarioId: string): Promise<Notificacao[]> {
+    const res = await db.execute({
+      sql: `
+        SELECT id, usuario_id, demanda_id, tipo, mensagem, lida, criado_em
+        FROM notificacoes
+        WHERE usuario_id = ?
+        ORDER BY criado_em DESC
+      `,
+      args: [usuarioId],
+    });
 
-    return rows.map((r) => ({ ...r, lida: Boolean(r.lida) }));
+    return (res.rows as unknown as Array<Omit<Notificacao, "lida"> & { lida: number }>).map((r) => ({
+      ...r,
+      lida: Boolean(r.lida),
+    }));
   },
 
-  marcarComoLida(id: string, usuarioId: string): void {
-    db.prepare(`
-      DELETE FROM notificacoes
-      WHERE id = ? AND usuario_id = ?
-    `).run(id, usuarioId);
+  async marcarComoLida(id: string, usuarioId: string): Promise<void> {
+    await db.execute({
+      sql: `
+        DELETE FROM notificacoes
+        WHERE id = ? AND usuario_id = ?
+      `,
+      args: [id, usuarioId],
+    });
   },
 
-  marcarTodasComoLidas(usuarioId: string): void {
-    db.prepare(`
-      DELETE FROM notificacoes
-      WHERE usuario_id = ?
-    `).run(usuarioId);
+  async marcarTodasComoLidas(usuarioId: string): Promise<void> {
+    await db.execute({
+      sql: `
+        DELETE FROM notificacoes
+        WHERE usuario_id = ?
+      `,
+      args: [usuarioId],
+    });
   },
 };

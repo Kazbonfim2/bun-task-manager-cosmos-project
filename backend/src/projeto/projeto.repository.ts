@@ -2,22 +2,27 @@ import { db } from "../database/connection";
 import type { Projeto } from "./projeto.types";
 
 export const projetoRepository = {
-  criar(projeto: Projeto): Projeto {
-    db.query(
-      `INSERT INTO projetos (id, nome, descricao, grupo_id, criado_em) VALUES (?, ?, ?, ?, ?)`,
-    ).run(projeto.id, projeto.nome, projeto.descricao, projeto.grupo_id ?? null, projeto.criado_em);
+  async criar(projeto: Projeto): Promise<Projeto> {
+    await db.execute({
+      sql: `INSERT INTO projetos (id, nome, descricao, grupo_id, criado_em) VALUES (?, ?, ?, ?, ?)`,
+      args: [projeto.id, projeto.nome, projeto.descricao, projeto.grupo_id ?? null, projeto.criado_em],
+    });
     return projeto;
   },
 
-  buscarPorId(id: string): Projeto | null {
-    return db.query("SELECT * FROM projetos WHERE id = ?").get(id) as Projeto | null;
+  async buscarPorId(id: string): Promise<Projeto | null> {
+    const res = await db.execute({
+      sql: "SELECT * FROM projetos WHERE id = ?",
+      args: [id],
+    });
+    return (res.rows[0] as unknown as Projeto) ?? null;
   },
 
-  listar(grupoId?: string): Projeto[] {
+  async listar(grupoId?: string): Promise<Projeto[]> {
     const where = grupoId ? "WHERE p.grupo_id = ?" : "";
     const params = grupoId ? [grupoId] : [];
-    return db
-      .query(`
+    const res = await db.execute({
+      sql: `
         SELECT
           p.id,
           p.nome,
@@ -33,20 +38,24 @@ export const projetoRepository = {
         ${where}
         GROUP BY p.id
         ORDER BY p.nome ASC
-      `)
-      .all(...params) as Projeto[];
+      `,
+      args: params,
+    });
+    return res.rows as unknown as Projeto[];
   },
 
-  atualizar(projeto: Projeto): Projeto {
-    db.query("UPDATE projetos SET nome = ?, descricao = ? WHERE id = ?").run(
-      projeto.nome,
-      projeto.descricao,
-      projeto.id,
-    );
+  async atualizar(projeto: Projeto): Promise<Projeto> {
+    await db.execute({
+      sql: "UPDATE projetos SET nome = ?, descricao = ? WHERE id = ?",
+      args: [projeto.nome, projeto.descricao, projeto.id],
+    });
     return projeto;
   },
 
-  excluir(id: string): void {
-    db.query("DELETE FROM projetos WHERE id = ?").run(id);
+  async excluir(id: string): Promise<void> {
+    await db.execute({
+      sql: "DELETE FROM projetos WHERE id = ?",
+      args: [id],
+    });
   },
 };

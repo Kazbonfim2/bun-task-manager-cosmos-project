@@ -20,11 +20,11 @@ export const usuarioService = {
     if (senha.length < 6) throw new HttpError(400, "Senha deve ter pelo menos 6 caracteres");
     if (!pergunta) throw new HttpError(400, "Pergunta secreta é obrigatória");
     if (!resposta) throw new HttpError(400, "Resposta secreta é obrigatória");
-    if (usuarioRepository.buscarPorEmail(email)) {
+    if (await usuarioRepository.buscarPorEmail(email)) {
       throw new HttpError(409, "E-mail já cadastrado");
     }
 
-    const usuario = usuarioRepository.criar({
+    const usuario = await usuarioRepository.criar({
       id: crypto.randomUUID(),
       nome_completo: nome,
       email,
@@ -37,11 +37,12 @@ export const usuarioService = {
     return semSenha(usuario);
   },
 
-  listarPublicos(grupoId?: string): UsuarioPublico[] {
-    return usuarioRepository.listar(grupoId).map(semSenha);
+  async listarPublicos(grupoId?: string): Promise<UsuarioPublico[]> {
+    const usuarios = await usuarioRepository.listar(grupoId);
+    return usuarios.map(semSenha);
   },
 
-  buscarPorEmail(email: string): Usuario | null {
+  async buscarPorEmail(email: string): Promise<Usuario | null> {
     return usuarioRepository.buscarPorEmail(email);
   },
 };

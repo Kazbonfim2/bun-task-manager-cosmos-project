@@ -7,19 +7,19 @@ import { comentarioRepository } from "./comentario.repository";
 import type { ComentarioComAutor, NovoComentario } from "./comentario.types";
 
 export const comentarioService = {
-  listarPorDemanda(demandaId: string): ComentarioComAutor[] {
-    if (!demandaRepository.buscarPorId(demandaId)) {
+  async listarPorDemanda(demandaId: string): Promise<ComentarioComAutor[]> {
+    if (!(await demandaRepository.buscarPorId(demandaId))) {
       throw new HttpError(404, "Demanda não encontrada");
     }
     return comentarioRepository.listarPorDemanda(demandaId);
   },
 
-  criar(demandaId: string, dados: NovoComentario, usuarioId: string): ComentarioComAutor {
-    const demanda = demandaRepository.buscarPorId(demandaId);
+  async criar(demandaId: string, dados: NovoComentario, usuarioId: string): Promise<ComentarioComAutor> {
+    const demanda = await demandaRepository.buscarPorId(demandaId);
     if (!demanda) {
       throw new HttpError(404, "Demanda não encontrada");
     }
-    if (!usuarioId || !usuarioRepository.buscarPorId(usuarioId)) {
+    if (!usuarioId || !(await usuarioRepository.buscarPorId(usuarioId))) {
       throw new HttpError(400, "Usuário não encontrado");
     }
 
@@ -29,7 +29,7 @@ export const comentarioService = {
     }
 
     const agora = new Date().toISOString();
-    const criado = comentarioRepository.criar({
+    const criado = await comentarioRepository.criar({
       id: crypto.randomUUID(),
       demanda_id: demandaId,
       usuario_id: usuarioId,
@@ -38,11 +38,11 @@ export const comentarioService = {
       atualizado_em: agora,
     });
 
-    const usuarios = usuarioRepository.listar();
+    const usuarios = await usuarioRepository.listar();
     const idsMencionados = extrairMencoes(texto, usuarios).filter((id) => id !== usuarioId);
 
     for (const destId of idsMencionados) {
-      notificacaoService.notificar({
+      await notificacaoService.notificar({
         usuario_id: destId,
         demanda_id: demanda.id,
         tipo: "mencao",
@@ -59,7 +59,7 @@ export const comentarioService = {
     }
 
     for (const destId of outrosDestinatarios) {
-      notificacaoService.notificar({
+      await notificacaoService.notificar({
         usuario_id: destId,
         demanda_id: demanda.id,
         tipo: "demanda_comentario",
@@ -70,8 +70,8 @@ export const comentarioService = {
     return criado;
   },
 
-  atualizar(id: string, dados: NovoComentario, usuarioId: string): ComentarioComAutor {
-    const atual = comentarioRepository.buscarPorId(id);
+  async atualizar(id: string, dados: NovoComentario, usuarioId: string): Promise<ComentarioComAutor> {
+    const atual = await comentarioRepository.buscarPorId(id);
     if (!atual) {
       throw new HttpError(404, "Comentário não encontrado");
     }
@@ -89,8 +89,8 @@ export const comentarioService = {
     return comentarioRepository.atualizar(id, texto, agora);
   },
 
-  excluir(id: string, usuarioId: string): void {
-    const atual = comentarioRepository.buscarPorId(id);
+  async excluir(id: string, usuarioId: string): Promise<void> {
+    const atual = await comentarioRepository.buscarPorId(id);
     if (!atual) {
       throw new HttpError(404, "Comentário não encontrado");
     }
@@ -99,6 +99,6 @@ export const comentarioService = {
       throw new HttpError(403, "Sem permissão para excluir este comentário");
     }
 
-    comentarioRepository.excluir(id);
+    await comentarioRepository.excluir(id);
   },
 };

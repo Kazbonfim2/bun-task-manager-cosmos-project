@@ -138,7 +138,7 @@ O backend segue a arquitetura **MVC em camadas** (estilo Nest.js, mas sem injeç
 |---|---|---|
 | **Runtime** | [Bun](https://bun.sh/) 1.3+ | Alta performance, inicialização ultrarrápida e runtime all-in-one para TS. |
 | **Backend** | [Express 5](https://expressjs.com/) + TS | Roteamento simples, robusto e compatível com o ecossistema Node/Bun. |
-| **Banco de Dados** | [SQLite](https://sqlite.org/) via `bun:sqlite` | Zero configuração de servidor externo, persistência local em arquivo único, modo `WAL` habilitado e foreign keys ativas. |
+| **Banco de Dados** | [Turso / libSQL](https://turso.tech/) + [SQLite](https://sqlite.org/) | `@libsql/client` unificado: zero-config SQLite local em desenvolvimento e Turso distribuído em nuvem para produção apenas alterando variáveis de ambiente. |
 | **Frontend** | [React 19](https://react.dev/) + [Vite](https://vite.dev/) | Renderização rápida, bundle otimizado e tipagem completa. |
 | **Estilização** | [Tailwind CSS v4](https://tailwindcss.com/) + coss UI | Componentes utilitários leves estilo shadcn/ui, sem runtime CSS pesado. |
 | **Autenticação** | JWT + `Bun.password` | Hashes nativos ultra seguros (`Bun.password.hash`) sem precisar de `bcrypt` externo. |
@@ -149,14 +149,18 @@ O backend segue a arquitetura **MVC em camadas** (estilo Nest.js, mas sem injeç
 
 ### ⚙️ Variáveis de Ambiente
 
-Crie um arquivo `.env` na raiz se desejar customizar as portas ou caminho do banco:
+Crie um arquivo `.env` na raiz (copiando de `.env.example`) se desejar customizar as portas ou configurar o Turso:
 
 ```env
 # Porta da aplicação (padrão: 3005)
 PORT=3005
 
-# Caminho do banco SQLite (padrão: ./data/orion.db)
+# 1) Desenvolvimento Local (SQLite padrão)
 SQLITE_PATH=./data/orion.db
+
+# 2) Produção (Turso Cloud Database)
+# TURSO_DATABASE_URL=libsql://[nome-do-banco]-[org].turso.io
+# TURSO_AUTH_TOKEN=seu_token_gerado_no_turso
 
 # Segredo para assinatura de JWTs
 JWT_SECRET=orion_secret_key_change_in_production

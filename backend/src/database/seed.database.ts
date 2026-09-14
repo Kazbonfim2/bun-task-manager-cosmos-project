@@ -130,39 +130,37 @@ const demandas = [
 
 export async function seedDatabase() {
   const senhaHash = await Bun.password.hash(SENHA_PADRAO);
+  const agora = new Date().toISOString();
 
-  const insertUsuario = db.prepare(
-    `INSERT OR IGNORE INTO usuarios (id, nome_completo, email, senha_hash, criado_em) VALUES (?, ?, ?, ?, ?)`
-  );
-  for (const u of usuarios) {
-    insertUsuario.run(u.id, u.nome_completo, u.email, senhaHash, new Date().toISOString());
-  }
+  const usuarioStatements = usuarios.map((u) => ({
+    sql: `INSERT OR IGNORE INTO usuarios (id, nome_completo, email, senha_hash, criado_em) VALUES (?, ?, ?, ?, ?)`,
+    args: [u.id, u.nome_completo, u.email, senhaHash, agora],
+  }));
 
-  const insertProjeto = db.prepare(
-    `INSERT OR IGNORE INTO projetos (id, nome, descricao, criado_em) VALUES (?, ?, NULL, ?)`
-  );
-  for (const p of projetos) {
-    insertProjeto.run(p.id, p.nome, new Date().toISOString());
-  }
+  const projetoStatements = projetos.map((p) => ({
+    sql: `INSERT OR IGNORE INTO projetos (id, nome, descricao, criado_em) VALUES (?, ?, NULL, ?)`,
+    args: [p.id, p.nome, agora],
+  }));
 
-  const insertDemanda = db.prepare(
-    `INSERT OR IGNORE INTO demandas
+  const demandaStatements = demandas.map((d) => ({
+    sql: `INSERT OR IGNORE INTO demandas
       (id, titulo, descricao, projeto_id, responsavel_id, criado_por_id, prazo, status, criado_em, atualizado_em)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-  );
-  for (const d of demandas) {
-    insertDemanda.run(
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    args: [
       d.id, d.titulo, d.descricao, d.projeto_id, d.responsavel_id, d.criado_por_id,
-      d.prazo, d.status, d.criado_em, d.criado_em
-    );
-  }
+      d.prazo, d.status, d.criado_em, d.criado_em,
+    ],
+  }));
+
+  await db.batch([...usuarioStatements, ...projetoStatements, ...demandaStatements], "write");
 
   console.log(`Seed concluído: ${usuarios.length} usuários, ${projetos.length} projetos, ${demandas.length} demandas.`);
 }
 
 export async function seedDatabaseIfEmpty() {
-  const row = db.query("SELECT COUNT(*) as count FROM usuarios").get() as { count: number };
-  if (row.count === 0) {
+  const res = await db.execute("SELECT COUNT(*) as count FROM usuarios");
+  const row = res.rows[0] as { count: number } | undefined;
+  if (!row || Number(row.count) === 0) {
     console.log("Banco de dados vazio. Executando seed inicial automático...");
     // Para evitar o Seed automático nessa instância, basta comentar o trecho abaixo.
     // await seedDatabase();

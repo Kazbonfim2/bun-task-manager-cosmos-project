@@ -2,44 +2,44 @@ import type { Request, Response } from "express";
 import { grupoService } from "./grupo.service";
 
 export const grupoController = {
-  listar: (req: Request, res: Response) => {
+  listar: async (req: Request, res: Response) => {
     const usuarioId = req.usuario?.id ?? "";
-    const grupos = grupoService.listarPorUsuario(usuarioId);
+    const grupos = await grupoService.listarPorUsuario(usuarioId);
     res.json(grupos);
   },
 
-  buscarPorId: (req: Request, res: Response) => {
+  buscarPorId: async (req: Request, res: Response) => {
     const usuarioId = req.usuario?.id ?? "";
-    const grupo = grupoService.buscarPorId(String(req.params.id), usuarioId);
+    const grupo = await grupoService.buscarPorId(String(req.params.id), usuarioId);
     res.json(grupo);
   },
 
-  criar: (req: Request, res: Response) => {
+  criar: async (req: Request, res: Response) => {
     const usuarioId = req.usuario?.id ?? "";
-    const resultado = grupoService.criar(req.body, usuarioId);
+    const resultado = await grupoService.criar(req.body, usuarioId);
     res.status(201).json(resultado);
   },
 
-  listarMembros: (req: Request, res: Response) => {
+  listarMembros: async (req: Request, res: Response) => {
     const usuarioId = req.usuario?.id ?? "";
-    const membros = grupoService.listarMembros(String(req.params.id), usuarioId);
+    const membros = await grupoService.listarMembros(String(req.params.id), usuarioId);
     res.json(membros);
   },
 
-  listarConvites: (req: Request, res: Response) => {
+  listarConvites: async (req: Request, res: Response) => {
     const usuarioId = req.usuario?.id ?? "";
-    const convites = grupoService.listarConvites(String(req.params.id), usuarioId);
+    const convites = await grupoService.listarConvites(String(req.params.id), usuarioId);
     res.json(convites);
   },
 
-  validarConvite: (req: Request, res: Response) => {
-    const resultado = grupoService.validarConvite(String(req.params.codigo));
+  validarConvite: async (req: Request, res: Response) => {
+    const resultado = await grupoService.validarConvite(String(req.params.codigo));
     res.json(resultado);
   },
 
-  aceitarConvite: (req: Request, res: Response) => {
+  aceitarConvite: async (req: Request, res: Response) => {
     const usuarioId = req.usuario?.id ?? "";
-    const resultado = grupoService.aceitarConvite(req.body?.codigo, usuarioId);
+    const resultado = await grupoService.aceitarConvite(req.body?.codigo, usuarioId);
     res.json(resultado);
   },
 };

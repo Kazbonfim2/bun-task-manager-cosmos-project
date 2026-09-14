@@ -22,7 +22,7 @@ export const authService = {
     convites?: Convite[];
   }> {
     if (dados.codigo_convite) {
-      const convite = grupoRepository.buscarConvitePorCodigo(dados.codigo_convite);
+      const convite = await grupoRepository.buscarConvitePorCodigo(dados.codigo_convite);
       if (!convite || convite.usado_por_id) {
         throw new HttpError(400, "Código de convite inválido ou já utilizado");
       }
@@ -35,12 +35,12 @@ export const authService = {
     let convites: Convite[] | undefined;
 
     if (dados.codigo_convite) {
-      const convite = grupoRepository.buscarConvitePorCodigo(dados.codigo_convite)!;
-      grupoRepository.usarConvite(convite.id, usuario.id);
-      grupoRepository.adicionarMembro(convite.grupo_id, usuario.id);
-      grupo = grupoRepository.buscarPorId(convite.grupo_id) ?? undefined;
+      const convite = (await grupoRepository.buscarConvitePorCodigo(dados.codigo_convite))!;
+      await grupoRepository.usarConvite(convite.id, usuario.id);
+      await grupoRepository.adicionarMembro(convite.grupo_id, usuario.id);
+      grupo = (await grupoRepository.buscarPorId(convite.grupo_id)) ?? undefined;
     } else if (dados.grupo_nome?.trim()) {
-      const criado = grupoRepository.criar(dados.grupo_nome.trim(), usuario.id);
+      const criado = await grupoRepository.criar(dados.grupo_nome.trim(), usuario.id);
       grupo = criado.grupo;
       convites = criado.convites;
     }
@@ -49,17 +49,17 @@ export const authService = {
   },
 
   async login(email: string, senha: string): Promise<{ usuario: UsuarioPublico; token: string; grupo?: Grupo }> {
-    const usuario = usuarioRepository.buscarPorEmail(email?.trim().toLowerCase() ?? "");
+    const usuario = await usuarioRepository.buscarPorEmail(email?.trim().toLowerCase() ?? "");
     if (!usuario || !(await Bun.password.verify(senha ?? "", usuario.senha_hash))) {
       throw new HttpError(401, "E-mail ou senha inválidos");
     }
     const publico = semSenha(usuario);
-    const grupos = grupoRepository.listarPorUsuario(publico.id);
+    const grupos = await grupoRepository.listarPorUsuario(publico.id);
     return { usuario: publico, token: this.gerarToken(publico), grupo: grupos[0] };
   },
 
   async buscarPergunta(email: string): Promise<{ email: string; pergunta: string }> {
-    const usuario = usuarioRepository.buscarPorEmail(email?.trim().toLowerCase() ?? "");
+    const usuario = await usuarioRepository.buscarPorEmail(email?.trim().toLowerCase() ?? "");
     if (!usuario || !usuario.pergunta_secreta) {
       throw new HttpError(404, "E-mail não encontrado ou sem pergunta secreta configurada");
     }
@@ -67,7 +67,7 @@ export const authService = {
   },
 
   async validarRespostaSecreta(email: string, resposta: string): Promise<{ token_reset: string }> {
-    const usuario = usuarioRepository.buscarPorEmail(email?.trim().toLowerCase() ?? "");
+    const usuario = await usuarioRepository.buscarPorEmail(email?.trim().toLowerCase() ?? "");
     if (!usuario || !usuario.resposta_secreta_hash) {
       throw new HttpError(400, "Dados de recuperação inválidos");
     }
@@ -94,7 +94,7 @@ export const authService = {
         throw new HttpError(400, "Token inválido para redefinição");
       }
       const senha_hash = await Bun.password.hash(nova_senha);
-      usuarioRepository.atualizarSenha(payload.id, senha_hash);
+      await usuarioRepository.atualizarSenha(payload.id, senha_hash);
     } catch (e) {
       if (e instanceof HttpError) throw e;
       throw new HttpError(400, "Token de recuperação inválido ou expirado");
@@ -117,4 +117,3 @@ export const authService = {
     }
   },
 };
-

@@ -24,35 +24,35 @@ function validarPrazo(prazo: string): string {
 }
 
 export const demandaService = {
-  listar(filtro: FiltroDemanda): DemandaComNomes[] {
+  async listar(filtro: FiltroDemanda): Promise<DemandaComNomes[]> {
     if (filtro.status && filtro.status !== "atrasadas" && !ehStatus(filtro.status)) {
       throw new HttpError(400, "Status inválido");
     }
     return demandaRepository.listar(filtro);
   },
 
-  buscarPorId(id: string): DemandaComNomes {
-    const demanda = demandaRepository.buscarPorId(id);
+  async buscarPorId(id: string): Promise<DemandaComNomes> {
+    const demanda = await demandaRepository.buscarPorId(id);
     if (!demanda) throw new HttpError(404, "Demanda não encontrada");
     return demanda;
   },
 
-  criar(dados: NovaDemanda, criadoPorId: string): DemandaComNomes {
+  async criar(dados: NovaDemanda, criadoPorId: string): Promise<DemandaComNomes> {
     const titulo = dados.titulo?.trim();
     if (!titulo) throw new HttpError(400, "Título é obrigatório");
     const descricao = dados.descricao?.trim() || null;
     if (!dados.projeto_id) throw new HttpError(400, "Projeto é obrigatório");
     if (!dados.responsavel_id) throw new HttpError(400, "Responsável é obrigatório");
     if (!ehStatus(dados.status)) throw new HttpError(400, "Status inválido");
-    if (!projetoRepository.buscarPorId(dados.projeto_id)) {
+    if (!(await projetoRepository.buscarPorId(dados.projeto_id))) {
       throw new HttpError(400, "Projeto não encontrado");
     }
-    if (!usuarioRepository.buscarPorId(dados.responsavel_id)) {
+    if (!(await usuarioRepository.buscarPorId(dados.responsavel_id))) {
       throw new HttpError(400, "Responsável não encontrado");
     }
 
     const agora = new Date().toISOString();
-    const criada = demandaRepository.criar({
+    const criada = await demandaRepository.criar({
       id: crypto.randomUUID(),
       titulo,
       descricao,
@@ -65,7 +65,7 @@ export const demandaService = {
       atualizado_em: agora,
     });
 
-    notificacaoService.notificar({
+    await notificacaoService.notificar({
       usuario_id: criada.responsavel_id,
       demanda_id: criada.id,
       tipo: "demanda_criada",
@@ -73,13 +73,13 @@ export const demandaService = {
     });
 
     if (descricao) {
-      const usuarios = usuarioRepository.listar();
+      const usuarios = await usuarioRepository.listar();
       const idsMencionados = extrairMencoes(descricao, usuarios).filter(
         (id) => id !== criadoPorId && id !== criada.responsavel_id
       );
 
       for (const destId of idsMencionados) {
-        notificacaoService.notificar({
+        await notificacaoService.notificar({
           usuario_id: destId,
           demanda_id: criada.id,
           tipo: "mencao",
@@ -91,8 +91,8 @@ export const demandaService = {
     return criada;
   },
 
-  atualizar(id: string, dados: NovaDemanda): DemandaComNomes {
-    const atual = demandaRepository.buscarPorId(id);
+  async atualizar(id: string, dados: NovaDemanda): Promise<DemandaComNomes> {
+    const atual = await demandaRepository.buscarPorId(id);
     if (!atual) throw new HttpError(404, "Demanda não encontrada");
 
     const titulo = dados.titulo?.trim();
@@ -101,14 +101,14 @@ export const demandaService = {
     if (!dados.projeto_id) throw new HttpError(400, "Projeto é obrigatório");
     if (!dados.responsavel_id) throw new HttpError(400, "Responsável é obrigatório");
     if (!ehStatus(dados.status)) throw new HttpError(400, "Status inválido");
-    if (!projetoRepository.buscarPorId(dados.projeto_id)) {
+    if (!(await projetoRepository.buscarPorId(dados.projeto_id))) {
       throw new HttpError(400, "Projeto não encontrado");
     }
-    if (!usuarioRepository.buscarPorId(dados.responsavel_id)) {
+    if (!(await usuarioRepository.buscarPorId(dados.responsavel_id))) {
       throw new HttpError(400, "Responsável não encontrado");
     }
 
-    const atualizada = demandaRepository.atualizar({
+    const atualizada = await demandaRepository.atualizar({
       ...atual,
       titulo,
       descricao,
@@ -122,7 +122,7 @@ export const demandaService = {
     if (atual.status !== dados.status) {
       const destinatarios = new Set([atualizada.responsavel_id, atualizada.criado_por_id]);
       for (const usuarioId of destinatarios) {
-        notificacaoService.notificar({
+        await notificacaoService.notificar({
           usuario_id: usuarioId,
           demanda_id: atualizada.id,
           tipo: "demanda_status_alterado",
@@ -132,7 +132,7 @@ export const demandaService = {
     }
 
     if (atual.responsavel_id !== dados.responsavel_id) {
-      notificacaoService.notificar({
+      await notificacaoService.notificar({
         usuario_id: dados.responsavel_id,
         demanda_id: atualizada.id,
         tipo: "demanda_criada",
@@ -141,7 +141,7 @@ export const demandaService = {
     }
 
     if (descricao && descricao !== atual.descricao) {
-      const usuarios = usuarioRepository.listar();
+      const usuarios = await usuarioRepository.listar();
       const mencoesAtuais = extrairMencoes(descricao, usuarios);
       const mencoesAntigas = atual.descricao ? extrairMencoes(atual.descricao, usuarios) : [];
       const novasMencoes = mencoesAtuais.filter(
@@ -149,7 +149,7 @@ export const demandaService = {
       );
 
       for (const destId of novasMencoes) {
-        notificacaoService.notificar({
+        await notificacaoService.notificar({
           usuario_id: destId,
           demanda_id: atualizada.id,
           tipo: "mencao",
@@ -161,12 +161,12 @@ export const demandaService = {
     return atualizada;
   },
 
-  alterarStatus(id: string, status: string): DemandaComNomes {
-    const atual = demandaRepository.buscarPorId(id);
+  async alterarStatus(id: string, status: string): Promise<DemandaComNomes> {
+    const atual = await demandaRepository.buscarPorId(id);
     if (!atual) throw new HttpError(404, "Demanda não encontrada");
     if (!ehStatus(status)) throw new HttpError(400, "Status inválido");
 
-    const atualizada = demandaRepository.atualizar({
+    const atualizada = await demandaRepository.atualizar({
       ...atual,
       status,
       atualizado_em: new Date().toISOString(),
@@ -175,7 +175,7 @@ export const demandaService = {
     if (atual.status !== status) {
       const destinatarios = new Set([atualizada.responsavel_id, atualizada.criado_por_id]);
       for (const usuarioId of destinatarios) {
-        notificacaoService.notificar({
+        await notificacaoService.notificar({
           usuario_id: usuarioId,
           demanda_id: atualizada.id,
           tipo: "demanda_status_alterado",
@@ -187,9 +187,9 @@ export const demandaService = {
     return atualizada;
   },
 
-  excluir(id: string): void {
-    const atual = demandaRepository.buscarPorId(id);
+  async excluir(id: string): Promise<void> {
+    const atual = await demandaRepository.buscarPorId(id);
     if (!atual) throw new HttpError(404, "Demanda não encontrada");
-    demandaRepository.excluir(id);
+    await demandaRepository.excluir(id);
   },
 };

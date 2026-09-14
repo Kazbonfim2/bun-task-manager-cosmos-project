@@ -11,42 +11,51 @@ const SELECT_COM_AUTOR = `
 `;
 
 export const comentarioRepository = {
-  criar(comentario: Comentario): ComentarioComAutor {
-    db.query(
-      `INSERT INTO comentarios (
+  async criar(comentario: Comentario): Promise<ComentarioComAutor> {
+    await db.execute({
+      sql: `INSERT INTO comentarios (
         id, demanda_id, usuario_id, texto, criado_em, atualizado_em
-      ) VALUES (?, ?, ?, ?, ?, ?)`
-    ).run(
-      comentario.id,
-      comentario.demanda_id,
-      comentario.usuario_id,
-      comentario.texto,
-      comentario.criado_em,
-      comentario.atualizado_em
-    );
-    return this.buscarPorId(comentario.id) as ComentarioComAutor;
+      ) VALUES (?, ?, ?, ?, ?, ?)`,
+      args: [
+        comentario.id,
+        comentario.demanda_id,
+        comentario.usuario_id,
+        comentario.texto,
+        comentario.criado_em,
+        comentario.atualizado_em,
+      ],
+    });
+    return (await this.buscarPorId(comentario.id)) as ComentarioComAutor;
   },
 
-  buscarPorId(id: string): ComentarioComAutor | null {
-    return db
-      .query(`${SELECT_COM_AUTOR} WHERE c.id = ?`)
-      .get(id) as ComentarioComAutor | null;
+  async buscarPorId(id: string): Promise<ComentarioComAutor | null> {
+    const res = await db.execute({
+      sql: `${SELECT_COM_AUTOR} WHERE c.id = ?`,
+      args: [id],
+    });
+    return (res.rows[0] as unknown as ComentarioComAutor) ?? null;
   },
 
-  listarPorDemanda(demandaId: string): ComentarioComAutor[] {
-    return db
-      .query(`${SELECT_COM_AUTOR} WHERE c.demanda_id = ? ORDER BY c.criado_em ASC`)
-      .all(demandaId) as ComentarioComAutor[];
+  async listarPorDemanda(demandaId: string): Promise<ComentarioComAutor[]> {
+    const res = await db.execute({
+      sql: `${SELECT_COM_AUTOR} WHERE c.demanda_id = ? ORDER BY c.criado_em ASC`,
+      args: [demandaId],
+    });
+    return res.rows as unknown as ComentarioComAutor[];
   },
 
-  atualizar(id: string, texto: string, atualizadoEm: string): ComentarioComAutor {
-    db.query(
-      `UPDATE comentarios SET texto = ?, atualizado_em = ? WHERE id = ?`
-    ).run(texto, atualizadoEm, id);
-    return this.buscarPorId(id) as ComentarioComAutor;
+  async atualizar(id: string, texto: string, atualizadoEm: string): Promise<ComentarioComAutor> {
+    await db.execute({
+      sql: `UPDATE comentarios SET texto = ?, atualizado_em = ? WHERE id = ?`,
+      args: [texto, atualizadoEm, id],
+    });
+    return (await this.buscarPorId(id)) as ComentarioComAutor;
   },
 
-  excluir(id: string): void {
-    db.query(`DELETE FROM comentarios WHERE id = ?`).run(id);
+  async excluir(id: string): Promise<void> {
+    await db.execute({
+      sql: `DELETE FROM comentarios WHERE id = ?`,
+      args: [id],
+    });
   },
 };

@@ -5,26 +5,26 @@ import { notificacaoService } from "./notificacao.service";
 export const notificacaoRoutes = Router();
 notificacaoRoutes.use(authMiddleware);
 
-notificacaoRoutes.get("/", (req: Request, res: Response) => {
+notificacaoRoutes.get("/", async (req: Request, res: Response) => {
   const usuarioId = req.usuario?.id ?? "";
-  const notificacoes = notificacaoService.listarPorUsuario(usuarioId);
+  const notificacoes = await notificacaoService.listarPorUsuario(usuarioId);
   res.json(notificacoes);
 });
 
-notificacaoRoutes.patch("/ler-todas", (req: Request, res: Response) => {
+notificacaoRoutes.patch("/ler-todas", async (req: Request, res: Response) => {
   const usuarioId = req.usuario?.id ?? "";
-  notificacaoService.marcarTodasComoLidas(usuarioId);
+  await notificacaoService.marcarTodasComoLidas(usuarioId);
   res.status(204).send();
 });
 
-notificacaoRoutes.patch("/:id/lida", (req: Request, res: Response) => {
+notificacaoRoutes.patch("/:id/lida", async (req: Request, res: Response) => {
   const usuarioId = req.usuario?.id ?? "";
-  notificacaoService.marcarComoLida(String(req.params.id), usuarioId);
+  await notificacaoService.marcarComoLida(String(req.params.id), usuarioId);
   res.status(204).send();
 });
 
-notificacaoRoutes.delete("/:id", (req: Request, res: Response) => {
+notificacaoRoutes.delete("/:id", async (req: Request, res: Response) => {
   const usuarioId = req.usuario?.id ?? "";
-  notificacaoService.marcarComoLida(String(req.params.id), usuarioId);
+  await notificacaoService.marcarComoLida(String(req.params.id), usuarioId);
   res.status(204).send();
 });

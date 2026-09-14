@@ -12,36 +12,39 @@ const SELECT_COM_NOMES = `
 `;
 
 export const demandaRepository = {
-  criar(demanda: Demanda): DemandaComNomes {
-    db.query(
-      `INSERT INTO demandas (
+  async criar(demanda: Demanda): Promise<DemandaComNomes> {
+    await db.execute({
+      sql: `INSERT INTO demandas (
         id, titulo, descricao, projeto_id, responsavel_id, criado_por_id,
         prazo, status, criado_em, atualizado_em
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    ).run(
-      demanda.id,
-      demanda.titulo,
-      demanda.descricao,
-      demanda.projeto_id,
-      demanda.responsavel_id,
-      demanda.criado_por_id,
-      demanda.prazo,
-      demanda.status,
-      demanda.criado_em,
-      demanda.atualizado_em,
-    );
-    return this.buscarPorId(demanda.id) as DemandaComNomes;
+      args: [
+        demanda.id,
+        demanda.titulo,
+        demanda.descricao,
+        demanda.projeto_id,
+        demanda.responsavel_id,
+        demanda.criado_por_id,
+        demanda.prazo,
+        demanda.status,
+        demanda.criado_em,
+        demanda.atualizado_em,
+      ],
+    });
+    return (await this.buscarPorId(demanda.id)) as DemandaComNomes;
   },
 
-  buscarPorId(id: string): DemandaComNomes | null {
-    return db
-      .query(`${SELECT_COM_NOMES} WHERE d.id = ?`)
-      .get(id) as DemandaComNomes | null;
+  async buscarPorId(id: string): Promise<DemandaComNomes | null> {
+    const res = await db.execute({
+      sql: `${SELECT_COM_NOMES} WHERE d.id = ?`,
+      args: [id],
+    });
+    return (res.rows[0] as unknown as DemandaComNomes) ?? null;
   },
 
-  listar(filtro: FiltroDemanda): DemandaComNomes[] {
+  async listar(filtro: FiltroDemanda): Promise<DemandaComNomes[]> {
     const condicoes: string[] = [];
-    const params: string[] = [];
+    const params: any[] = [];
 
     if (filtro.responsavel_id) {
       condicoes.push("d.responsavel_id = ?");
@@ -74,33 +77,39 @@ export const demandaRepository = {
     const pagina = Math.max(Number(filtro.pagina) || 1, 1);
     const offset = (pagina - 1) * limite;
 
-    params.push(String(limite), String(offset));
+    params.push(limite, offset);
 
-    return db
-      .query(`${SELECT_COM_NOMES} ${where} ORDER BY d.prazo ASC LIMIT ? OFFSET ?`)
-      .all(...params) as DemandaComNomes[];
+    const res = await db.execute({
+      sql: `${SELECT_COM_NOMES} ${where} ORDER BY d.prazo ASC LIMIT ? OFFSET ?`,
+      args: params,
+    });
+    return res.rows as unknown as DemandaComNomes[];
   },
 
-  atualizar(demanda: Demanda): DemandaComNomes {
-    db.query(
-      `UPDATE demandas SET
+  async atualizar(demanda: Demanda): Promise<DemandaComNomes> {
+    await db.execute({
+      sql: `UPDATE demandas SET
         titulo = ?, descricao = ?, projeto_id = ?, responsavel_id = ?,
         prazo = ?, status = ?, atualizado_em = ?
       WHERE id = ?`,
-    ).run(
-      demanda.titulo,
-      demanda.descricao,
-      demanda.projeto_id,
-      demanda.responsavel_id,
-      demanda.prazo,
-      demanda.status,
-      demanda.atualizado_em,
-      demanda.id,
-    );
-    return this.buscarPorId(demanda.id) as DemandaComNomes;
+      args: [
+        demanda.titulo,
+        demanda.descricao,
+        demanda.projeto_id,
+        demanda.responsavel_id,
+        demanda.prazo,
+        demanda.status,
+        demanda.atualizado_em,
+        demanda.id,
+      ],
+    });
+    return (await this.buscarPorId(demanda.id)) as DemandaComNomes;
   },
 
-  excluir(id: string): void {
-    db.query(`DELETE FROM demandas WHERE id = ?`).run(id);
+  async excluir(id: string): Promise<void> {
+    await db.execute({
+      sql: "DELETE FROM demandas WHERE id = ?",
+      args: [id],
+    });
   },
 };
