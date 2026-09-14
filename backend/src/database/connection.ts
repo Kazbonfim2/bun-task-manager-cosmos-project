@@ -2,7 +2,10 @@ import { createClient } from "@libsql/client";
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 
-const dbUrl = process.env.TURSO_DATABASE_URL ?? `file:${process.env.SQLITE_PATH ?? "./data/orion.db"}`;
+let dbUrl = process.env.TURSO_DATABASE_URL ?? `file:${process.env.SQLITE_PATH ?? "./data/orion.db"}`;
+if (dbUrl.startsWith("turso://")) {
+  dbUrl = dbUrl.replace(/^turso:\/\//, "libsql://");
+}
 const dbAuthToken = process.env.TURSO_AUTH_TOKEN;
 
 if (dbUrl.startsWith("file:")) {
