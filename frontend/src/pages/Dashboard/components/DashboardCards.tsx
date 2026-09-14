@@ -22,7 +22,7 @@ export function DashboardCards({
   onFiltrarStatus,
 }: DashboardCardsProps) {
   return (
-    <section className="grid gap-3 sm:grid-cols-3 animate__animated animate__fadeIn">
+    <section className="grid gap-3 sm:grid-cols-3 animate-fade-in">
       {/* // Card de total de demandas cadastradas */}
       <Tooltip>
         <TooltipTrigger

@@ -1,15 +1,31 @@
 import type { Request, Response } from "express";
+import { grupoRepository } from "../grupo/grupo.repository";
 import { demandaService } from "./demanda.service";
 
 export const demandaController = {
   listar: (req: Request, res: Response) => {
-    const { status, responsavel_id, projeto_id } = req.query;
-    const grupoId = (req.query.grupo_id as string) || (req.headers["x-grupo-id"] as string) || undefined;
+    const usuarioId = req.usuario?.id;
+    if (!usuarioId) {
+      return res.json([]);
+    }
+
+    const gruposUsuario = grupoRepository.listarPorUsuario(usuarioId);
+    const headerGrupoId = (req.query.grupo_id as string) || (req.headers["x-grupo-id"] as string);
+    const grupoAtivo = gruposUsuario.find((g) => g.id === headerGrupoId) || gruposUsuario[0];
+
+    if (!grupoAtivo) {
+      return res.json([]);
+    }
+
+    const { status, responsavel_id, projeto_id, busca, limite, pagina } = req.query;
     const demandas = demandaService.listar({
       status: typeof status === "string" ? status : undefined,
       responsavel_id: typeof responsavel_id === "string" ? responsavel_id : undefined,
       projeto_id: typeof projeto_id === "string" ? projeto_id : undefined,
-      grupo_id: grupoId,
+      busca: typeof busca === "string" ? busca : undefined,
+      limite: limite ? Number(limite) : undefined,
+      pagina: pagina ? Number(pagina) : undefined,
+      grupo_id: grupoAtivo.id,
     });
     res.json(demandas);
   },

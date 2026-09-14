@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import { grupoRepository } from "../grupo/grupo.repository";
 import { projetoService } from "./projeto.service";
 
 export const projetoController = {
@@ -10,8 +11,16 @@ export const projetoController = {
   },
 
   listar: (req: Request, res: Response) => {
-    const grupoId = (req.query.grupo_id as string) || (req.headers["x-grupo-id"] as string) || undefined;
-    res.json(projetoService.listar(grupoId));
+    const usuarioId = req.usuario?.id;
+    if (!usuarioId) return res.json([]);
+
+    const gruposUsuario = grupoRepository.listarPorUsuario(usuarioId);
+    const headerGrupoId = (req.query.grupo_id as string) || (req.headers["x-grupo-id"] as string);
+    const grupoAtivo = gruposUsuario.find((g) => g.id === headerGrupoId) || gruposUsuario[0];
+
+    if (!grupoAtivo) return res.json([]);
+
+    res.json(projetoService.listar(grupoAtivo.id));
   },
 
   atualizar: (req: Request, res: Response) => {

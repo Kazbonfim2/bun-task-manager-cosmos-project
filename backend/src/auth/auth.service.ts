@@ -48,13 +48,14 @@ export const authService = {
     return { usuario, token, grupo, convites };
   },
 
-  async login(email: string, senha: string): Promise<{ usuario: UsuarioPublico; token: string }> {
+  async login(email: string, senha: string): Promise<{ usuario: UsuarioPublico; token: string; grupo?: Grupo }> {
     const usuario = usuarioRepository.buscarPorEmail(email?.trim().toLowerCase() ?? "");
     if (!usuario || !(await Bun.password.verify(senha ?? "", usuario.senha_hash))) {
       throw new HttpError(401, "E-mail ou senha inválidos");
     }
     const publico = semSenha(usuario);
-    return { usuario: publico, token: this.gerarToken(publico) };
+    const grupos = grupoRepository.listarPorUsuario(publico.id);
+    return { usuario: publico, token: this.gerarToken(publico), grupo: grupos[0] };
   },
 
   async buscarPergunta(email: string): Promise<{ email: string; pergunta: string }> {

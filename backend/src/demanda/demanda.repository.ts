@@ -55,6 +55,11 @@ export const demandaRepository = {
       condicoes.push("p.grupo_id = ?");
       params.push(filtro.grupo_id);
     }
+    if (filtro.busca?.trim()) {
+      condicoes.push("(d.titulo LIKE ? OR d.descricao LIKE ?)");
+      const termo = `%${filtro.busca.trim()}%`;
+      params.push(termo, termo);
+    }
     if (filtro.status === "atrasadas") {
       const hoje = new Date().toISOString().slice(0, 10);
       condicoes.push("d.status != 'concluida' AND d.prazo < ?");
@@ -65,8 +70,14 @@ export const demandaRepository = {
     }
 
     const where = condicoes.length ? `WHERE ${condicoes.join(" AND ")}` : "";
+    const limite = Math.min(Math.max(Number(filtro.limite) || 50, 1), 100);
+    const pagina = Math.max(Number(filtro.pagina) || 1, 1);
+    const offset = (pagina - 1) * limite;
+
+    params.push(String(limite), String(offset));
+
     return db
-      .query(`${SELECT_COM_NOMES} ${where} ORDER BY d.prazo ASC`)
+      .query(`${SELECT_COM_NOMES} ${where} ORDER BY d.prazo ASC LIMIT ? OFFSET ?`)
       .all(...params) as DemandaComNomes[];
   },
 

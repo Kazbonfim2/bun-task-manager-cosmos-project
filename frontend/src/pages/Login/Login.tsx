@@ -11,7 +11,7 @@ import {
   InputGroupText,
 } from "@/components/ui/input-group";
 import { api, type RespostaAuth } from "@/lib/api";
-import { lerToken, salvarSessao } from "@/lib/auth";
+import { lerToken, salvarGrupoAtivo, salvarSessao } from "@/lib/auth";
 
 export function Login() {
   const navegar = useNavigate();
@@ -33,6 +33,9 @@ export function Login() {
         body: JSON.stringify({ email, senha }),
       });
       salvarSessao(resposta.token, resposta.usuario);
+      if (resposta.grupo?.id) {
+        salvarGrupoAtivo(resposta.grupo.id);
+      }
       navegar("/");
     } catch (falha) {
       setErro(falha instanceof Error ? falha.message : "Falha no login");

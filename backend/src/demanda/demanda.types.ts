@@ -34,4 +34,7 @@ export type FiltroDemanda = {
   projeto_id?: string;
   status?: string;
   grupo_id?: string;
+  busca?: string;
+  limite?: number;
+  pagina?: number;
 };
