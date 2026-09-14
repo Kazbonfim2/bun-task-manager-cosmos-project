@@ -162,8 +162,7 @@ export async function seedDatabaseIfEmpty() {
   const row = res.rows[0] as { count: number } | undefined;
   if (!row || Number(row.count) === 0) {
     console.log("Banco de dados vazio. Executando seed inicial automático...");
-    // Para evitar o Seed automático nessa instância, basta comentar o trecho abaixo.
-    // await seedDatabase();
+    await seedDatabase();
   }
 }
 

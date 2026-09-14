@@ -1,4 +1,4 @@
-import { Check, Copy, Crown, Ticket, Users } from "lucide-react";
+import { Check, Copy, Ticket, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -81,11 +81,10 @@ export function DialogGerenciarGrupo({
           <button
             type="button"
             onClick={() => setAbaAtiva("convites")}
-            className={`text-xs font-semibold px-3 py-1.5 rounded-md transition-colors flex items-center gap-1.5 cursor-pointer ${
-              abaAtiva === "convites"
-                ? "bg-primary text-primary-foreground shadow-xs"
-                : "text-muted-foreground hover:bg-muted"
-            }`}
+            className={`text-xs font-semibold px-3 py-1.5 rounded-md transition-colors flex items-center gap-1.5 cursor-pointer ${abaAtiva === "convites"
+              ? "bg-primary text-primary-foreground shadow-xs"
+              : "text-muted-foreground hover:bg-muted"
+              }`}
           >
             <Ticket className="size-3.5" />
             Convites ({disponiveis} disponíveis)
@@ -93,11 +92,10 @@ export function DialogGerenciarGrupo({
           <button
             type="button"
             onClick={() => setAbaAtiva("membros")}
-            className={`text-xs font-semibold px-3 py-1.5 rounded-md transition-colors flex items-center gap-1.5 cursor-pointer ${
-              abaAtiva === "membros"
-                ? "bg-primary text-primary-foreground shadow-xs"
-                : "text-muted-foreground hover:bg-muted"
-            }`}
+            className={`text-xs font-semibold px-3 py-1.5 rounded-md transition-colors flex items-center gap-1.5 cursor-pointer ${abaAtiva === "membros"
+              ? "bg-primary text-primary-foreground shadow-xs"
+              : "text-muted-foreground hover:bg-muted"
+              }`}
           >
             <Users className="size-3.5" />
             Membros ({membros.length})
@@ -127,11 +125,10 @@ export function DialogGerenciarGrupo({
                 return (
                   <div
                     key={c.id}
-                    className={`flex items-center justify-between p-3 rounded-lg border transition-all gap-2 ${
-                      usado
-                        ? "bg-muted/30 border-dashed border-border/80 opacity-70"
-                        : "bg-card border-border hover:border-primary/40 shadow-xs"
-                    }`}
+                    className={`flex items-center justify-between p-3 rounded-lg border transition-all gap-2 ${usado
+                      ? "bg-muted/30 border-dashed border-border/80 opacity-70"
+                      : "bg-card border-border hover:border-primary/40 shadow-xs"
+                      }`}
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
@@ -197,7 +194,6 @@ export function DialogGerenciarGrupo({
                       </span>
                       {m.eh_dono && (
                         <Badge variant="default" className="text-[10px] gap-1 px-1.5 py-0 h-4 bg-amber-500 hover:bg-amber-600 shrink-0">
-                          <Crown className="size-2.5" />
                           Dono
                         </Badge>
                       )}

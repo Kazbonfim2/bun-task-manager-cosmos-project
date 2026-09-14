@@ -1,6 +1,36 @@
 import { createClient } from "@libsql/client";
-import { mkdirSync } from "node:fs";
-import { dirname } from "node:path";
+import { existsSync, mkdirSync, readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+
+function carregarEnvRaizSeNecessario() {
+  if (process.env.TURSO_DATABASE_URL) return;
+  const possiveisCaminhos = [
+    resolve(process.cwd(), ".env"),
+    resolve(process.cwd(), "../.env"),
+    resolve(import.meta.dir, "../../../.env"),
+    resolve(import.meta.dir, "../../.env"),
+  ];
+  for (const caminho of possiveisCaminhos) {
+    if (existsSync(caminho)) {
+      const conteudo = readFileSync(caminho, "utf-8");
+      for (const linha of conteudo.split("\n")) {
+        const limpa = linha.trim();
+        if (!limpa || limpa.startsWith("#")) continue;
+        const [chave, ...resto] = limpa.split("=");
+        if (chave && resto.length > 0) {
+          const nomeVar = chave.trim();
+          const valorVar = resto.join("=").trim().replace(/^["']|["']$/g, "");
+          if (!process.env[nomeVar]) {
+            process.env[nomeVar] = valorVar;
+          }
+        }
+      }
+      break;
+    }
+  }
+}
+
+carregarEnvRaizSeNecessario();
 
 let dbUrl = process.env.TURSO_DATABASE_URL ?? `file:${process.env.SQLITE_PATH ?? "./data/orion.db"}`;
 if (dbUrl.startsWith("turso://")) {
