@@ -158,10 +158,15 @@ export async function seedDatabase() {
 }
 
 export async function seedDatabaseIfEmpty() {
-  const res = await db.execute("SELECT COUNT(*) as count FROM usuarios");
-  const row = res.rows[0] as { count: number } | undefined;
-  if (!row || Number(row.count) === 0) {
+  const res = await db.execute(
+    "SELECT COUNT(*) as count FROM usuarios"
+  );
+
+  const row = res.rows[0] as unknown as { count: number };
+
+  if (Number(row.count) === 0) {
     console.log("Banco de dados vazio. Executando seed inicial automático...");
+
     await seedDatabase();
   }
 }
