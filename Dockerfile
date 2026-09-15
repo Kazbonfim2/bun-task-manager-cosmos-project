@@ -1,38 +1,28 @@
-FROM oven/bun:1 AS base
-
+# 1. Build frontend and backend dependencies
+FROM oven/bun:1-alpine AS builder
 WORKDIR /app
 
-COPY backend/package.json backend/bun.lock ./backend/
 COPY frontend/package.json frontend/bun.lock ./frontend/
+COPY backend/package.json backend/bun.lock ./backend/
 
-RUN cd backend && bun install --frozen-lockfile \
-  && cd ../frontend && bun install --frozen-lockfile
+RUN cd frontend && bun install --frozen-lockfile
+RUN cd backend && bun install --frozen-lockfile --production
 
-COPY . .
+COPY frontend ./frontend
+RUN cd frontend && bun run build
 
-FROM base AS dev
-
-WORKDIR /app/backend
-
-ENV NODE_ENV=development
-ENV PORT=3005
-ENV SQLITE_PATH=/app/data/orion.db
-
-EXPOSE 3005
-
-CMD ["bun", "--watch", "src/server.ts"]
-
-FROM base AS prod
-
-WORKDIR /app/frontend
-RUN bun run build
-
-WORKDIR /app/backend
+# 2. Production runner
+FROM oven/bun:1-alpine
+WORKDIR /app
 
 ENV NODE_ENV=production
 ENV PORT=3005
-ENV SQLITE_PATH=/app/data/orion.db
+
+COPY --from=builder /app/backend/node_modules ./backend/node_modules
+COPY --from=builder /app/frontend/dist ./frontend/dist
+COPY backend ./backend
 
 EXPOSE 3005
+USER bun
 
-CMD ["bun", "src/server.ts"]
+CMD ["bun", "backend/src/server.ts"]

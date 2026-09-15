@@ -1,18 +1,18 @@
 services:
-  orion:
+  app:
     build:
       context: .
-      target: prod
-    ports:
-      - "${PORT:-3005}:${PORT:-3005}"
+      dockerfile: Dockerfile
+    container_name: orion-app
+    restart: unless-stopped
     environment:
-      NODE_ENV: production
-      PORT: "${PORT:-3005}"
-      JWT_SECRET: ${JWT_SECRET:-orion-local-secret}
-      SQLITE_PATH: ${SQLITE_PATH:-/app/data/orion.db}
-    volumes:
-      - orion-data:/app/data
+      - NODE_ENV=production
+      - PORT=3005
+    env_file:
+      - .env
+    networks:
+      - proxy-net
 
-volumes:
-  orion-data:
-
+networks:
+  proxy-net:
+    external: true
