@@ -3,7 +3,6 @@ import { existsSync, mkdirSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 
 function carregarEnvRaizSeNecessario() {
-  if (process.env.TURSO_DATABASE_URL) return;
   const possiveisCaminhos = [
     resolve(process.cwd(), ".env"),
     resolve(process.cwd(), "../.env"),
@@ -32,11 +31,15 @@ function carregarEnvRaizSeNecessario() {
 
 carregarEnvRaizSeNecessario();
 
-let dbUrl = process.env.TURSO_DATABASE_URL ?? `file:${process.env.SQLITE_PATH ?? "./data/orion.db"}`;
+const isDev = process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test" || !process.env.NODE_ENV;
+let dbUrl = isDev
+  ? `file:${process.env.SQLITE_PATH ?? "./data/orion.db"}`
+  : (process.env.TURSO_DATABASE_URL ?? `file:${process.env.SQLITE_PATH ?? "./data/orion.db"}`);
+
 if (dbUrl.startsWith("turso://")) {
   dbUrl = dbUrl.replace(/^turso:\/\//, "libsql://");
 }
-const dbAuthToken = process.env.TURSO_AUTH_TOKEN;
+const dbAuthToken = isDev ? undefined : process.env.TURSO_AUTH_TOKEN;
 
 if (dbUrl.startsWith("file:")) {
   const filePath = dbUrl.replace(/^file:/, "");
