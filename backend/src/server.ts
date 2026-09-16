@@ -6,6 +6,7 @@ import express, { type NextFunction, type Request, type Response } from "express
 import { authRoutes } from "./auth/auth.routes";
 import { comentarioRoutes } from "./comentario/comentario.routes";
 import { demandaRoutes } from "./demanda/demanda.routes";
+import { demandaService } from "./demanda/demanda.service";
 import { HttpError } from "./http-error";
 import { grupoRoutes } from "./grupo/grupo.routes";
 import { notificacaoRoutes } from "./notificacao/notificacao.routes";
@@ -65,6 +66,18 @@ app.use((erro: unknown, _req: Request, res: Response, _next: NextFunction) => {
   console.error(erro);
   res.status(500).json({ erro: "Erro interno" });
 });
+
+// Varredura periódica de demandas atrasadas para notificar o responsável.
+// ponytail: full-scan a cada hora; se o volume crescer, disparar via job/cron dedicado.
+async function varrerAtrasadas() {
+  try {
+    await demandaService.notificarAtrasadas();
+  } catch (e) {
+    console.error("Falha ao notificar demandas atrasadas", e);
+  }
+}
+varrerAtrasadas();
+setInterval(varrerAtrasadas, 60 * 60 * 1000);
 
 server.listen(porta, "0.0.0.0", () => {
   console.log(`ORION em http://localhost:${porta}`);

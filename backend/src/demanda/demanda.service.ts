@@ -23,6 +23,10 @@ function validarPrazo(prazo: string): string {
   return prazo.slice(0, 10);
 }
 
+function estaAtrasada(prazo: string, status: string): boolean {
+  return status !== "concluida" && prazo.slice(0, 10) < new Date().toISOString().slice(0, 10);
+}
+
 export const demandaService = {
   async listar(filtro: FiltroDemanda): Promise<DemandaComNomes[]> {
     if (filtro.status && filtro.status !== "atrasadas" && !ehStatus(filtro.status)) {
@@ -158,6 +162,11 @@ export const demandaService = {
       }
     }
 
+    // Rearma o alerta de atraso se a demanda deixou de estar atrasada
+    if (!estaAtrasada(atualizada.prazo, atualizada.status)) {
+      await demandaRepository.limparAtrasoNotificado(atualizada.id);
+    }
+
     return atualizada;
   },
 
@@ -184,6 +193,10 @@ export const demandaService = {
       }
     }
 
+    if (!estaAtrasada(atualizada.prazo, atualizada.status)) {
+      await demandaRepository.limparAtrasoNotificado(atualizada.id);
+    }
+
     return atualizada;
   },
 
@@ -191,5 +204,20 @@ export const demandaService = {
     const atual = await demandaRepository.buscarPorId(id);
     if (!atual) throw new HttpError(404, "Demanda não encontrada");
     await demandaRepository.excluir(id);
+  },
+
+  // Notifica o responsável de cada demanda que entrou em atraso (uma vez por atraso)
+  async notificarAtrasadas(): Promise<number> {
+    const atrasadas = await demandaRepository.listarAtrasadasNaoNotificadas();
+    for (const d of atrasadas) {
+      await notificacaoService.notificar({
+        usuario_id: d.responsavel_id,
+        demanda_id: d.id,
+        tipo: "demanda_atrasada",
+        mensagem: `A demanda "${d.titulo}" está atrasada e precisa de atenção.`,
+      });
+      await demandaRepository.marcarAtrasoNotificado(d.id);
+    }
+    return atrasadas.length;
   },
 };
