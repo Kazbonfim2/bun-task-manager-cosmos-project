@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardPanel } from "@/components/ui/card";
 import type { Demanda } from "@/lib/api";
 import { STATUS_ITENS } from "@/lib/status";
-import { cn } from "@/lib/utils";
+import { cn, copiarTexto } from "@/lib/utils";
 import {
   calcularStatusPrazo,
   formatarPrazoExtenso,
@@ -39,10 +39,11 @@ export function DemandOverview({
   const StatusIcone = statusInfo?.icone;
   const infoPrazo = calcularStatusPrazo(demanda.prazo, demanda.status);
 
-  function copiarTextoTitulo() {
-    navigator.clipboard.writeText(demanda.titulo);
-    setCopiadoTexto(true);
-    setTimeout(() => setCopiadoTexto(false), 2000);
+  async function copiarTextoTitulo() {
+    if (await copiarTexto(demanda.titulo)) {
+      setCopiadoTexto(true);
+      setTimeout(() => setCopiadoTexto(false), 2000);
+    }
   }
 
   return (
