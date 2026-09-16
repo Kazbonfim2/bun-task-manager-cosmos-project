@@ -11,3 +11,4 @@ data
 .fuse_hidden*
 .agent
 .gemini
+/docs

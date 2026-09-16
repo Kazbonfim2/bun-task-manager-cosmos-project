@@ -112,4 +112,30 @@ export const demandaRepository = {
       args: [id],
     });
   },
+
+  // Demandas atrasadas (prazo < hoje, não concluídas) que ainda não geraram notificação de atraso
+  async listarAtrasadasNaoNotificadas(): Promise<Array<{ id: string; titulo: string; responsavel_id: string }>> {
+    const hoje = new Date().toISOString().slice(0, 10);
+    const res = await db.execute({
+      sql: `SELECT id, titulo, responsavel_id FROM demandas
+            WHERE status != 'concluida' AND prazo < ? AND atraso_notificado_em IS NULL`,
+      args: [hoje],
+    });
+    return res.rows as unknown as Array<{ id: string; titulo: string; responsavel_id: string }>;
+  },
+
+  async marcarAtrasoNotificado(id: string): Promise<void> {
+    await db.execute({
+      sql: "UPDATE demandas SET atraso_notificado_em = ? WHERE id = ?",
+      args: [new Date().toISOString(), id],
+    });
+  },
+
+  // Rearma o alerta de atraso quando a demanda deixa de estar atrasada
+  async limparAtrasoNotificado(id: string): Promise<void> {
+    await db.execute({
+      sql: "UPDATE demandas SET atraso_notificado_em = NULL WHERE id = ?",
+      args: [id],
+    });
+  },
 };

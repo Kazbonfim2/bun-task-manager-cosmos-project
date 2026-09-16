@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { api, type Convite, type Grupo, type MembroGrupo } from "@/lib/api";
+import { copiarTexto } from "@/lib/utils";
 
 interface DialogGerenciarGrupoProps {
   aberto: boolean;
@@ -50,10 +51,11 @@ export function DialogGerenciarGrupo({
     carregarDados();
   }, [aberto, grupo?.id]);
 
-  function copiarCodigo(convite: Convite) {
-    navigator.clipboard.writeText(convite.codigo);
-    setCopiadoId(convite.id);
-    setTimeout(() => setCopiadoId(null), 2000);
+  async function copiarCodigo(convite: Convite) {
+    if (await copiarTexto(convite.codigo)) {
+      setCopiadoId(convite.id);
+      setTimeout(() => setCopiadoId(null), 2000);
+    }
   }
 
   const disponiveis = convites.filter((c) => c.status === "disponivel").length;

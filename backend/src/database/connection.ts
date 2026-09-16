@@ -160,6 +160,13 @@ export async function initDatabase() {
     } catch {}
   }
 
+  const colunasDemanda = (await db.execute("PRAGMA table_info(demandas)")).rows as unknown as Array<{ name: string }>;
+  if (!colunasDemanda.some((c) => c.name === "atraso_notificado_em")) {
+    try {
+      await db.execute("ALTER TABLE demandas ADD COLUMN atraso_notificado_em TEXT;");
+    } catch {}
+  }
+
   const colunasUsuario = (await db.execute("PRAGMA table_info(usuarios)")).rows as unknown as Array<{ name: string }>;
   if (!colunasUsuario.some((c) => c.name === "pergunta_secreta")) {
     try {

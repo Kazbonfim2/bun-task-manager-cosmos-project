@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { api, type Convite, type Grupo } from "@/lib/api";
 import { salvarGrupoAtivo } from "@/lib/auth";
+import { copiarTexto } from "@/lib/utils";
 
 interface DialogCriarGrupoProps {
   aberto: boolean;
@@ -74,10 +75,11 @@ export function DialogCriarGrupo({
     }
   }
 
-  function copiarCodigo(convite: Convite) {
-    navigator.clipboard.writeText(convite.codigo);
-    setCopiadoId(convite.id);
-    setTimeout(() => setCopiadoId(null), 2000);
+  async function copiarCodigo(convite: Convite) {
+    if (await copiarTexto(convite.codigo)) {
+      setCopiadoId(convite.id);
+      setTimeout(() => setCopiadoId(null), 2000);
+    }
   }
 
   return (

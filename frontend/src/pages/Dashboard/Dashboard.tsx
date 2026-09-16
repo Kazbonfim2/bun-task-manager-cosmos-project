@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type SubmitEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type SubmitEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { type ItemSelect } from "@/components/SelectSimples";
 import {
@@ -7,6 +7,7 @@ import {
   type Projeto,
   type Usuario,
 } from "@/lib/api";
+import { invalidarCache, useCachedFetch } from "@/hooks/useCachedFetch";
 import { demandaAtrasada, STATUS_ITENS } from "@/lib/status";
 import { DashboardCards } from "./components/DashboardCards";
 import { DashboardHeader } from "./components/DashboardHeader";
@@ -33,7 +34,6 @@ const FORM_VAZIO: FormDemandaData = {
 export function Dashboard() {
   const navigate = useNavigate();
 
-  const [demandas, setDemandas] = useState<Demanda[]>([]);
   const [projetos, setProjetos] = useState<Projeto[]>([]);
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [filtroResponsavel, setFiltroResponsavel] = useState("todos");
@@ -42,8 +42,26 @@ export function Dashboard() {
   const [modoVisualizacao, setModoVisualizacao] = useState<"lista" | "cards">("lista");
   const [busca, setBusca] = useState("");
   const [paginaAtual, setPaginaAtual] = useState(1);
-  const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
+
+  // Demandas com cache local (filtros de servidor: responsável e projeto)
+  const demandasPath = useMemo(() => {
+    const params = new URLSearchParams();
+    if (filtroResponsavel !== "todos") params.set("responsavel_id", filtroResponsavel);
+    if (filtroProjeto !== "todos") params.set("projeto_id", filtroProjeto);
+    const query = params.toString();
+    return `/demandas${query ? `?${query}` : ""}`;
+  }, [filtroResponsavel, filtroProjeto]);
+
+  const {
+    data: demandasData,
+    loading,
+    isCached,
+    refetch: recarregarDemandas,
+    setData: setDemandasCache,
+  } = useCachedFetch<Demanda[]>(demandasPath);
+  const demandas = useMemo(() => demandasData ?? [], [demandasData]);
+  const carregando = loading && !isCached;
   const [dialogDemanda, setDialogDemanda] = useState(false);
   const [dialogProjeto, setDialogProjeto] = useState(false);
   const [editando, setEditando] = useState<Demanda | null>(null);
@@ -133,44 +151,34 @@ export function Dashboard() {
     setUsuarios(listaUsuarios);
   }
 
-  async function carregarDemandas() {
-    setCarregando(true);
-    try {
-      const params = new URLSearchParams();
-      if (filtroResponsavel !== "todos") params.set("responsavel_id", filtroResponsavel);
-      if (filtroProjeto !== "todos") params.set("projeto_id", filtroProjeto);
-      const query = params.toString();
-      const dados = await api<Demanda[]>(`/demandas${query ? `?${query}` : ""}`);
-      setDemandas(dados);
-    } finally {
-      setCarregando(false);
-    }
-  }
+  // Mantém referência estável do refetch para o listener de troca de grupo
+  const recarregarDemandasRef = useRef(recarregarDemandas);
+  recarregarDemandasRef.current = recarregarDemandas;
 
   useEffect(() => {
+    carregarListas().catch((falha: unknown) => {
+      setErro(falha instanceof Error ? falha.message : "Falha ao carregar");
+    });
+
     function recarregar() {
       setFiltroResponsavel("todos");
       setFiltroProjeto("todos");
+      invalidarCache("/demandas");
       carregarListas().catch((falha: unknown) => {
         setErro(falha instanceof Error ? falha.message : "Falha ao carregar");
       });
-      carregarDemandas().catch((falha: unknown) => {
-        setErro(falha instanceof Error ? falha.message : "Falha ao carregar");
-      });
+      recarregarDemandasRef.current();
     }
 
-    recarregar();
     window.addEventListener("orion:grupo-alterado", recarregar);
     return () => {
       window.removeEventListener("orion:grupo-alterado", recarregar);
     };
   }, []);
 
+  // Troca de página ao mudar filtros de servidor (o cache refaz o fetch pelo path)
   useEffect(() => {
     setPaginaAtual(1);
-    carregarDemandas().catch((falha: unknown) => {
-      setErro(falha instanceof Error ? falha.message : "Falha ao carregar");
-    });
   }, [filtroResponsavel, filtroProjeto]);
 
   useEffect(() => {
@@ -218,7 +226,8 @@ export function Dashboard() {
         await api("/demandas", { method: "POST", body: corpo });
       }
       setDialogDemanda(false);
-      await Promise.all([carregarDemandas(), carregarListas()]);
+      invalidarCache("/demandas");
+      await Promise.all([recarregarDemandas(), carregarListas()]);
     } catch (falha) {
       setErro(falha instanceof Error ? falha.message : "Falha ao salvar demanda");
     } finally {
@@ -234,7 +243,8 @@ export function Dashboard() {
       await api(`/demandas/${editando.id}`, { method: "DELETE" });
       setDialogDemanda(false);
       setEditando(null);
-      await Promise.all([carregarDemandas(), carregarListas()]);
+      invalidarCache("/demandas");
+      await Promise.all([recarregarDemandas(), carregarListas()]);
     } catch (falha) {
       setErro(falha instanceof Error ? falha.message : "Falha ao excluir demanda");
     } finally {
@@ -283,8 +293,9 @@ export function Dashboard() {
       setProjetoDescricao("");
       setProjetoEditando(null);
       setDialogProjeto(false);
+      invalidarCache("/demandas");
       await carregarListas();
-      await carregarDemandas();
+      await recarregarDemandas();
     } catch (falha) {
       setErro(falha instanceof Error ? falha.message : "Falha ao salvar projeto");
     } finally {
@@ -306,8 +317,9 @@ export function Dashboard() {
       setProjetoDescricao("");
       setProjetoEditando(null);
       setDialogProjeto(false);
+      invalidarCache("/demandas");
       await carregarListas();
-      await carregarDemandas();
+      await recarregarDemandas();
     } catch (falha) {
       setErro(falha instanceof Error ? falha.message : "Falha ao excluir projeto");
     } finally {
@@ -338,18 +350,19 @@ export function Dashboard() {
   }
 
   async function trocarStatus(id: string, status: string) {
-    setDemandas((anteriores) =>
-      anteriores.map((d) => (d.id === id ? { ...d, status } : d)),
+    setDemandasCache((anteriores) =>
+      (anteriores ?? []).map((d) => (d.id === id ? { ...d, status } : d)),
     );
     try {
       await api(`/demandas/${id}/status`, {
         method: "PATCH",
         body: JSON.stringify({ status }),
       });
+      invalidarCache("/demandas");
       await carregarListas();
     } catch (falha) {
       setErro(falha instanceof Error ? falha.message : "Falha ao alterar status");
-      await carregarDemandas();
+      await recarregarDemandas();
     }
   }
 

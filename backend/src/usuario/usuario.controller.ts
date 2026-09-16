@@ -16,4 +16,18 @@ export const usuarioController = {
     const usuarios = await usuarioService.listarPublicos(grupoAtivo.id);
     res.json(usuarios);
   },
+
+  atualizarPerfil: async (req: Request, res: Response) => {
+    const usuarioId = req.usuario?.id ?? "";
+    const { nome_completo, email } = req.body ?? {};
+    const usuario = await usuarioService.atualizarPerfil(usuarioId, { nome_completo, email });
+    res.json(usuario);
+  },
+
+  alterarSenha: async (req: Request, res: Response) => {
+    const usuarioId = req.usuario?.id ?? "";
+    const { senha_atual, nova_senha } = req.body ?? {};
+    await usuarioService.alterarSenha(usuarioId, senha_atual, nova_senha);
+    res.json({ sucesso: true });
+  },
 };

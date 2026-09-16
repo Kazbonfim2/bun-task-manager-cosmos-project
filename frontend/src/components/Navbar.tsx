@@ -6,10 +6,9 @@ import {
   ChevronDown,
   LogOut,
   Moon,
-  Plus,
+  Settings,
   Snowflake,
   Sun,
-  Ticket,
   Users,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -30,9 +29,6 @@ import {
   limparSessao,
   salvarGrupoAtivo,
 } from "@/lib/auth";
-import { DialogCriarGrupo } from "./DialogCriarGrupo";
-import { DialogEntrarGrupo } from "./DialogEntrarGrupo";
-import { DialogGerenciarGrupo } from "./DialogGerenciarGrupo";
 
 function obterIniciais(nome?: string, email?: string): string {
   const chave = (nome || email || "U").trim();
@@ -63,10 +59,6 @@ export function Navbar() {
   const [notificacoes, setNotificacoes] = useState<Notificacao[]>([]);
   const [grupos, setGrupos] = useState<Grupo[]>([]);
   const [grupoAtivo, setGrupoAtivo] = useState<Grupo | null>(null);
-
-  const [dialogGerenciar, setDialogGerenciar] = useState(false);
-  const [dialogCriar, setDialogCriar] = useState(false);
-  const [dialogEntrar, setDialogEntrar] = useState(false);
 
   const [escuro, setEscuro] = useState(() => {
     return (
@@ -194,110 +186,97 @@ export function Navbar() {
                 </span>
               </div>
             </button>
-
-            {/* Seletor de Grupo de Trabalho (Workspace Tenancy) */}
-            {usuario && (
-              <div className="flex items-center gap-1">
-                <div className="h-4 w-px bg-border shrink-0 mx-1" aria-hidden="true" />
-                <DropdownMenu>
-                  <DropdownMenuTrigger
-                    render={
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="xs"
-                        className="h-8 max-w-48 sm:max-w-64 gap-1.5 px-2.5 font-medium border-border/80 bg-muted/30 hover:bg-muted/70 shadow-2xs"
-                      />
-                    }
-                  >
-                    <Building2 className="size-3.5 text-primary shrink-0" />
-                    <span className="truncate text-xs text-foreground font-semibold">
-                      {grupoAtivo ? grupoAtivo.nome : "Selecionar Grupo"}
-                    </span>
-                    <ChevronDown className="size-3 text-muted-foreground shrink-0 opacity-70" />
-                  </DropdownMenuTrigger>
-
-                  <DropdownMenuContent align="start" className="w-64 p-1.5">
-                    <DropdownMenuLabel className="text-[10px] uppercase font-bold text-muted-foreground px-2 py-1">
-                      Seus Grupos de Trabalho
-                    </DropdownMenuLabel>
-
-                    {grupos.map((g) => {
-                      const ehAtivo = grupoAtivo?.id === g.id;
-                      return (
-                        <DropdownMenuItem
-                          key={g.id}
-                          onClick={() => selecionarGrupo(g)}
-                          className="flex items-center justify-between gap-2 px-2 py-1.5 cursor-pointer text-xs"
-                        >
-                          <div className="flex items-center gap-2 min-w-0">
-                            <Building2 className="size-3.5 text-muted-foreground shrink-0" />
-                            <span className={`truncate ${ehAtivo ? "font-bold text-foreground" : "text-muted-foreground"}`}>
-                              {g.nome}
-                            </span>
-                          </div>
-                          {ehAtivo && <Check className="size-3.5 text-primary shrink-0" />}
-                        </DropdownMenuItem>
-                      );
-                    })}
-
-                    {grupos.length === 0 && (
-                      <div className="px-2 py-2 text-xs text-muted-foreground text-center">
-                        Nenhum grupo vinculado
-                      </div>
-                    )}
-
-                    <DropdownMenuSeparator />
-
-                    {grupoAtivo && (
-                      <DropdownMenuItem
-                        onClick={() => setDialogGerenciar(true)}
-                        className="flex items-center gap-2 px-2 py-1.5 cursor-pointer text-xs text-foreground font-medium"
-                      >
-                        <Users className="size-3.5 text-primary" />
-                        <span>Gerenciar Grupo & Convites</span>
-                      </DropdownMenuItem>
-                    )}
-
-                    <DropdownMenuItem
-                      onClick={() => setDialogCriar(true)}
-                      className="flex items-center gap-2 px-2 py-1.5 cursor-pointer text-xs text-primary font-medium"
-                    >
-                      <Plus className="size-3.5" />
-                      <span>Criar Novo Grupo (+5 convites)</span>
-                    </DropdownMenuItem>
-
-                    <DropdownMenuItem
-                      onClick={() => setDialogEntrar(true)}
-                      className="flex items-center gap-2 px-2 py-1.5 cursor-pointer text-xs text-muted-foreground hover:text-foreground font-medium"
-                    >
-                      <Ticket className="size-3.5" />
-                      <span>Entrar com Código de Convite</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            )}
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {usuario ? (
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div
-                  className="size-8 shrink-0 flex items-center justify-center rounded-full bg-primary/10 text-primary border border-primary/20 text-xs font-semibold select-none shadow-xs"
-                  aria-hidden="true"
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  render={
+                    <button
+                      type="button"
+                      className="flex items-center gap-2.5 min-w-0 rounded-lg px-1.5 py-1 hover:bg-muted/60 transition-colors cursor-pointer focus:outline-hidden"
+                      aria-label="Menu do usuário"
+                    />
+                  }
                 >
-                  {obterIniciais(usuario.nome_completo, usuario.email)}
-                </div>
-                <div className="hidden min-w-0 sm:flex flex-col text-left">
-                  <span className="truncate text-xs font-semibold leading-tight text-foreground max-w-36">
-                    {usuario.nome_completo}
-                  </span>
-                  <span className="truncate text-[11px] leading-tight text-muted-foreground max-w-36">
-                    {usuario.email}
-                  </span>
-                </div>
-              </div>
+                  <div
+                    className="size-8 shrink-0 flex items-center justify-center rounded-full bg-primary/10 text-primary border border-primary/20 text-xs font-semibold select-none shadow-xs"
+                    aria-hidden="true"
+                  >
+                    {obterIniciais(usuario.nome_completo, usuario.email)}
+                  </div>
+                  <div className="hidden min-w-0 sm:flex flex-col text-left">
+                    <span className="truncate text-xs font-semibold leading-tight text-foreground max-w-36">
+                      {usuario.nome_completo}
+                    </span>
+                    <span className="truncate text-[11px] leading-tight text-muted-foreground max-w-36">
+                      {grupoAtivo ? grupoAtivo.nome : usuario.email}
+                    </span>
+                  </div>
+                  <ChevronDown className="size-3 text-muted-foreground shrink-0 opacity-70" />
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent align="end" className="w-64 p-1.5">
+                  <DropdownMenuLabel className="text-[10px] uppercase font-bold text-muted-foreground px-2 py-1">
+                    Grupos
+                  </DropdownMenuLabel>
+
+                  {grupos.map((g) => {
+                    const ehAtivo = grupoAtivo?.id === g.id;
+                    return (
+                      <DropdownMenuItem
+                        key={g.id}
+                        onClick={() => selecionarGrupo(g)}
+                        className="flex items-center justify-between gap-2 px-2 py-1.5 cursor-pointer text-xs"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <Building2 className="size-3.5 text-muted-foreground shrink-0" />
+                          <span className={`truncate ${ehAtivo ? "font-bold text-foreground" : "text-muted-foreground"}`}>
+                            {g.nome}
+                          </span>
+                        </div>
+                        {ehAtivo && <Check className="size-3.5 text-primary shrink-0" />}
+                      </DropdownMenuItem>
+                    );
+                  })}
+
+                  {grupos.length === 0 && (
+                    <div className="px-2 py-2 text-xs text-muted-foreground text-center">
+                      Nenhum grupo vinculado
+                    </div>
+                  )}
+
+                  <DropdownMenuItem
+                    onClick={() => navigate("/configuracoes")}
+                    className="flex items-center gap-2 px-2 py-1.5 cursor-pointer text-xs text-muted-foreground hover:text-foreground font-medium"
+                  >
+                    <Users className="size-3.5" />
+                    <span>Ver todos os grupos</span>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator />
+
+                  <DropdownMenuItem
+                    onClick={() => navigate("/configuracoes")}
+                    className="flex items-center gap-2 px-2 py-1.5 cursor-pointer text-xs text-foreground font-medium"
+                  >
+                    <Settings className="size-3.5 text-primary" />
+                    <span>Configurações</span>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem
+                    onClick={() => {
+                      limparSessao();
+                      window.location.assign("/login");
+                    }}
+                    className="flex items-center gap-2 px-2 py-1.5 cursor-pointer text-xs text-destructive font-medium"
+                  >
+                    <LogOut className="size-3.5" />
+                    <span>Sair</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : null}
 
             {usuario ? (
@@ -402,54 +381,10 @@ export function Navbar() {
                 )}
               </Button>
 
-              {usuario ? (
-                <>
-                  <div className="h-4 w-px bg-border shrink-0" aria-hidden="true" />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      limparSessao();
-                      window.location.assign("/login");
-                    }}
-                    title="Encerrar sessão"
-                    className="gap-1.5"
-                  >
-                    <LogOut className="size-4" aria-hidden="true" />
-                    <span className="hidden sm:inline">Sair</span>
-                  </Button>
-                </>
-              ) : null}
             </div>
           </div>
         </div>
       </header>
-
-      {/* Modais de Tenancy / Grupos */}
-      <DialogGerenciarGrupo
-        aberto={dialogGerenciar}
-        onFechar={() => setDialogGerenciar(false)}
-        grupo={grupoAtivo}
-      />
-
-      <DialogCriarGrupo
-        aberto={dialogCriar}
-        onFechar={() => setDialogCriar(false)}
-        onCriado={(novo) => {
-          setGrupoAtivo(novo);
-          carregarGrupos();
-        }}
-      />
-
-      <DialogEntrarGrupo
-        aberto={dialogEntrar}
-        onFechar={() => setDialogEntrar(false)}
-        onEntrou={(novo) => {
-          setGrupoAtivo(novo);
-          carregarGrupos();
-        }}
-      />
     </>
   );
 }
