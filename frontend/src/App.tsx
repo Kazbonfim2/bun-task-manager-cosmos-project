@@ -2,6 +2,7 @@ import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { lerToken } from "@/lib/auth";
 import { Cadastro } from "@/pages/Cadastro";
+import { Configuracoes } from "@/pages/Configuracoes";
 import { Dashboard } from "@/pages/Dashboard";
 import { DetalhesDemanda } from "@/pages/DetalhesDemanda";
 import { Login } from "@/pages/Login";
@@ -31,6 +32,7 @@ export default function App() {
         <Route path="/esqueci-senha" element={<Navigate to="/recuperar-senha" replace />} />
         <Route element={<RotaProtegida />}>
           <Route path="/" element={<Dashboard />} />
+          <Route path="/configuracoes" element={<Configuracoes />} />
           <Route path="/demandas/:id" element={<DetalhesDemanda />} />
           <Route path="/demanda/:id" element={<DetalhesDemanda />} />
           <Route path="/demanda" element={<DetalhesDemanda />} />

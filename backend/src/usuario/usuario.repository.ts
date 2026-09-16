@@ -26,6 +26,13 @@ export const usuarioRepository = {
     });
   },
 
+  async atualizarPerfil(id: string, nome_completo: string, email: string): Promise<void> {
+    await db.execute({
+      sql: "UPDATE usuarios SET nome_completo = ?, email = ? WHERE id = ?",
+      args: [nome_completo, email, id],
+    });
+  },
+
   async buscarPorEmail(email: string): Promise<Usuario | null> {
     const res = await db.execute({
       sql: "SELECT * FROM usuarios WHERE email = ?",

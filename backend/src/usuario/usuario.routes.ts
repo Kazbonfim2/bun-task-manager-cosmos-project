@@ -5,3 +5,5 @@ import { usuarioController } from "./usuario.controller";
 export const usuarioRoutes = Router();
 usuarioRoutes.use(authMiddleware);
 usuarioRoutes.get("/", usuarioController.listar);
+usuarioRoutes.put("/perfil", usuarioController.atualizarPerfil);
+usuarioRoutes.put("/senha", usuarioController.alterarSenha);
