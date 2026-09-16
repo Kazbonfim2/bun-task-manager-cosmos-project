@@ -1,4 +1,4 @@
-# ORION — Sistema de Gestão e Controle de Demandas
+# ORION: Controle de Demandas
 
 [![CI](https://github.com/Kazbonfim2/bun-task-manager-cosmos-project/actions/workflows/ci.yml/badge.svg)](https://github.com/Kazbonfim2/bun-task-manager-cosmos-project/actions/workflows/ci.yml)
 ![Bun](https://img.shields.io/badge/Bun-1.3+-000?logo=bun)
@@ -7,7 +7,7 @@
 ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?logo=tailwindcss)
 ![SQLite / libSQL](https://img.shields.io/badge/libSQL-Turso%20%2F%20SQLite-003B57?logo=sqlite)
 
-Aplicação web fullstack de alta performance desenvolvida para centralizar o gerenciamento de demandas, projetos, prazos e equipes, substituindo planilhas compartilhadas por fluxos estruturados com notificações, menções e controle de atrasos em tempo real.
+Aplicação web para cadastrar tarefas, atribuir responsáveis e acompanhar prazos vencidos.
 
 ---
 
@@ -163,7 +163,7 @@ Todas as rotas (exceto públicas de auth e validação de convite) exigem o cabe
 O layout utiliza Tailwind CSS v4 com tokens centralizados no arquivo [frontend/src/index.css](file:///frontend/src/index.css):
 
 - **Tema Claro (`:root`):** Paleta editorial quente com fundo `#f8f7f4`, superfícies `#ffffff` e tipografia de alto contraste `#1e1d1a`.
-- **Tema Escuro (`.dark`):** Modo de baixa luminosidade com fundo `#0d0e11`, cartões escuros e contraste refinado.
+- **Tema Escuro (`.dark`):** Modo de baixa luminosidade com fundo escuro (`#0d0e11`) e texto de alto contraste.
 - **Transições e Variáveis:** O controle de bordas (`--border`), inputs (`--input`), anéis de foco (`--ring`) e gráficos (`--chart-1` a `--chart-5`) é 100% derivado das variáveis CSS.
 
 ---

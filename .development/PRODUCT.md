@@ -1,33 +1,33 @@
-# 🚀 ORION (PolarisTasks) — Guia do Produto & Manual do Usuário
+# ORION: Guia do Produto & Manual do Usuário
 
-O **ORION** (PolarisTasks) é uma plataforma intuitiva e ágil criada para simplificar a gestão de demandas, prazos e entregas em equipes de qualquer segmento. 
+O **ORION** organiza tarefas, responsáveis e datas de entrega de projetos em equipe.
 
-Ele substitui controles manuais e planilhas compartilhadas que se perdem no dia a dia por um ambiente centralizado, transparente e focado no que realmente importa: **saber exatamente o que precisa ser feito, quem é o responsável e quando deve ser entregue.**
+Substitui o controle em planilhas por uma interface web onde cada participante visualiza suas tarefas e os prazos definidos.
 
 ---
 
-## 🎯 Por que o ORION existe? (O Problema que Resolvemos)
+## Problemas comuns no uso de planilhas
 
-Nas rotinas corporativas, o uso de planilhas para controle de pendências costuma gerar gargalos conhecidos:
+Nas rotinas de equipe, o uso de planilhas para controle de pendências costuma gerar problemas frequentes:
 * **Falta de clareza:** Linhas apagadas sem querer, fórmulas quebradas e dados desatualizados.
-* **Ambiguidade de donos:** Dificuldade em saber quem é o responsável direto por cada ação.
-* **Prazos perdidos:** Atrasos só são percebidos quando o problema já aconteceu.
-* **Excesso de reuniões de status:** Tempo perdido apenas para descobrir o andamento das tarefas.
+* **Ambiguidade de donos:** Dificuldade em identificar quem responde por cada ação.
+* **Prazos perdidos:** Atrasos percebidos apenas após o vencimento.
+* **Excesso de reuniões de status:** Tempo gasto apenas para checar o andamento de tarefas.
 
-O ORION elimina esses atritos com uma interface limpa, onde cada colaborador visualiza suas prioridades em segundos e os gestores acompanham a evolução dos projetos em tempo real.
+O ORION centraliza esses dados em uma interface com filtros por projeto, responsável e status.
 
 ---
 
-## 💡 Principais Benefícios
+## Funcionalidades Principais
 
-| Benefício | Como o ORION entrega no seu dia a dia |
+| Funcionalidade | Descrição |
 |---|---|
-| **Zero Perda de Prazos** | Demandas vencidas ganham destaque visual imediato em vermelho e cards dedicados no topo da tela. |
-| **Responsabilidade Clara** | Toda demanda tem um responsável nominal e um projeto vinculado. Nada fica "sem dono". |
-| **Agilidade Operacional** | Atualize o status de qualquer tarefa com apenas 1 clique, sem precisar abrir modais ou recarregar a página. |
-| **Alertas Automáticos** | Receba notificações instantâneas sempre que uma nova tarefa for atribuída a você ou quando seu status mudar. |
-| **Relatórios em 1 Clique** | Exporte dados filtrados para Excel (CSV) a qualquer momento para reuniões de diretoria ou auditorias. |
-| **Visual Flexível & Moderno** | Alterne entre o modo Tabela (alta densidade) e o modo Cards (visualização ágil), além de suporte completo a Dark Mode. |
+| **Alertas de atraso** | Demandas vencidas recebem destaque visual em vermelho e contador dedicado no topo da tela. |
+| **Responsabilidade clara** | Toda demanda tem um responsável nominal e um projeto vinculado. |
+| **Edição rápida de status** | Atualização de status com um clique direto na listagem. |
+| **Notificações automáticas** | Alertas ao receber atribuição de tarefa, menção ou mudança de status. |
+| **Exportação CSV** | Download dos dados filtrados em formato `.csv` compatível com Excel e Google Planilhas. |
+| **Visualização em tabela ou cards** | Alternância entre visualização em tabela e cards, com suporte a modo claro e escuro. |
 
 ---
 
@@ -174,4 +174,4 @@ sequenceDiagram
 
 ---
 
-> 💡 **Dica de Produtividade:** Comece seu dia clicando no card vermelho **Demandas Atrasadas** no topo da tela. Resolvendo os itens críticos primeiro, seu fluxo de trabalho ganha ritmo e previsibilidade.
+> O filtro de demandas atrasadas exibe itens cujo prazo já passou.

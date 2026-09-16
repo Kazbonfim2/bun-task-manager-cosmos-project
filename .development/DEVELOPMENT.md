@@ -75,24 +75,6 @@ Entre elas:
 * **Testes funcionais da aplicação;**
 * **Correção de implementações que não correspondiam ao comportamento esperado.**
 
-## Uso da IA durante o desenvolvimento
+## Como a IA foi utilizada
 
-A principal utilização da IA foi como **aceleradora do processo de desenvolvimento**.
-
-Ela foi utilizada para auxiliar na geração de código, criação de estruturas iniciais, resolução de problemas e implementação de partes repetitivas da aplicação.
-
-Entretanto, a utilização da IA também exigiu revisão. Em alguns casos, o código gerado precisava ser ajustado, simplificado ou corrigido para seguir as decisões tomadas anteriormente.
-
-Por esse motivo, a qualidade da especificação inicial foi importante para orientar as ferramentas utilizadas e reduzir interpretações incorretas dos requisitos.
-
-## Sobre o uso de IA
-
-A utilização de ferramentas de IA acelerou significativamente o processo de desenvolvimento, principalmente na criação da estrutura inicial e na implementação de partes repetitivas.
-
-No entanto, **a IA não substituiu as decisões técnicas do projeto**. A definição inicial da arquitetura, do modelo de dados, das regras de negócio e do escopo foi necessária para orientar a implementação.
-
-Além disso, o código gerado precisou ser revisado e validado durante o desenvolvimento.
-
-## Conclusão
-
-Ao longo do projeto, seu uso contribuiu diretamente para tornar o processo de desenvolvimento mais ágil, permitindo maior foco nas decisões técnicas, na estrutura da aplicação e na validação dos resultados. Dessa forma, **a IA foi incorporada ao processo de desenvolvimento como uma ferramenta de apoio à implementação e à tomada de decisões, potencializando a produtividade sem substituir a responsabilidade técnica sobre o projeto.**
+A IA foi utilizada para gerar o código base e a tipagem inicial. A definição da arquitetura, os testes manuais, as correções e as revisões foram realizados manualmente.

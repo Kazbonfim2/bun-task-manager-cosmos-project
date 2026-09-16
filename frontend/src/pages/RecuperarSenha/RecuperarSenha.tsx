@@ -138,12 +138,12 @@ export function RecuperarSenha() {
       }
       subtitulo={
         etapa === "sucesso"
-          ? "Sua nova senha foi atualizada com sucesso."
+          ? "Acesse o sistema com as novas credenciais."
           : etapa === "redefinir"
-            ? "Escolha uma nova senha forte para acessar sua conta."
+            ? "Defina uma nova senha para a conta."
             : etapa === "pergunta"
-              ? "Responda à sua pergunta secreta para validar sua identidade."
-              : "Informe seu e-mail cadastrado para redefinir sua senha."
+              ? "Responda à pergunta de segurança cadastrada."
+              : "Informe seu e-mail cadastrado."
       }
     >
       <div className="space-y-4 sm:space-y-5">

@@ -215,9 +215,6 @@ export function Configuracoes() {
                     <CardTitle className="text-sm font-semibold text-foreground">
                       Dados do Perfil
                     </CardTitle>
-                    <CardDescription className="text-xs text-muted-foreground mt-0.5">
-                      Atualize seu nome de exibição e e-mail de acesso.
-                    </CardDescription>
                   </div>
                 </div>
               </CardHeader>
@@ -309,9 +306,6 @@ export function Configuracoes() {
                     <CardTitle className="text-sm font-semibold text-foreground">
                       Alterar Senha
                     </CardTitle>
-                    <CardDescription className="text-xs text-muted-foreground mt-0.5">
-                      Mantenha sua conta protegida com uma senha segura.
-                    </CardDescription>
                   </div>
                 </div>
               </CardHeader>
@@ -407,9 +401,6 @@ export function Configuracoes() {
                     <CardTitle className="text-sm font-semibold text-foreground">
                       Animações & Efeitos
                     </CardTitle>
-                    <CardDescription className="text-xs text-muted-foreground mt-0.5">
-                      Personalize os efeitos visuais e de rolagem da interface.
-                    </CardDescription>
                   </div>
                 </div>
               </CardHeader>
@@ -466,9 +457,6 @@ export function Configuracoes() {
                     <CardTitle className="text-sm font-semibold text-foreground truncate">
                       Grupos & Convites
                     </CardTitle>
-                    <CardDescription className="text-xs text-muted-foreground mt-0.5 truncate">
-                      Espaços de trabalho e equipes colaborativas.
-                    </CardDescription>
                   </div>
                 </div>
 
