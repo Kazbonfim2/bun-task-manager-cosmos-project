@@ -10,6 +10,7 @@ import {
   LogIn,
   Plus,
   Settings,
+  Sparkles,
   Ticket,
   Trash2,
   User,
@@ -20,6 +21,7 @@ import { useNavigate } from "react-router-dom";
 import { DialogCriarGrupo } from "@/components/DialogCriarGrupo";
 import { DialogEntrarGrupo } from "@/components/DialogEntrarGrupo";
 import { DialogGerenciarGrupo } from "@/components/DialogGerenciarGrupo";
+import { ScrollReveal, alternarAnimacoes, saoAnimacoesDesabilitadas } from "@/components/ScrollReveal";
 import { GruposSkeleton } from "@/components/Skeleton";
 import { useCachedFetch, invalidarCache } from "@/hooks/useCachedFetch";
 import { Badge } from "@/components/ui/badge";
@@ -47,12 +49,16 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { api, type Grupo, type Usuario } from "@/lib/api";
 import { lerGrupoAtivo, lerToken, lerUsuario, limparGrupoAtivo, salvarSessao } from "@/lib/auth";
+import { cn } from "@/lib/utils";
 
 type Aviso = { tipo: "ok" | "erro"; texto: string } | null;
 
 export function Configuracoes() {
   const navigate = useNavigate();
   const usuario = lerUsuario();
+
+  // --- Animações ---
+  const [desabilitarAnimacoes, setDesabilitarAnimacoes] = useState(() => saoAnimacoesDesabilitadas());
 
   // --- Perfil ---
   const [nome, setNome] = useState(usuario?.nome_completo ?? "");
@@ -154,238 +160,301 @@ export function Configuracoes() {
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 p-4 sm:p-6">
       {/* Cabeçalho da Página */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b pb-4">
-        <div className="flex items-center gap-3">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            onClick={() => navigate("/")}
-            title="Voltar ao Dashboard"
-            aria-label="Voltar ao Dashboard"
-            className="cursor-pointer"
-          >
-            <ArrowLeft className="size-4" />
-          </Button>
-          <div className="flex items-center gap-2.5">
-            <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary border border-primary/20 shadow-xs">
-              <Settings className="size-4.5" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold tracking-tight text-foreground">
-                Configurações
-              </h1>
-              <p className="text-xs text-muted-foreground">
-                Gerencie seus dados pessoais, credenciais de acesso e espaços de trabalho.
-              </p>
+      <ScrollReveal direction="down" duration={350}>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b pb-4">
+          <div className="flex items-center gap-3">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => navigate("/dashboard")}
+              title="Voltar ao Dashboard"
+              aria-label="Voltar ao Dashboard"
+              className="cursor-pointer"
+            >
+              <ArrowLeft className="size-4" />
+            </Button>
+            <div className="flex items-center gap-2.5">
+              <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary border border-primary/20 shadow-xs">
+                <Settings className="size-4.5" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold tracking-tight text-foreground">
+                  Configurações
+                </h1>
+                <p className="text-xs text-muted-foreground">
+                  Gerencie seus dados pessoais, credenciais de acesso e espaços de trabalho.
+                </p>
+              </div>
             </div>
           </div>
-        </div>
 
-        {usuario && (
-          <div className="flex items-center gap-2 self-start sm:self-auto pl-12 sm:pl-0">
-            <Badge variant="outline" className="text-xs px-2.5 py-1 text-muted-foreground">
-              {usuario.email}
-            </Badge>
-          </div>
-        )}
-      </div>
+          {usuario && (
+            <div className="flex items-center gap-2 self-start sm:self-auto pl-12 sm:pl-0">
+              <Badge variant="outline" className="text-xs px-2.5 py-1 text-muted-foreground">
+                {usuario.email}
+              </Badge>
+            </div>
+          )}
+        </div>
+      </ScrollReveal>
 
       {/* Grid Principal: 2 Colunas no Desktop (>= 768px), 1 Coluna no Mobile (< 768px) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-        {/* COLUNA DA ESQUERDA: Dados do Perfil + Alterar Senha */}
+        {/* COLUNA DA ESQUERDA: Dados do Perfil + Alterar Senha + Animações */}
         <div className="flex flex-col gap-6">
           {/* Card 1: Dados do Perfil */}
-          <Card className="border border-border/80 shadow-xs overflow-hidden">
-            <CardHeader className="border-b bg-muted/10 pb-4">
-              <div className="flex items-center gap-2.5">
-                <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
-                  <User className="size-4" />
-                </div>
-                <div>
-                  <CardTitle className="text-sm font-semibold text-foreground">
-                    Dados do Perfil
-                  </CardTitle>
-                  <CardDescription className="text-xs text-muted-foreground mt-0.5">
-                    Atualize seu nome de exibição e e-mail de acesso.
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-
-            <form onSubmit={salvarPerfil}>
-              <CardPanel className="p-6 space-y-4">
-                <Field className="space-y-1.5 w-full">
-                  <FieldLabel htmlFor="cfg-nome" className="text-xs font-semibold text-foreground">
-                    Nome completo
-                  </FieldLabel>
-                  <Input
-                    id="cfg-nome"
-                    value={nome}
-                    onChange={(e) => setNome(e.target.value)}
-                    placeholder="Seu nome completo"
-                    required
-                  />
-                </Field>
-
-                <Field className="space-y-1.5 w-full">
-                  <FieldLabel htmlFor="cfg-email" className="text-xs font-semibold text-foreground">
-                    Endereço de e-mail
-                  </FieldLabel>
-                  <Input
-                    id="cfg-email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="nome@empresa.com"
-                    required
-                  />
-                </Field>
-
-                {avisoPerfil && (
-                  <div
-                    className={`flex items-center gap-2 rounded-lg p-3 text-xs border ${
-                      avisoPerfil.tipo === "ok"
-                        ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400"
-                        : "bg-destructive/10 border-destructive/20 text-destructive"
-                    }`}
-                  >
-                    {avisoPerfil.tipo === "ok" ? (
-                      <CheckCircle2 className="size-4 shrink-0" />
-                    ) : (
-                      <AlertCircle className="size-4 shrink-0" />
-                    )}
-                    <span>{avisoPerfil.texto}</span>
+          <ScrollReveal direction="up" delay={0} duration={350}>
+            <Card className="border border-border/80 shadow-xs overflow-hidden">
+              <CardHeader className="border-b bg-muted/10 pb-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
+                    <User className="size-4" />
                   </div>
-                )}
-              </CardPanel>
+                  <div>
+                    <CardTitle className="text-sm font-semibold text-foreground">
+                      Dados do Perfil
+                    </CardTitle>
+                    <CardDescription className="text-xs text-muted-foreground mt-0.5">
+                      Atualize seu nome de exibição e e-mail de acesso.
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
 
-              <CardFooter className="border-t bg-muted/15 px-6 py-3.5 flex items-center justify-between gap-3">
-                <span className="text-[11px] text-muted-foreground hidden sm:inline-flex items-center gap-1.5">
-                  <Info className="size-3.5 text-sky-400 shrink-0" />
-                  Visível para colegas de equipe
-                </span>
-                <Button
-                  type="submit"
-                  size="sm"
-                  disabled={salvandoPerfil}
-                  className="gap-1.5 ml-auto cursor-pointer"
-                >
-                  {salvandoPerfil ? (
-                    <>
-                      <Spinner className="size-3.5" />
-                      Salvando...
-                    </>
-                  ) : (
-                    <>
-                      <Check className="size-3.5" />
-                      Salvar alterações
-                    </>
+              <form onSubmit={salvarPerfil}>
+                <CardPanel className="p-6 space-y-4">
+                  <Field className="space-y-1.5 w-full">
+                    <FieldLabel htmlFor="cfg-nome" className="text-xs font-semibold text-foreground">
+                      Nome completo
+                    </FieldLabel>
+                    <Input
+                      id="cfg-nome"
+                      value={nome}
+                      onChange={(e) => setNome(e.target.value)}
+                      placeholder="Seu nome completo"
+                      required
+                    />
+                  </Field>
+
+                  <Field className="space-y-1.5 w-full">
+                    <FieldLabel htmlFor="cfg-email" className="text-xs font-semibold text-foreground">
+                      Endereço de e-mail
+                    </FieldLabel>
+                    <Input
+                      id="cfg-email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="nome@empresa.com"
+                      required
+                    />
+                  </Field>
+
+                  {avisoPerfil && (
+                    <div
+                      className={`flex items-center gap-2 rounded-lg p-3 text-xs border ${
+                        avisoPerfil.tipo === "ok"
+                          ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+                          : "bg-destructive/10 border-destructive/20 text-destructive"
+                      }`}
+                    >
+                      {avisoPerfil.tipo === "ok" ? (
+                        <CheckCircle2 className="size-4 shrink-0" />
+                      ) : (
+                        <AlertCircle className="size-4 shrink-0" />
+                      )}
+                      <span>{avisoPerfil.texto}</span>
+                    </div>
                   )}
-                </Button>
-              </CardFooter>
-            </form>
-          </Card>
+                </CardPanel>
+
+                <CardFooter className="border-t bg-muted/15 px-6 py-3.5 flex items-center justify-between gap-3">
+                  <span className="text-[11px] text-muted-foreground hidden sm:inline-flex items-center gap-1.5">
+                    <Info className="size-3.5 text-sky-400 shrink-0" />
+                    Visível para colegas de equipe
+                  </span>
+                  <Button
+                    type="submit"
+                    size="sm"
+                    disabled={salvandoPerfil}
+                    className="gap-1.5 ml-auto cursor-pointer"
+                  >
+                    {salvandoPerfil ? (
+                      <>
+                        <Spinner className="size-3.5" />
+                        Salvando...
+                      </>
+                    ) : (
+                      <>
+                        <Check className="size-3.5" />
+                        Salvar alterações
+                      </>
+                    )}
+                  </Button>
+                </CardFooter>
+              </form>
+            </Card>
+          </ScrollReveal>
 
           {/* Card 2: Alterar Senha */}
-          <Card className="border border-border/80 shadow-xs overflow-hidden">
-            <CardHeader className="border-b bg-muted/10 pb-4">
-              <div className="flex items-center gap-2.5">
-                <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
-                  <KeyRound className="size-4" />
-                </div>
-                <div>
-                  <CardTitle className="text-sm font-semibold text-foreground">
-                    Alterar Senha
-                  </CardTitle>
-                  <CardDescription className="text-xs text-muted-foreground mt-0.5">
-                    Mantenha sua conta protegida com uma senha segura.
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-
-            <form onSubmit={salvarSenha}>
-              <CardPanel className="p-6 space-y-4">
-                <Field className="space-y-1.5 w-full">
-                  <FieldLabel htmlFor="cfg-senha-atual" className="text-xs font-semibold text-foreground">
-                    Senha atual
-                  </FieldLabel>
-                  <Input
-                    id="cfg-senha-atual"
-                    type="password"
-                    value={senhaAtual}
-                    onChange={(e) => setSenhaAtual(e.target.value)}
-                    placeholder="••••••••"
-                    required
-                    autoComplete="current-password"
-                  />
-                </Field>
-
-                <Field className="space-y-1.5 w-full">
-                  <FieldLabel htmlFor="cfg-senha-nova" className="text-xs font-semibold text-foreground">
-                    Nova senha
-                  </FieldLabel>
-                  <Input
-                    id="cfg-senha-nova"
-                    type="password"
-                    value={novaSenha}
-                    onChange={(e) => setNovaSenha(e.target.value)}
-                    required
-                    minLength={6}
-                    autoComplete="new-password"
-                    placeholder="Mínimo de 6 caracteres"
-                  />
-                </Field>
-
-                {avisoSenha && (
-                  <div
-                    className={`flex items-center gap-2 rounded-lg p-3 text-xs border ${
-                      avisoSenha.tipo === "ok"
-                        ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400"
-                        : "bg-destructive/10 border-destructive/20 text-destructive"
-                    }`}
-                  >
-                    {avisoSenha.tipo === "ok" ? (
-                      <CheckCircle2 className="size-4 shrink-0" />
-                    ) : (
-                      <AlertCircle className="size-4 shrink-0" />
-                    )}
-                    <span>{avisoSenha.texto}</span>
+          <ScrollReveal direction="up" delay={80} duration={350}>
+            <Card className="border border-border/80 shadow-xs overflow-hidden">
+              <CardHeader className="border-b bg-muted/10 pb-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
+                    <KeyRound className="size-4" />
                   </div>
-                )}
-              </CardPanel>
+                  <div>
+                    <CardTitle className="text-sm font-semibold text-foreground">
+                      Alterar Senha
+                    </CardTitle>
+                    <CardDescription className="text-xs text-muted-foreground mt-0.5">
+                      Mantenha sua conta protegida com uma senha segura.
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
 
-              <CardFooter className="border-t bg-muted/15 px-6 py-3.5 flex items-center justify-between gap-3">
-                <span className="text-[11px] text-muted-foreground hidden sm:inline-flex items-center gap-1.5">
-                  <Info className="size-3.5 text-sky-400 shrink-0" />
-                  Mínimo de 6 caracteres
-                </span>
-                <Button
-                  type="submit"
-                  size="sm"
-                  disabled={salvandoSenha}
-                  className="gap-1.5 ml-auto cursor-pointer"
-                >
-                  {salvandoSenha ? (
-                    <>
-                      <Spinner className="size-3.5" />
-                      Alterando...
-                    </>
-                  ) : (
-                    <>
-                      <KeyRound className="size-3.5" />
-                      Alterar senha
-                    </>
+              <form onSubmit={salvarSenha}>
+                <CardPanel className="p-6 space-y-4">
+                  <Field className="space-y-1.5 w-full">
+                    <FieldLabel htmlFor="cfg-senha-atual" className="text-xs font-semibold text-foreground">
+                      Senha atual
+                    </FieldLabel>
+                    <Input
+                      id="cfg-senha-atual"
+                      type="password"
+                      value={senhaAtual}
+                      onChange={(e) => setSenhaAtual(e.target.value)}
+                      placeholder="••••••••"
+                      required
+                      autoComplete="current-password"
+                    />
+                  </Field>
+
+                  <Field className="space-y-1.5 w-full">
+                    <FieldLabel htmlFor="cfg-senha-nova" className="text-xs font-semibold text-foreground">
+                      Nova senha
+                    </FieldLabel>
+                    <Input
+                      id="cfg-senha-nova"
+                      type="password"
+                      value={novaSenha}
+                      onChange={(e) => setNovaSenha(e.target.value)}
+                      required
+                      minLength={6}
+                      autoComplete="new-password"
+                      placeholder="Mínimo de 6 caracteres"
+                    />
+                  </Field>
+
+                  {avisoSenha && (
+                    <div
+                      className={`flex items-center gap-2 rounded-lg p-3 text-xs border ${
+                        avisoSenha.tipo === "ok"
+                          ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+                          : "bg-destructive/10 border-destructive/20 text-destructive"
+                      }`}
+                    >
+                      {avisoSenha.tipo === "ok" ? (
+                        <CheckCircle2 className="size-4 shrink-0" />
+                      ) : (
+                        <AlertCircle className="size-4 shrink-0" />
+                      )}
+                      <span>{avisoSenha.texto}</span>
+                    </div>
                   )}
-                </Button>
-              </CardFooter>
-            </form>
-          </Card>
+                </CardPanel>
+
+                <CardFooter className="border-t bg-muted/15 px-6 py-3.5 flex items-center justify-between gap-3">
+                  <span className="text-[11px] text-muted-foreground hidden sm:inline-flex items-center gap-1.5">
+                    <Info className="size-3.5 text-sky-400 shrink-0" />
+                    Mínimo de 6 caracteres
+                  </span>
+                  <Button
+                    type="submit"
+                    size="sm"
+                    disabled={salvandoSenha}
+                    className="gap-1.5 ml-auto cursor-pointer"
+                  >
+                    {salvandoSenha ? (
+                      <>
+                        <Spinner className="size-3.5" />
+                        Alterando...
+                      </>
+                    ) : (
+                      <>
+                        <KeyRound className="size-3.5" />
+                        Alterar senha
+                      </>
+                    )}
+                  </Button>
+                </CardFooter>
+              </form>
+            </Card>
+          </ScrollReveal>
+
+          {/* Card 3: Animações & Efeitos */}
+          <ScrollReveal direction="up" delay={160} duration={350}>
+            <Card className="border border-border/80 shadow-xs overflow-hidden">
+              <CardHeader className="border-b bg-muted/10 pb-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
+                    <Sparkles className="size-4" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-sm font-semibold text-foreground">
+                      Animações & Efeitos
+                    </CardTitle>
+                    <CardDescription className="text-xs text-muted-foreground mt-0.5">
+                      Personalize os efeitos visuais e de rolagem da interface.
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+
+              <CardPanel className="p-6">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="space-y-0.5 min-w-0">
+                    <span className="text-xs font-semibold text-foreground block">
+                      Desabilitar animações de rolagem (Scroll Reveal)
+                    </span>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">
+                      Remove os efeitos de transição e animações de entrada ao rolar a página em todo o sistema.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={desabilitarAnimacoes}
+                    onClick={() => {
+                      const novo = !desabilitarAnimacoes;
+                      setDesabilitarAnimacoes(novo);
+                      alternarAnimacoes(novo);
+                    }}
+                    className={cn(
+                      "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden",
+                      desabilitarAnimacoes ? "bg-primary" : "bg-input"
+                    )}
+                    title={desabilitarAnimacoes ? "Ativar animações" : "Desativar animações"}
+                  >
+                    <span
+                      className={cn(
+                        "pointer-events-none inline-block size-5 transform rounded-full bg-background shadow-md ring-0 transition duration-200 ease-in-out",
+                        desabilitarAnimacoes ? "translate-x-5" : "translate-x-0"
+                      )}
+                    />
+                  </button>
+                </div>
+              </CardPanel>
+            </Card>
+          </ScrollReveal>
         </div>
 
         {/* COLUNA DA DIREITA: Grupos & Convites */}
-        <div className="flex flex-col gap-6">
+        <ScrollReveal direction="up" delay={100} duration={400} className="flex flex-col gap-6">
           <Card className="border border-border/80 shadow-xs overflow-hidden">
             <CardHeader className="border-b bg-muted/10 pb-4">
               <div className="flex items-center justify-between gap-3">
@@ -555,7 +624,7 @@ export function Configuracoes() {
               </div>
             </CardFooter>
           </Card>
-        </div>
+        </ScrollReveal>
       </div>
 
       {/* Diálogos Modais do Coss.ui */}

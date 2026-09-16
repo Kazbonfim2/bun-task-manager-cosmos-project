@@ -9,6 +9,7 @@ import {
 } from "@/lib/api";
 import { invalidarCache, useCachedFetch } from "@/hooks/useCachedFetch";
 import { demandaAtrasada, STATUS_ITENS } from "@/lib/status";
+import { ScrollReveal } from "@/components/ScrollReveal";
 import { DashboardCards } from "./components/DashboardCards";
 import { DashboardHeader } from "./components/DashboardHeader";
 import { DashboardPagination } from "./components/DashboardPagination";
@@ -368,10 +369,12 @@ export function Dashboard() {
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 p-4 sm:p-6">
-      {/* // Cabeçalho com saudação dinâmica e efeito de digitação (typewriter) */}
-      <DashboardHeader />
+      {/* 1. Cabeçalho com saudação dinâmica */}
+      <ScrollReveal direction="down" duration={350}>
+        <DashboardHeader />
+      </ScrollReveal>
 
-      {/* // Cards para exibição de totais de demandas em aberto, concluídas e atrasadas */}
+      {/* 2. Cards para exibição de totais de demandas em aberto, concluídas e atrasadas */}
       <DashboardCards
         total={total}
         abertas={abertas}
@@ -379,17 +382,19 @@ export function Dashboard() {
         onFiltrarStatus={setFiltroStatus}
       />
 
-      {/* // Nova seção visual colapsável de Projetos */}
-      <DashboardProjects
-        projetos={projetos}
-        filtroProjeto={filtroProjeto}
-        onSelecionarProjeto={selecionarProjeto}
-        onNovoProjeto={() => abrirModalProjeto(null)}
-      />
+      {/* 3. Seção visual de Projetos */}
+      <ScrollReveal direction="up" delay={80} duration={350}>
+        <DashboardProjects
+          projetos={projetos}
+          filtroProjeto={filtroProjeto}
+          onSelecionarProjeto={selecionarProjeto}
+          onNovoProjeto={() => abrirModalProjeto(null)}
+        />
+      </ScrollReveal>
 
-      {/* // Seção principal de listagem de demandas, filtros e ações */}
-      <section className="flex flex-col gap-4">
-        {/* // Barra de ferramentas superior: filtros, alternador de visualização, busca e criação */}
+      {/* 4. Seção principal de listagem de demandas, filtros e ações */}
+      <ScrollReveal direction="up" delay={140} duration={400} className="flex flex-col gap-4">
+        {/* Barra de ferramentas superior: filtros, alternador de visualização, busca e criação */}
         <DashboardToolbar
           itensResponsavel={itensResponsavel}
           filtroResponsavel={filtroResponsavel}
@@ -408,12 +413,12 @@ export function Dashboard() {
           onExportarCsv={exportarCsv}
         />
 
-        {/* // Exibição de mensagem de erro global da dashboard */}
+        {/* Exibição de mensagem de erro global da dashboard */}
         {erro && !dialogDemanda && !dialogProjeto ? (
           <p className="text-destructive text-sm">{erro}</p>
         ) : null}
 
-        {/* // Exibição: mobile sempre em cards; desktop respeita a alternância entre tabela e cards */}
+        {/* Exibição: mobile sempre em cards; desktop respeita a alternância entre tabela e cards */}
         {modoVisualizacao === "lista" ? (
           <>
             <div className="sm:hidden">
@@ -448,7 +453,7 @@ export function Dashboard() {
           />
         )}
 
-        {/* // Rodapé fixo de paginação com resumo numérico de itens e controles */}
+        {/* Rodapé fixo de paginação com resumo numérico de itens e controles */}
         <DashboardPagination
           totalItens={demandasFiltradas.length}
           paginaAtual={paginaAtual}
@@ -456,7 +461,7 @@ export function Dashboard() {
           totalPaginas={totalPaginas}
           onMudarPagina={setPaginaAtual}
         />
-      </section>
+      </ScrollReveal>
 
       {/* // Diálogo modal para criar ou editar demanda (com ação de excluir) */}
       <DialogDemanda

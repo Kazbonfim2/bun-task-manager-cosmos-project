@@ -5,178 +5,195 @@
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5+-3178C6?logo=typescript)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?logo=tailwindcss)
-![SQLite](https://img.shields.io/badge/SQLite-WAL-003B57?logo=sqlite)
+![SQLite / libSQL](https://img.shields.io/badge/libSQL-Turso%20%2F%20SQLite-003B57?logo=sqlite)
 
-Aplicação web moderna desenvolvida para substituir planilhas compartilhadas de equipe, oferecendo visibilidade em tempo real sobre demandas em aberto, responsáveis, prazos, histórico de discussões e notificações.
+Aplicação web fullstack de alta performance desenvolvida para centralizar o gerenciamento de demandas, projetos, prazos e equipes, substituindo planilhas compartilhadas por fluxos estruturados com notificações, menções e controle de atrasos em tempo real.
 
 ---
 
-## 👥 Guia Rápido de Uso (Para Usuários Finais)
+## ⚡ Início Rápido (Quickstart)
 
-Se você quer apenas rodar a aplicação e gerenciar projetos e demandas da sua equipe no dia a dia, siga os passos abaixo.
-
-### 🚀 Como colocar para rodar em 1 minuto
-
-#### Opção 1: Com Docker (Recomendado — mais rápido)
-Se você tem o [Docker Desktop](https://www.docker.com/) instalado:
-
+### Opção 1: Via Docker (Recomendado)
 ```bash
 docker compose up --build
 ```
-> Acesse no seu navegador: 👉 **[http://localhost:3005](http://localhost:3005)**
+> Acesse: **[http://localhost:3005](http://localhost:3005)**
 
----
-
-#### Opção 2: Sem Docker (Usando Bun)
-Se preferir rodar direto no seu computador (Windows, Linux ou Mac):
-
-1. **Instale o Bun** (se ainda não tiver):
-   - **Windows** (PowerShell): `powershell -c "irm bun.sh/install.ps1 | iex"`
-   - **Linux / macOS** (Terminal): `curl -fsSL https://bun.sh/install | bash`
-2. **Instale e inicie:**
-   ```bash
-   bun run setup   # Instala tudo de uma vez
-   bun run dev     # Inicia o sistema
-   ```
-> Acesse no seu navegador: 👉 **[http://localhost:3005](http://localhost:3005)**
-> *(O banco de dados e dados de exemplo são criados automaticamente no primeiro acesso).*
-
----
-
-### ✨ O que você pode fazer no ORION
-
-#### 1. 🔐 Acesso e Perfil
-- **Cadastro e Login:** Crie sua conta com nome, e-mail e senha e acesse seu ambiente de trabalho seguro.
-- **Tema Claro / Escuro:** Alterne entre os modos claro e escuro no cabeçalho conforme sua preferência visual.
-
-#### 2. 📊 Painel de Controle (Dashboard)
-- **Métricas em Destaque:** Acompanhe o total de demandas, quantas estão abertas e quantas estão em atraso.
-- **Alerta de Atraso Inteligente:** Demandas com prazo vencido ganham destaque visual imediato em vermelho com contador de dias em atraso.
-- **Visão em Lista ou Grade (Cards):** Alterne a exibição das demandas entre tabela detalhada ou cards visuais.
-- **Filtros Combinados:** Filtre tarefas por responsável, por projeto e por status simultaneamente.
-- **Busca Rápida:** Encontre qualquer demanda digitando palavras do título ou descrição.
-- **Exportação para Planilha (CSV):** Baixe a lista de demandas com um clique para relatórios externos.
-
-#### 3. 📁 Projetos e Demandas
-- **Gestão de Projetos:** Crie novos projetos com nome e descrição para organizar o trabalho da equipe.
-- **Cadastro Detalhado:** Cadastre demandas com **Título claro**, **Descrição detalhada**, projeto vinculado, prazo de entrega e responsável.
-- **Mudança Rápida de Status:** Atualize o fluxo de trabalho (`Aberta` ➔ `Em andamento` ➔ `Concluída`) direto na listagem ou na tela de detalhes.
-- **Edição e Exclusão Segura:** Modifique prazos, descrições e responsáveis a qualquer momento.
-
-#### 4. 💬 Discussão e Comentários nas Demandas
-- **Página de Detalhes da Demanda:** Clique em qualquer demanda para acessar a linha do tempo e o espaço de discussão.
-- **Comentários da Equipe:** Compartilhe atualizações, tire dúvidas e registre o histórico da tarefa.
-- **Edição pelo Autor:** Você pode editar ou excluir comentários que você mesmo enviou.
-
-#### 5. 🔔 Notificações e Menções (`@usuario`)
-- **Central de Notificações (Sino):** Receba avisos instantâneos quando uma tarefa for atribuída a você, quando o status mudar ou quando comentarem em sua demanda.
-- **Marcação com `@`:** Digite `@` em um comentário ou descrição para abrir a lista de membros e marcar um colega.
-- **Notificação Direta por Menção:** O usuário mencionado recebe um alerta específico indicando onde foi marcado.
-- **Leitura Rápida:** Marque notificações individuais como lidas ou clique em "Ler todas".
-
----
-
-## 💻 Guia Técnico e Arquitetura (Para Desenvolvedores)
-
-Esta seção documenta a arquitetura, convenções, stack e como contribuir tecnicamente com o projeto.
-
-### 🛠️ Modos de Desenvolvimento
-
+### Opção 2: Local com Bun
 ```bash
-# 1. Desenvolvimento com Docker e Hot-Reload (Express + Vite integrados)
-bun run dev:docker
-# (equivalente a: docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build)
+bun run setup    # Instala dependências da raiz, backend e frontend
+bun run dev      # Executa backend e frontend integrados com hot-reload
+```
+> Acesse: **[http://localhost:3005](http://localhost:3005)**
 
-# 2. Desenvolvimento Local com Bun
-bun run setup    # instala dependências da raiz, backend e frontend
-bun run dev      # sobe o servidor unificado em modo desenvolvimento
-
-# 3. Rodar Testes Automatizados
-bun run test     # executa a suíte de testes unitários e de integração
+### 🧪 Testes e Qualidade
+```bash
+bun run test     # Executa a suíte de testes unitários e de integração
 ```
 
-#### 🌱 Dados Iniciais (Seed)
-- O seed é executado automaticamente na inicialização se o banco estiver vazio.
-- Para rodar manualmente: `bun run seed` (ou `docker compose exec orion bun run seed`).
-- **Credenciais padrão:** E-mails no formato `nome.sobrenome@cosmos.com` (ex: `ana.paula.ribeiro@cosmos.com`) com a senha `novo123456789`.
+#### 🌱 Credenciais e Seed Inicial
+O banco é populado automaticamente na primeira execução com usuários de exemplo no padrão `nome.sobrenome@cosmos.com` (ex: `ana.paula.ribeiro@cosmos.com`) e senha padrão `novo123456789`.
 
 ---
 
-### 🏛️ Estrutura do Projeto & Arquitetura
+## 🏛️ Arquitetura & Visão Técnica
 
-O backend segue a arquitetura **MVC em camadas** (estilo Nest.js, mas sem injeção de dependência complexa ou decorators — apenas classes/objetos com injeção manual simples e TypeScript estrito).
+O projeto é estruturado em monorepo enxuto com integração direta entre Express 5 e Vite middleware durante o desenvolvimento, e SPA estático servido pelo Express em produção.
 
 ```text
-├── .github/workflows/ci.yml # Pipeline de CI (Bun test + Vite build)
 ├── backend/
-│   ├── src/
-│   │   ├── auth/           # Login, cadastro, geração/validação JWT
-│   │   ├── usuario/        # CRUD e listagem pública de membros da equipe
-│   │   ├── projeto/        # Gestão de projetos
-│   │   ├── demanda/        # Regras de negócio, prazos e status de demandas
-│   │   ├── comentario/     # CRUD de comentários e discussões em demandas
-│   │   ├── notificacao/    # Serviço de eventos, utilitário de menções e alertas
-│   │   ├── database/       # Conexão SQLite (bun:sqlite, WAL, FKs) e migrações
-│   │   └── server.ts       # Setup do Express 5, rotas /api e SPA Vite
-│   └── data/               # Arquivo de banco de dados orion.db
-└── frontend/
-    ├── src/
-    │   ├── components/     # UI (Navbar, Dialogs, TextareaMencoes, TextoComMencoes)
-    │   ├── pages/
-    │   │   ├── Dashboard/        # Visão geral, filtros, grid/tabela, modais
-    │   │   ├── DetalhesDemanda/  # Timeline, overview, comentários e menções
-    │   │   ├── Login/ e Cadastro/# Telas de autenticação
-    │   └── lib/            # Cliente HTTP (api.ts), sessão e status helpers
-    └── index.html
+│   └── src/
+│       ├── auth/          # Autenticação JWT, login, cadastro e recuperação por pergunta secreta
+│       ├── grupo/         # Multi-tenancy, membros de equipe e convites descartáveis (ORION-XXXX-XXXX)
+│       ├── usuario/       # Gestão de membros, perfil e alteração de credenciais
+│       ├── projeto/       # CRUD de projetos vinculados ao grupo ativo
+│       ├── demanda/       # Regras de demandas, status, prazos e varredura de atrasos
+│       ├── comentario/    # Comentários em demandas e suporte a menções
+│       ├── notificacao/   # Central de eventos, marcação de lidas e alertas automáticos
+│       ├── database/      # Conexão libSQL (SQLite local / Turso Cloud) e migrações
+│       ├── http-error.ts  # Tratamento unificado de erros HTTP
+│       └── server.ts      # Ponto de entrada Express 5, rotas /api e Vite SSR/middleware
+├── frontend/
+│   └── src/
+│       ├── components/    # Componentes modais, navbar, textarea com menções e UI primitives
+│       ├── pages/
+│       │   ├── Dashboard/        # Visão geral, métricas, filtros combinados, visualização cards/tabela
+│       │   ├── DetalhesDemanda/  # Linha do tempo, histórico, comentários e menções @usuario
+│       │   ├── Configuracoes/    # Perfil, alteração de senha e pergunta secreta
+│       │   ├── Login/ e Cadastro/# Fluxos de autenticação e validação de convites
+│       │   └── RecuperarSenha/   # Redefinição de senha sem dependência de SMTP
+│       ├── hooks/         # Hooks customizados (cache, sincronização)
+│       ├── lib/           # Cliente HTTP (api.ts), sessão e utilitários
+│       └── index.css      # Design System em Tailwind CSS v4 com variáveis de tema claro e escuro
+└── docker-compose.yml     # Orquestração de containers para produção e desenvolvimento
 ```
 
 ---
 
-### 🧰 Stack Tecnológica & Decisões Técnicas
+## 🗄️ Modelo de Dados & Esquema (libSQL / SQLite)
 
-| Camada | Tecnologia | Decisão Técnica / Motivação |
+O banco de dados utiliza `@libsql/client` suportando SQLite local com modo `WAL` (`journal_mode = WAL`) ou banco distribuído no [Turso](https://turso.tech/).
+
+```mermaid
+erDiagram
+    usuarios ||--o{ grupo_membros : "pertence"
+    usuarios ||--o{ grupos : "administra"
+    usuarios ||--o{ demandas : "responsavel / criador"
+    usuarios ||--o{ comentarios : "escreve"
+    usuarios ||--o{ notificacoes : "recebe"
+    grupos ||--o{ grupo_membros : "possui"
+    grupos ||--o{ convites : "gera"
+    grupos ||--o{ projetos : "contem"
+    projetos ||--o{ demandas : "agrupa"
+    demandas ||--o{ comentarios : "possui"
+    demandas ||--o{ notificacoes : "dispara"
+```
+
+### Entidades Principais
+
+| Tabela | Colunas Chave | Descrição / Regras |
 |---|---|---|
-| **Runtime** | [Bun](https://bun.sh/) 1.3+ | Alta performance, inicialização ultrarrápida e runtime all-in-one para TS. |
-| **Backend** | [Express 5](https://expressjs.com/) + TS | Roteamento simples, robusto e compatível com o ecossistema Node/Bun. |
-| **Banco de Dados** | [Turso / libSQL](https://turso.tech/) + [SQLite](https://sqlite.org/) | `@libsql/client` unificado: zero-config SQLite local em desenvolvimento e Turso distribuído em nuvem para produção apenas alterando variáveis de ambiente. |
-| **Frontend** | [React 19](https://react.dev/) + [Vite](https://vite.dev/) | Renderização rápida, bundle otimizado e tipagem completa. |
-| **Estilização** | [Tailwind CSS v4](https://tailwindcss.com/) + coss UI | Componentes utilitários leves estilo shadcn/ui, sem runtime CSS pesado. |
-| **Autenticação** | JWT + `Bun.password` | Hashes nativos ultra seguros (`Bun.password.hash`) sem precisar de `bcrypt` externo. |
-| **Menções & Texto** | Regex nativa + parsing local | Detecção rápida de `@usuario` sem dependência de editores rich-text pesados (YAGNI). |
-| **CI / CD** | GitHub Actions | Validação contínua de testes e compilação do build a cada push e PR. |
+| `usuarios` | `id`, `nome_completo`, `email`, `senha_hash`, `pergunta_secreta`, `resposta_secreta_hash` | Contas de usuário; senha com `Bun.password` e recuperação via hash da resposta. |
+| `grupos` | `id`, `nome`, `dono_id`, `criado_em` | Equipes/Workspaces isolados. |
+| `grupo_membros` | `grupo_id`, `usuario_id`, `criado_em` | Relação N:N de participação dos usuários nas equipes. |
+| `convites` | `id`, `grupo_id`, `codigo`, `criado_por_id`, `usado_por_id`, `usado_em` | Códigos únicos (`ORION-XXXX-XXXX`) de uso único para entrada de membros. |
+| `projetos` | `id`, `nome`, `descricao`, `grupo_id`, `criado_em` | Categorias de demandas restritas ao grupo. |
+| `demandas` | `id`, `titulo`, `descricao`, `projeto_id`, `responsavel_id`, `criado_por_id`, `prazo`, `status`, `atraso_notificado_em` | Demandas com status (`aberta`, `em_andamento`, `concluida`). |
+| `comentarios` | `id`, `demanda_id`, `usuario_id`, `texto`, `criado_em`, `atualizado_em` | Mensagens na timeline da demanda; suporta detecção de `@usuario`. |
+| `notificacoes` | `id`, `usuario_id`, `demanda_id`, `tipo`, `mensagem`, `lida`, `criado_em` | Alertas de atribuição, menção, atraso e mudança de status. |
 
 ---
 
-### ⚙️ Variáveis de Ambiente
+## 📡 Referência da API REST (`/api/*`)
 
-Crie um arquivo `.env` na raiz (copiando de `.env.example`) se desejar customizar as portas ou configurar o Turso:
+Todas as rotas (exceto públicas de auth e validação de convite) exigem o cabeçalho `Authorization: Bearer <token_jwt>`.
+
+### Autenticação (`/api/auth`)
+- `POST /api/auth/cadastro` — Cadastro de usuário (suporta código de convite opcional).
+- `POST /api/auth/login` — Autenticação via e-mail e senha.
+- `POST /api/auth/recuperar-pergunta` — Retorna a pergunta secreta cadastrada para um e-mail.
+- `POST /api/auth/validar-resposta` — Valida a resposta secreta e retorna token temporário de redefinição.
+- `POST /api/auth/redefinir-senha` — Altera a senha utilizando o token de recuperação.
+
+### Grupos & Equipes (`/api/grupos`)
+- `GET /api/grupos/convites/validar/:codigo` — *(Público)* Valida status e existência de um código de convite.
+- `GET /api/grupos` — Lista os grupos dos quais o usuário autenticado participa.
+- `POST /api/grupos` — Cria um novo grupo (o criador torna-se o dono).
+- `POST /api/grupos/convites/aceitar` — Vincula o usuário ao grupo via código de convite.
+- `GET /api/grupos/:id` — Detalhes do grupo.
+- `GET /api/grupos/:id/membros` — Lista membros participantes do grupo.
+- `GET /api/grupos/:id/convites` — Lista códigos de convite disponíveis para o grupo (apenas dono).
+- `DELETE /api/grupos/:id/membros/:usuarioId` — Remove um membro da equipe.
+- `DELETE /api/grupos/:id` — Exclui o grupo (apenas dono).
+
+### Usuários & Perfil (`/api/usuarios`)
+- `GET /api/usuarios` — Lista membros para atribuição e autocomplete de menções (`@`).
+- `PUT /api/usuarios/perfil` — Atualiza nome completo e/ou pergunta/resposta secreta.
+- `PUT /api/usuarios/senha` — Altera a senha do usuário logado mediante validação da senha atual.
+
+### Projetos (`/api/projetos`)
+- `GET /api/projetos?grupo_id=<id>` — Lista projetos pertencentes a um grupo.
+- `POST /api/projetos` — Cria um novo projeto.
+- `PUT /api/projetos/:id` — Atualiza título e descrição do projeto.
+- `DELETE /api/projetos/:id` — Remove um projeto e desassocia demandas.
+
+### Demandas (`/api/demandas`)
+- `GET /api/demandas?grupo_id=<id>&projeto_id=<id>&responsavel_id=<id>&status=<status>&busca=<termo>` — Listagem com filtros compostos.
+- `POST /api/demandas` — Criação de demanda e notificação automática do responsável.
+- `GET /api/demandas/:id` — Detalhes completos da demanda com criador e responsável.
+- `PUT /api/demandas/:id` — Atualização de dados da demanda (título, descrição, prazo, responsável).
+- `PATCH /api/demandas/:id/status` — Transição de status (`aberta` | `em_andamento` | `concluida`).
+- `DELETE /api/demandas/:id` — Exclusão da demanda e seus comentários.
+
+### Comentários & Menções (`/api/comentarios` e `/api/demandas/:id/comentarios`)
+- `GET /api/demandas/:id/comentarios` — Lista linha do tempo de comentários da demanda.
+- `POST /api/demandas/:id/comentarios` — Adiciona comentário; dispara notificações para mencionados (`@usuario`).
+- `PUT /api/comentarios/:id` — Edita comentário existente (apenas autor).
+- `DELETE /api/comentarios/:id` — Remove comentário (apenas autor).
+
+### Notificações (`/api/notificacoes`)
+- `GET /api/notificacoes` — Lista as notificações recentes do usuário logado.
+- `PATCH /api/notificacoes/ler-todas` — Marca todas as notificações como lidas.
+- `PATCH /api/notificacoes/:id/lida` — Marca uma notificação individual como lida.
+
+---
+
+## 🎨 Design System & Temas (Tailwind CSS v4)
+
+O layout utiliza Tailwind CSS v4 com tokens centralizados no arquivo [frontend/src/index.css](file:///frontend/src/index.css):
+
+- **Tema Claro (`:root`):** Paleta editorial quente com fundo `#f8f7f4`, superfícies `#ffffff` e tipografia de alto contraste `#1e1d1a`.
+- **Tema Escuro (`.dark`):** Modo de baixa luminosidade com fundo `#0d0e11`, cartões escuros e contraste refinado.
+- **Transições e Variáveis:** O controle de bordas (`--border`), inputs (`--input`), anéis de foco (`--ring`) e gráficos (`--chart-1` a `--chart-5`) é 100% derivado das variáveis CSS.
+
+---
+
+## ⚙️ Variáveis de Ambiente (`.env`)
 
 ```env
-# Porta da aplicação (padrão: 3005)
+# Porta da aplicação unificada
 PORT=3005
 
-# 1) Desenvolvimento Local (SQLite padrão)
+# Ambiente de execução ('development' ativa Vite HMR; 'production' serve build estático)
+NODE_ENV=development
+
+# 1. Banco de Dados Local (Padrão SQLite)
 SQLITE_PATH=./data/orion.db
 
-# 2) Produção (Turso Cloud Database)
-# TURSO_DATABASE_URL=libsql://[nome-do-banco]-[org].turso.io
+# 2. Banco de Dados em Nuvem (Opcional - Turso / libSQL)
+# TURSO_DATABASE_URL=libsql://orion-db-org.turso.io
 # TURSO_AUTH_TOKEN=seu_token_gerado_no_turso
 
-# Segredo para assinatura de JWTs
+# Chave secreta para assinatura dos tokens JWT
 JWT_SECRET=orion_secret_key_change_in_production
 ```
 
 ---
 
-### 🚫 Decisões de Escopo e Simplificações (YAGNI)
+## 🤖 Regras & Convenções de Engenharia (Para Desenvolvedores e IAs)
 
-- **Sem Broker de Mensagens (Kafka/RabbitMQ):** Inserção de notificações e eventos síncronos no SQLite local levam `< 1ms`.
-- **Sem Editores WYSIWYG complexos (Quill/Draft.js):** `<textarea>` com autocomplete flutuante atende 100% das menções com menos de 200 linhas de código.
-- **Sem WebSockets pesados:** Polling inteligente com revalidação no foco da janela atualiza notificações de forma leve e resiliente.
-- **Sem Reset de Senha por E-mail:** Autenticação enxuta focada no fluxo corporativo fechado de demandas.
-
----
-
-## 🤖 Registro de Uso de IA
-
-O registro de decisões técnicas e prompts arquiteturais encontra-se documentado no histórico de engenharia do repositório.
+1. **Simplicidade Radical (YAGNI & Ponytail):** Priorize código direto, funções nativas de plataforma e o menor número de camadas possível. Evite abstrações especulativas (como factories para uma única classe ou wrappers desnecessários).
+2. **Erros HTTP:** Lance sempre instâncias de `HttpError(status, message)` nos services/controllers do backend para capturas padronizadas no middleware global.
+3. **Senhas & Hashes:** Utilize `Bun.password.hash()` e `Bun.password.verify()` nativos do runtime para máxima segurança sem dependências nativas C/C++ pesadas.
+4. **Isolamento de Grupos:** Toda consulta a projetos ou demandas deve respeitar o `grupo_id` ativo para garantir o isolamento entre equipes.
+5. **Varredura de Atrasos:** Demandas com prazo vencido e status diferente de `concluida` são processadas periodicamente pelo worker interno `varrerAtrasadas()`.

@@ -41,7 +41,7 @@ export function RecuperarSenha() {
   const [erro, setErro] = useState("");
   const [enviando, setEnviando] = useState(false);
 
-  if (lerToken()) return <Navigate to="/" replace />;
+  if (lerToken()) return <Navigate to="/dashboard" replace />;
 
   async function enviarEmail(evento: SubmitEvent<HTMLFormElement>) {
     evento.preventDefault();

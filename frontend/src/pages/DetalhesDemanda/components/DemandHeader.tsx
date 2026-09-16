@@ -48,14 +48,14 @@ export function DemandHeader({
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink render={<Link to="/" className="flex items-center gap-1.5" />}>
+              <BreadcrumbLink render={<Link to="/dashboard" className="flex items-center gap-1.5" />}>
                 <Layers className="size-3.5" />
                 <span>Dashboard</span>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink render={<Link to="/" className="flex items-center gap-1.5" />}>
+              <BreadcrumbLink render={<Link to="/dashboard" className="flex items-center gap-1.5" />}>
                 <Folder className="size-3.5" />
                 <span className="max-w-36 truncate sm:max-w-xs">{demanda.projeto_nome}</span>
               </BreadcrumbLink>
@@ -95,7 +95,7 @@ export function DemandHeader({
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/dashboard")}
           className="gap-2 text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="size-4" />

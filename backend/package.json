@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "bun --watch src/server.ts",
     "start": "NODE_ENV=production bun src/server.ts",
+    "test": "bun test --timeout 15000",
     "seed": "bun src/database/seed.database.ts"
   },
   "dependencies": {

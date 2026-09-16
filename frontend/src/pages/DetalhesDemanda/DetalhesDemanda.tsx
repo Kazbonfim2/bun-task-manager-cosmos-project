@@ -133,7 +133,7 @@ export function DetalhesDemanda() {
     try {
       await api(`/demandas/${demanda.id}`, { method: "DELETE" });
       setDialogExclusao(false);
-      navigate("/");
+      navigate("/dashboard");
     } catch (falha) {
       setErro(falha instanceof Error ? falha.message : "Falha ao excluir demanda");
       setSalvando(false);
@@ -156,7 +156,7 @@ export function DetalhesDemanda() {
             {erro || "A demanda solicitada não existe, foi removida ou o código informado está incorreto."}
           </p>
         </div>
-        <Button onClick={() => navigate("/")} variant="secondary" className="gap-2">
+        <Button onClick={() => navigate("/dashboard")} variant="secondary" className="gap-2">
           <ArrowLeft className="size-4" />
           Voltar para o Dashboard
         </Button>

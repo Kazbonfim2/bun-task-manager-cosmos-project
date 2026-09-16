@@ -41,7 +41,7 @@ export function Cadastro() {
   const [erro, setErro] = useState("");
   const [enviando, setEnviando] = useState(false);
 
-  if (lerToken()) return <Navigate to="/" replace />;
+  if (lerToken()) return <Navigate to="/dashboard" replace />;
 
   async function enviar(evento: SubmitEvent<HTMLFormElement>) {
     evento.preventDefault();
@@ -72,7 +72,7 @@ export function Cadastro() {
       if (resposta.grupo) {
         salvarGrupoAtivo(resposta.grupo.id);
       }
-      navegar("/");
+      navegar("/dashboard");
     } catch (falha) {
       setErro(falha instanceof Error ? falha.message : "Falha no cadastro");
     } finally {

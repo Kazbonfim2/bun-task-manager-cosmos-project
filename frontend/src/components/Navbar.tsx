@@ -170,7 +170,7 @@ export function Navbar() {
           <div className="flex items-center gap-3 min-w-0">
             <button
               type="button"
-              onClick={() => navigate("/")}
+              onClick={() => navigate(usuario ? "/dashboard" : "/")}
               className="flex items-center gap-2.5 min-w-0 text-left cursor-pointer focus:outline-hidden"
             >
               <Snowflake
@@ -189,7 +189,27 @@ export function Navbar() {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            {usuario ? (
+            {!usuario ? (
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="xs"
+                  onClick={() => navigate("/login")}
+                  className="text-xs font-medium"
+                >
+                  Entrar
+                </Button>
+                <Button
+                  type="button"
+                  size="xs"
+                  onClick={() => navigate("/cadastro")}
+                  className="text-xs font-medium"
+                >
+                  Cadastre-se
+                </Button>
+              </div>
+            ) : (
               <DropdownMenu>
                 <DropdownMenuTrigger
                   render={
@@ -218,6 +238,16 @@ export function Navbar() {
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent align="end" className="w-64 p-1.5">
+                  <DropdownMenuItem
+                    onClick={() => navigate("/dashboard")}
+                    className="flex items-center gap-2 px-2 py-1.5 cursor-pointer text-xs text-foreground font-medium"
+                  >
+                    <Building2 className="size-3.5 text-primary" />
+                    <span>Dashboard</span>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator />
+
                   <DropdownMenuLabel className="text-[10px] uppercase font-bold text-muted-foreground px-2 py-1">
                     Grupos
                   </DropdownMenuLabel>
@@ -277,7 +307,7 @@ export function Navbar() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            ) : null}
+            )}
 
             {usuario ? (
               <div className="h-4 w-px bg-border shrink-0" aria-hidden="true" />
