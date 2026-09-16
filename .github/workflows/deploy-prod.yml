@@ -30,4 +30,5 @@ jobs:
               --name orion-app \
               --restart unless-stopped \
               --network proxy-net \
+              --env-file .env \
               bun-task-manager:latest
