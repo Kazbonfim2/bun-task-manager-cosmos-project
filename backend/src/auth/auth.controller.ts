@@ -3,13 +3,15 @@ import { authService } from "./auth.service";
 
 export const authController = {
   cadastrar: async (req: Request, res: Response) => {
-    const { nome_completo, email, senha, pergunta_secreta, resposta_secreta } = req.body ?? {};
+    const { nome_completo, email, senha, pergunta_secreta, resposta_secreta, grupo_nome, codigo_convite } = req.body ?? {};
     const resultado = await authService.cadastrar({
       nome_completo,
       email,
       senha,
       pergunta_secreta,
       resposta_secreta,
+      grupo_nome,
+      codigo_convite,
     });
     res.status(201).json(resultado);
   },
