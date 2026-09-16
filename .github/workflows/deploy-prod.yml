@@ -24,11 +24,10 @@ jobs:
 
             docker build -t bun-task-manager .
 
-            docker stop orion-app || true
-            docker rm orion-app || true
+            docker rm -f orion-app 2>/dev/null || true
 
             docker run -d \
               --name orion-app \
               --restart unless-stopped \
-              -p 3005:3005 \
+              --network proxy-net \
               bun-task-manager:latest
