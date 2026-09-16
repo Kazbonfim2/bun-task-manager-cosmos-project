@@ -23,4 +23,4 @@ jobs:
             docker build -t bun-task-manager .
             docker stop bun-task-manager || true
             docker rm bun-task-manager || true
-            docker run -d --name bun-task-manager -p 3005:3005 bun-task-manager
+            docker run -d --name orion-app -p 3005:3005 bun-task-manager
