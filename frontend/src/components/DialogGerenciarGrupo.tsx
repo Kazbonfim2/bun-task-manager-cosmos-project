@@ -1,4 +1,4 @@
-import { Check, Copy, Ticket, Users } from "lucide-react";
+import { AlertCircle, AlertTriangle, Check, Copy, Ticket, Trash2, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,9 @@ import {
   DialogPanel,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Spinner } from "@/components/ui/spinner";
 import { api, type Convite, type Grupo, type MembroGrupo } from "@/lib/api";
+import { lerUsuario } from "@/lib/auth";
 import { copiarTexto } from "@/lib/utils";
 
 interface DialogGerenciarGrupoProps {
@@ -30,6 +32,11 @@ export function DialogGerenciarGrupo({
   const [membros, setMembros] = useState<MembroGrupo[]>([]);
   const [carregando, setCarregando] = useState(false);
   const [copiadoId, setCopiadoId] = useState<string | null>(null);
+  const [membroExcluir, setMembroExcluir] = useState<MembroGrupo | null>(null);
+  const [removendo, setRemovendo] = useState(false);
+  const [erroRemover, setErroRemover] = useState("");
+
+  const ehDono = !!grupo && lerUsuario()?.id === grupo.dono_id;
 
   useEffect(() => {
     if (!aberto || !grupo?.id) return;
@@ -55,6 +62,22 @@ export function DialogGerenciarGrupo({
     if (await copiarTexto(convite.codigo)) {
       setCopiadoId(convite.id);
       setTimeout(() => setCopiadoId(null), 2000);
+    }
+  }
+
+  async function removerMembro() {
+    if (!membroExcluir || !grupo) return;
+    setRemovendo(true);
+    setErroRemover("");
+    try {
+      await api(`/grupos/${grupo.id}/membros/${membroExcluir.usuario_id}`, { method: "DELETE" });
+      setMembros((atuais) => atuais.filter((m) => m.usuario_id !== membroExcluir.usuario_id));
+      setMembroExcluir(null);
+      window.dispatchEvent(new CustomEvent("orion:grupo-alterado"));
+    } catch (falha) {
+      setErroRemover(falha instanceof Error ? falha.message : "Falha ao remover membro");
+    } finally {
+      setRemovendo(false);
     }
   }
 
@@ -202,9 +225,28 @@ export function DialogGerenciarGrupo({
                     </div>
                     <p className="text-[11px] text-muted-foreground truncate">{m.email}</p>
                   </div>
-                  <span className="text-[10px] text-muted-foreground shrink-0">
-                    Entrou em {new Date(m.entrou_em).toLocaleDateString("pt-BR")}
-                  </span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-[10px] text-muted-foreground">
+                      Entrou em {new Date(m.entrou_em).toLocaleDateString("pt-BR")}
+                    </span>
+                    {/* Só o dono remove membros; o próprio dono não pode ser removido */}
+                    {ehDono && !m.eh_dono && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon-sm"
+                        onClick={() => {
+                          setErroRemover("");
+                          setMembroExcluir(m);
+                        }}
+                        title="Remover membro"
+                        aria-label={`Remover ${m.nome_completo} do grupo`}
+                        className="cursor-pointer text-muted-foreground hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30"
+                      >
+                        <Trash2 className="size-3.5" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -217,6 +259,73 @@ export function DialogGerenciarGrupo({
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      {/* Confirmação de remoção de membro (ação destrutiva, só dono) */}
+      <Dialog
+        open={!!membroExcluir}
+        onOpenChange={(aberto) => !aberto && !removendo && setMembroExcluir(null)}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <div className="flex items-center gap-2.5">
+              <span className="p-2 rounded-lg bg-destructive/10 text-destructive shrink-0">
+                <AlertTriangle className="size-5" />
+              </span>
+              <div>
+                <DialogTitle>Remover membro</DialogTitle>
+                <DialogDescription>Esta ação não pode ser desfeita.</DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <DialogPanel className="space-y-3">
+            <p className="text-sm text-foreground">
+              Remover <strong>{membroExcluir?.nome_completo}</strong> do grupo{" "}
+              <strong>{grupo?.nome}</strong>? Os projetos e demandas do grupo não são afetados. O
+              membro será notificado.
+            </p>
+            {erroRemover && (
+              <div className="flex items-center gap-2 rounded-lg p-3 text-xs border bg-destructive/10 border-destructive/20 text-destructive">
+                <AlertCircle className="size-4 shrink-0" />
+                <span>{erroRemover}</span>
+              </div>
+            )}
+          </DialogPanel>
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setMembroExcluir(null)}
+              disabled={removendo}
+              className="w-full sm:w-auto"
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              onClick={removerMembro}
+              disabled={removendo}
+              className="w-full sm:w-auto gap-1.5"
+            >
+              {removendo ? (
+                <>
+                  <Spinner className="size-3.5" />
+                  Removendo...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="size-3.5" />
+                  Remover
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 }

@@ -93,4 +93,49 @@ export const grupoService = {
       mensagem: `Bem-vindo ao grupo "${grupo.nome}"!`,
     };
   },
+
+  async removerMembro(grupoId: string, membroId: string, solicitanteId: string): Promise<void> {
+    const grupo = await grupoRepository.buscarPorId(grupoId);
+    if (!grupo) throw new HttpError(404, "Grupo não encontrado");
+    if (grupo.dono_id !== solicitanteId) {
+      throw new HttpError(403, "Apenas o dono do grupo pode remover membros");
+    }
+    if (membroId === grupo.dono_id) {
+      throw new HttpError(400, "O dono não pode ser removido do próprio grupo");
+    }
+    if (!(await grupoRepository.ehMembro(grupoId, membroId))) {
+      throw new HttpError(404, "Usuário não é membro deste grupo");
+    }
+
+    // Projetos e demandas do grupo não são afetados; só o vínculo do membro sai
+    await grupoRepository.removerMembro(grupoId, membroId);
+
+    await notificacaoService.notificar({
+      usuario_id: membroId,
+      tipo: "removido_grupo",
+      mensagem: `Você foi removido do grupo "${grupo.nome}".`,
+    });
+  },
+
+  async excluir(grupoId: string, usuarioId: string): Promise<void> {
+    const grupo = await grupoRepository.buscarPorId(grupoId);
+    if (!grupo) throw new HttpError(404, "Grupo não encontrado");
+    if (grupo.dono_id !== usuarioId) {
+      throw new HttpError(403, "Apenas o dono do grupo pode excluí-lo");
+    }
+
+    // Captura membros antes de excluir (o cascade remove grupo_membros)
+    const membros = await grupoRepository.listarMembros(grupoId);
+    await grupoRepository.excluir(grupoId);
+
+    // Usuários permanecem; apenas recebem notificação da exclusão
+    for (const membro of membros) {
+      if (membro.usuario_id === usuarioId) continue;
+      await notificacaoService.notificar({
+        usuario_id: membro.usuario_id,
+        tipo: "grupo_excluido",
+        mensagem: `O grupo "${grupo.nome}" foi excluído pelo dono.`,
+      });
+    }
+  },
 };

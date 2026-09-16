@@ -1,5 +1,6 @@
 import {
   AlertCircle,
+  AlertTriangle,
   ArrowLeft,
   Building2,
   Check,
@@ -10,6 +11,7 @@ import {
   Plus,
   Settings,
   Ticket,
+  Trash2,
   User,
   Users,
 } from "lucide-react";
@@ -31,11 +33,20 @@ import {
   CardPanel,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogPanel,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { api, type Grupo, type Usuario } from "@/lib/api";
-import { lerToken, lerUsuario, salvarSessao } from "@/lib/auth";
+import { lerGrupoAtivo, lerToken, lerUsuario, limparGrupoAtivo, salvarSessao } from "@/lib/auth";
 
 type Aviso = { tipo: "ok" | "erro"; texto: string } | null;
 
@@ -66,6 +77,9 @@ export function Configuracoes() {
   const [dialogCriar, setDialogCriar] = useState(false);
   const [dialogEntrar, setDialogEntrar] = useState(false);
   const [grupoGerenciar, setGrupoGerenciar] = useState<Grupo | null>(null);
+  const [grupoExcluir, setGrupoExcluir] = useState<Grupo | null>(null);
+  const [excluindoGrupo, setExcluindoGrupo] = useState(false);
+  const [erroExcluir, setErroExcluir] = useState("");
 
   async function salvarPerfil(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -116,6 +130,23 @@ export function Configuracoes() {
     invalidarCache("/grupos");
     recarregarGrupos();
     window.dispatchEvent(new CustomEvent("orion:grupo-alterado"));
+  }
+
+  async function excluirGrupo() {
+    if (!grupoExcluir) return;
+    setExcluindoGrupo(true);
+    setErroExcluir("");
+    try {
+      await api(`/grupos/${grupoExcluir.id}`, { method: "DELETE" });
+      // Se o grupo excluído era o ativo, limpa a seleção
+      if (lerGrupoAtivo() === grupoExcluir.id) limparGrupoAtivo();
+      setGrupoExcluir(null);
+      onGrupoAlteradoSucesso();
+    } catch (falha) {
+      setErroExcluir(falha instanceof Error ? falha.message : "Falha ao excluir grupo");
+    } finally {
+      setExcluindoGrupo(false);
+    }
   }
 
   const gruposExibidos = grupos.slice(0, 5);
@@ -482,16 +513,35 @@ export function Configuracoes() {
                         </div>
                       </div>
 
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="xs"
-                        onClick={() => setGrupoGerenciar(g)}
-                        className="w-full gap-1.5 text-xs justify-center cursor-pointer hover:bg-accent hover:text-accent-foreground"
-                      >
-                        <Users className="size-3" />
-                        Gerenciar
-                      </Button>
+                      <div className="flex items-center gap-1.5">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="xs"
+                          onClick={() => setGrupoGerenciar(g)}
+                          className="flex-1 gap-1.5 text-xs justify-center cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                        >
+                          <Users className="size-3" />
+                          Gerenciar
+                        </Button>
+                        {/* Só o dono do grupo pode excluí-lo */}
+                        {usuario?.id === g.dono_id && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon-sm"
+                            onClick={() => {
+                              setErroExcluir("");
+                              setGrupoExcluir(g);
+                            }}
+                            title="Excluir grupo"
+                            aria-label={`Excluir grupo ${g.nome}`}
+                            className="shrink-0 cursor-pointer text-muted-foreground hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30"
+                          >
+                            <Trash2 className="size-3.5" />
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -524,6 +574,72 @@ export function Configuracoes() {
         onFechar={() => setDialogEntrar(false)}
         onEntrou={onGrupoAlteradoSucesso}
       />
+
+      {/* Confirmação de exclusão de grupo (ação destrutiva, só dono) */}
+      <Dialog
+        open={!!grupoExcluir}
+        onOpenChange={(aberto) => !aberto && !excluindoGrupo && setGrupoExcluir(null)}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <div className="flex items-center gap-2.5">
+              <span className="p-2 rounded-lg bg-destructive/10 text-destructive shrink-0">
+                <AlertTriangle className="size-5" />
+              </span>
+              <div>
+                <DialogTitle>Excluir grupo</DialogTitle>
+                <DialogDescription>Esta ação não pode ser desfeita.</DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <DialogPanel className="space-y-3">
+            <p className="text-sm text-foreground">
+              Excluir o grupo <strong>{grupoExcluir?.nome}</strong> remove todos os projetos e
+              demandas dentro dele. Os usuários não são excluídos e os membros serão notificados.
+            </p>
+            {erroExcluir && (
+              <div className="flex items-center gap-2 rounded-lg p-3 text-xs border bg-destructive/10 border-destructive/20 text-destructive">
+                <AlertCircle className="size-4 shrink-0" />
+                <span>{erroExcluir}</span>
+              </div>
+            )}
+          </DialogPanel>
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setGrupoExcluir(null)}
+              disabled={excluindoGrupo}
+              className="w-full sm:w-auto"
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              onClick={excluirGrupo}
+              disabled={excluindoGrupo}
+              className="w-full sm:w-auto gap-1.5"
+            >
+              {excluindoGrupo ? (
+                <>
+                  <Spinner className="size-3.5" />
+                  Excluindo...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="size-3.5" />
+                  Excluir grupo
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }

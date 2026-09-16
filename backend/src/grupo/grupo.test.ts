@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import { authService } from "../auth/auth.service";
 import { demandaRepository } from "../demanda/demanda.repository";
+import { notificacaoService } from "../notificacao/notificacao.service";
 import { projetoRepository } from "../projeto/projeto.repository";
 import { grupoRepository } from "./grupo.repository";
 import { grupoService } from "./grupo.service";
@@ -192,5 +193,123 @@ describe("Tenancy, Grupos e Convites", () => {
 
     expect(demandasB.some((d) => d.titulo === "Demanda do Grupo B")).toBe(true);
     expect(demandasB.some((d) => d.titulo === "Demanda do Grupo A")).toBe(false);
+  });
+
+  it("só o dono remove membro; membro sai do grupo, é notificado e projetos ficam intactos", async () => {
+    const dono = await authService.cadastrar({
+      nome_completo: "Dono Remover",
+      email: `dono-rm-${Date.now()}@teste.com`,
+      senha: "senhaSegura123",
+      pergunta_secreta: "X?",
+      resposta_secreta: "X",
+      grupo_nome: "Grupo Remover Membro",
+    });
+    const grupoId = dono.grupo!.id;
+
+    const membro = await authService.cadastrar({
+      nome_completo: "Membro Removivel",
+      email: `membro-rm-${Date.now()}@teste.com`,
+      senha: "senhaSegura123",
+      pergunta_secreta: "Y?",
+      resposta_secreta: "Y",
+    });
+    const convites = await grupoService.listarConvites(grupoId, dono.usuario.id);
+    await grupoService.aceitarConvite(convites[0].codigo, membro.usuario.id);
+
+    const proj = await projetoRepository.criar({
+      id: crypto.randomUUID(),
+      nome: "Projeto Preservado",
+      descricao: null,
+      grupo_id: grupoId,
+      criado_em: new Date().toISOString(),
+    });
+
+    // Membro não pode remover ninguém
+    expect(async () => {
+      await grupoService.removerMembro(grupoId, dono.usuario.id, membro.usuario.id);
+    }).toThrow();
+
+    // Dono não pode remover a si mesmo
+    expect(async () => {
+      await grupoService.removerMembro(grupoId, dono.usuario.id, dono.usuario.id);
+    }).toThrow();
+
+    await grupoService.removerMembro(grupoId, membro.usuario.id, dono.usuario.id);
+
+    const membros = await grupoService.listarMembros(grupoId, dono.usuario.id);
+    expect(membros.map((m) => m.usuario_id)).not.toContain(membro.usuario.id);
+    expect(membros.map((m) => m.usuario_id)).toContain(dono.usuario.id);
+
+    // Projeto do grupo permanece
+    expect(await projetoRepository.buscarPorId(proj.id)).not.toBeNull();
+
+    // Membro removido é notificado
+    const notifs = await notificacaoService.listarPorUsuario(membro.usuario.id);
+    expect(notifs.some((n) => n.tipo === "removido_grupo")).toBe(true);
+  });
+
+  it("só o dono exclui o grupo; remove projetos/demandas, mantém usuários e notifica membros", async () => {
+    const dono = await authService.cadastrar({
+      nome_completo: "Dono Exclusao",
+      email: `dono-del-${Date.now()}@teste.com`,
+      senha: "senhaSegura123",
+      pergunta_secreta: "X?",
+      resposta_secreta: "X",
+      grupo_nome: "Grupo a Excluir",
+    });
+    const grupoId = dono.grupo!.id;
+
+    // Membro entra via convite
+    const membro = await authService.cadastrar({
+      nome_completo: "Membro Exclusao",
+      email: `membro-del-${Date.now()}@teste.com`,
+      senha: "senhaSegura123",
+      pergunta_secreta: "Y?",
+      resposta_secreta: "Y",
+    });
+    const convites = await grupoService.listarConvites(grupoId, dono.usuario.id);
+    await grupoService.aceitarConvite(convites[0].codigo, membro.usuario.id);
+
+    // Projeto + demanda no grupo
+    const proj = await projetoRepository.criar({
+      id: crypto.randomUUID(),
+      nome: "Projeto Descartável",
+      descricao: null,
+      grupo_id: grupoId,
+      criado_em: new Date().toISOString(),
+    });
+    await demandaRepository.criar({
+      id: crypto.randomUUID(),
+      titulo: "Demanda Descartável",
+      descricao: null,
+      projeto_id: proj.id,
+      responsavel_id: dono.usuario.id,
+      criado_por_id: dono.usuario.id,
+      prazo: "2026-12-31",
+      status: "aberta",
+      criado_em: new Date().toISOString(),
+      atualizado_em: new Date().toISOString(),
+    });
+
+    // Não-dono não pode excluir
+    expect(async () => {
+      await grupoService.excluir(grupoId, membro.usuario.id);
+    }).toThrow();
+
+    await grupoService.excluir(grupoId, dono.usuario.id);
+
+    // Grupo, projetos e demandas somem
+    expect(await grupoRepository.buscarPorId(grupoId)).toBeNull();
+    expect((await projetoRepository.listar(grupoId)).length).toBe(0);
+    expect(await projetoRepository.buscarPorId(proj.id)).toBeNull();
+
+    // Usuários permanecem
+    expect(await authService.login(membro.usuario.email, "senhaSegura123")).toBeDefined();
+
+    // Membro recebe notificação; dono não
+    const notifsMembro = await notificacaoService.listarPorUsuario(membro.usuario.id);
+    expect(notifsMembro.some((n) => n.tipo === "grupo_excluido")).toBe(true);
+    const notifsDono = await notificacaoService.listarPorUsuario(dono.usuario.id);
+    expect(notifsDono.some((n) => n.tipo === "grupo_excluido")).toBe(false);
   });
 });

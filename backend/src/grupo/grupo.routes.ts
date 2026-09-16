@@ -16,3 +16,5 @@ grupoRoutes.post("/convites/aceitar", grupoController.aceitarConvite);
 grupoRoutes.get("/:id", grupoController.buscarPorId);
 grupoRoutes.get("/:id/membros", grupoController.listarMembros);
 grupoRoutes.get("/:id/convites", grupoController.listarConvites);
+grupoRoutes.delete("/:id/membros/:usuarioId", grupoController.removerMembro);
+grupoRoutes.delete("/:id", grupoController.excluir);

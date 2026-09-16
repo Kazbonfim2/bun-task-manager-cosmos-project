@@ -108,6 +108,14 @@ export const demandaRepository = {
 
   async excluir(id: string): Promise<void> {
     await db.execute({
+      sql: "DELETE FROM comentarios WHERE demanda_id = ?",
+      args: [id],
+    });
+    await db.execute({
+      sql: "DELETE FROM notificacoes WHERE demanda_id = ?",
+      args: [id],
+    });
+    await db.execute({
       sql: "DELETE FROM demandas WHERE id = ?",
       args: [id],
     });
