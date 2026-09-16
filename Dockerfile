@@ -18,9 +18,11 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3005
 
-COPY --from=builder /app/backend/node_modules ./backend/node_modules
-COPY --from=builder /app/frontend/dist ./frontend/dist
-COPY backend ./backend
+RUN mkdir -p /app/data && chown -R bun:bun /app
+
+COPY --from=builder --chown=bun:bun /app/backend/node_modules ./backend/node_modules
+COPY --from=builder --chown=bun:bun /app/frontend/dist ./frontend/dist
+COPY --chown=bun:bun backend ./backend
 
 EXPOSE 3005
 USER bun
