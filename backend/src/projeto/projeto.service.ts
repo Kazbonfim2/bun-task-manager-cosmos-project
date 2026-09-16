@@ -45,7 +45,7 @@ export const projetoService = {
       sql: "SELECT COUNT(*) as total FROM demandas WHERE projeto_id = ?",
       args: [id],
     });
-    const vinculadas = res.rows[0] as { total: number } | undefined;
+    const vinculadas = res.rows[0] as unknown as { total: number } | undefined;
 
     if (vinculadas && Number(vinculadas.total) > 0) {
       throw new HttpError(

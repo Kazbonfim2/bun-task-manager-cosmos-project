@@ -160,26 +160,26 @@ export async function initDatabase() {
   if (!colunasProjeto.some((c) => c.name === "grupo_id")) {
     try {
       await db.execute("ALTER TABLE projetos ADD COLUMN grupo_id TEXT REFERENCES grupos(id);");
-    } catch {}
+    } catch { }
   }
 
   const colunasDemanda = (await db.execute("PRAGMA table_info(demandas)")).rows as unknown as Array<{ name: string }>;
   if (!colunasDemanda.some((c) => c.name === "atraso_notificado_em")) {
     try {
       await db.execute("ALTER TABLE demandas ADD COLUMN atraso_notificado_em TEXT;");
-    } catch {}
+    } catch { }
   }
 
   const colunasUsuario = (await db.execute("PRAGMA table_info(usuarios)")).rows as unknown as Array<{ name: string }>;
   if (!colunasUsuario.some((c) => c.name === "pergunta_secreta")) {
     try {
       await db.execute("ALTER TABLE usuarios ADD COLUMN pergunta_secreta TEXT;");
-    } catch {}
+    } catch { }
   }
   if (!colunasUsuario.some((c) => c.name === "resposta_secreta_hash")) {
     try {
       await db.execute("ALTER TABLE usuarios ADD COLUMN resposta_secreta_hash TEXT;");
-    } catch {}
+    } catch { }
   }
 
   const resGrupos = await db.execute("SELECT COUNT(*) as total FROM grupos");
@@ -190,7 +190,7 @@ export async function initDatabase() {
 
   if (totalGrupos === 0 && totalUsuarios > 0) {
     const resPrimeiro = await db.execute("SELECT id FROM usuarios ORDER BY criado_em ASC LIMIT 1");
-    const primeiroUsuario = resPrimeiro.rows[0] as { id: string } | undefined;
+    const primeiroUsuario = resPrimeiro.rows[0] as unknown as { id: string } | undefined;
     if (primeiroUsuario) {
       const grupoPadraoId = "grupo-padrao-orion";
       const agora = new Date().toISOString();
