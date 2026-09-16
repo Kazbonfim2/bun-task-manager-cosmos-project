@@ -4,20 +4,22 @@ import {
   Building2,
   Check,
   CheckCircle2,
+  Info,
   KeyRound,
   LogIn,
   Plus,
   Settings,
-  Sparkles,
   Ticket,
   User,
   Users,
 } from "lucide-react";
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { DialogCriarGrupo } from "@/components/DialogCriarGrupo";
 import { DialogEntrarGrupo } from "@/components/DialogEntrarGrupo";
 import { DialogGerenciarGrupo } from "@/components/DialogGerenciarGrupo";
+import { GruposSkeleton } from "@/components/Skeleton";
+import { useCachedFetch, invalidarCache } from "@/hooks/useCachedFetch";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,7 +35,7 @@ import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { api, type Grupo, type Usuario } from "@/lib/api";
-import { lerGrupoAtivo, lerToken, lerUsuario, salvarSessao } from "@/lib/auth";
+import { lerToken, lerUsuario, salvarSessao } from "@/lib/auth";
 
 type Aviso = { tipo: "ok" | "erro"; texto: string } | null;
 
@@ -53,35 +55,17 @@ export function Configuracoes() {
   const [salvandoSenha, setSalvandoSenha] = useState(false);
   const [avisoSenha, setAvisoSenha] = useState<Aviso>(null);
 
-  // --- Grupos ---
-  const [grupos, setGrupos] = useState<Grupo[]>([]);
+  // --- Grupos (cache local + skeleton) ---
+  const {
+    data: gruposData,
+    loading: gruposLoading,
+    isCached: gruposCached,
+    refetch: recarregarGrupos,
+  } = useCachedFetch<Grupo[]>("/grupos");
+  const grupos = gruposData ?? [];
   const [dialogCriar, setDialogCriar] = useState(false);
   const [dialogEntrar, setDialogEntrar] = useState(false);
   const [grupoGerenciar, setGrupoGerenciar] = useState<Grupo | null>(null);
-
-  const carregarGrupos = useCallback(async () => {
-    try {
-      const lista = await api<Grupo[]>("/grupos");
-      setGrupos(lista);
-    } catch {
-      // silencioso
-    }
-  }, []);
-
-  useEffect(() => {
-    let ativo = true;
-    (async () => {
-      try {
-        const lista = await api<Grupo[]>("/grupos");
-        if (ativo) setGrupos(lista);
-      } catch {
-        // silencioso
-      }
-    })();
-    return () => {
-      ativo = false;
-    };
-  }, []);
 
   async function salvarPerfil(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -129,11 +113,11 @@ export function Configuracoes() {
   }
 
   function onGrupoAlteradoSucesso() {
-    carregarGrupos();
+    invalidarCache("/grupos");
+    recarregarGrupos();
     window.dispatchEvent(new CustomEvent("orion:grupo-alterado"));
   }
 
-  const grupoAtivoId = lerGrupoAtivo();
   const gruposExibidos = grupos.slice(0, 5);
 
   return (
@@ -246,7 +230,8 @@ export function Configuracoes() {
               </CardPanel>
 
               <CardFooter className="border-t bg-muted/15 px-6 py-3.5 flex items-center justify-between gap-3">
-                <span className="text-[11px] text-muted-foreground hidden sm:inline">
+                <span className="text-[11px] text-muted-foreground hidden sm:inline-flex items-center gap-1.5">
+                  <Info className="size-3.5 text-sky-400 shrink-0" />
                   Visível para colegas de equipe
                 </span>
                 <Button
@@ -341,7 +326,8 @@ export function Configuracoes() {
               </CardPanel>
 
               <CardFooter className="border-t bg-muted/15 px-6 py-3.5 flex items-center justify-between gap-3">
-                <span className="text-[11px] text-muted-foreground hidden sm:inline">
+                <span className="text-[11px] text-muted-foreground hidden sm:inline-flex items-center gap-1.5">
+                  <Info className="size-3.5 text-sky-400 shrink-0" />
                   Mínimo de 6 caracteres
                 </span>
                 <Button
@@ -413,24 +399,30 @@ export function Configuracoes() {
             </CardHeader>
 
             <CardPanel className="p-6 space-y-3">
-              {/* Dica informativa com limite de itens */}
-              <div className="flex items-center justify-between gap-2 rounded-lg border bg-muted/30 p-2.5 text-xs text-muted-foreground">
-                <div className="flex items-center gap-2 min-w-0">
-                  <Ticket className="size-3.5 text-primary shrink-0" />
-                  <span className="truncate">
-                    {grupos.length === 1
-                      ? "1 grupo vinculado"
-                      : `${grupos.length} grupos vinculados`}
-                    {grupos.length > 5 && " (exibindo os 5 principais)"}
-                  </span>
+              {/* Indicador de limite de grupos por usuário */}
+              <div className="flex items-center gap-3 rounded-xl border bg-primary/5 p-4">
+                <div className="flex size-11 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
+                  <Building2 className="size-5" />
                 </div>
-                <Badge variant="outline" className="text-[10px] shrink-0">
-                  Max. 5 itens
-                </Badge>
+                <div className="min-w-0">
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-2xl font-bold leading-none text-foreground">
+                      {grupos.length}
+                    </span>
+                    <span className="text-sm font-medium text-muted-foreground">
+                      de 5 grupos cadastrados
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground mt-1">
+                    Limite de grupos por usuário
+                  </p>
+                </div>
               </div>
 
               {/* Lista / Grid de Grupos Limitada a 5 Itens */}
-              {gruposExibidos.length === 0 ? (
+              {gruposLoading && !gruposCached ? (
+                <GruposSkeleton />
+              ) : gruposExibidos.length === 0 ? (
                 <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border/80 p-8 text-center bg-muted/10">
                   <div className="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground mb-2.5">
                     <Building2 className="size-5 opacity-70" />
@@ -463,75 +455,52 @@ export function Configuracoes() {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {gruposExibidos.map((g) => {
-                    const ehAtivo = g.id === grupoAtivoId;
-                    return (
-                      <div
-                        key={g.id}
-                        className={`flex flex-col justify-between rounded-xl border p-3.5 transition-all gap-3 bg-card shadow-xs ${
-                          ehAtivo
-                            ? "border-primary/50 ring-1 ring-primary/20 bg-primary/2"
-                            : "border-border hover:border-primary/30 hover:bg-muted/20"
-                        }`}
-                      >
-                        <div className="space-y-2">
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex items-center gap-2 min-w-0">
-                              <div
-                                className={`flex size-7 items-center justify-center rounded-md shrink-0 ${
-                                  ehAtivo
-                                    ? "bg-primary text-primary-foreground"
-                                    : "bg-muted text-muted-foreground"
-                                }`}
-                              >
-                                <Building2 className="size-3.5" />
-                              </div>
-                              <span className="text-xs font-semibold text-foreground truncate" title={g.nome}>
-                                {g.nome}
-                              </span>
-                            </div>
-                            {ehAtivo && (
-                              <Badge
-                                variant="default"
-                                className="text-[10px] px-1.5 py-0 h-4 shrink-0 font-medium"
-                              >
-                                Ativo
-                              </Badge>
-                            )}
+                  {gruposExibidos.map((g) => (
+                    <div
+                      key={g.id}
+                      className="flex flex-col justify-between rounded-xl border border-border p-3.5 transition-all gap-3 bg-card shadow-xs hover:border-primary/30 hover:bg-muted/20"
+                    >
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="flex size-7 items-center justify-center rounded-md shrink-0 bg-muted text-muted-foreground">
+                            <Building2 className="size-3.5" />
                           </div>
-
-                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground pt-0.5">
-                            <span className="flex items-center gap-1">
-                              <Users className="size-3 opacity-70" />
-                              {g.total_membros ?? 0} membros
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Ticket className="size-3 opacity-70" />
-                              {g.convites_disponiveis ?? 0} convites
-                            </span>
-                          </div>
+                          <span className="text-xs font-semibold text-foreground truncate" title={g.nome}>
+                            {g.nome}
+                          </span>
                         </div>
 
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="xs"
-                          onClick={() => setGrupoGerenciar(g)}
-                          className="w-full gap-1.5 text-xs justify-center cursor-pointer hover:bg-accent hover:text-accent-foreground"
-                        >
-                          <Users className="size-3" />
-                          Gerenciar
-                        </Button>
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground pt-0.5">
+                          <span className="flex items-center gap-1">
+                            <Users className="size-3 opacity-70" />
+                            {g.total_membros ?? 0} membros
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Ticket className="size-3 opacity-70" />
+                            {g.convites_disponiveis ?? 0} convites
+                          </span>
+                        </div>
                       </div>
-                    );
-                  })}
+
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="xs"
+                        onClick={() => setGrupoGerenciar(g)}
+                        className="w-full gap-1.5 text-xs justify-center cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                      >
+                        <Users className="size-3" />
+                        Gerenciar
+                      </Button>
+                    </div>
+                  ))}
                 </div>
               )}
             </CardPanel>
 
             <CardFooter className="border-t bg-muted/15 px-6 py-3.5 flex items-center justify-between gap-2">
               <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                <Sparkles className="size-3.5 text-primary shrink-0" />
+                <Info className="size-3.5 text-sky-400 shrink-0" />
                 <span>Cada novo grupo recebe 5 convites exclusivos.</span>
               </div>
             </CardFooter>
