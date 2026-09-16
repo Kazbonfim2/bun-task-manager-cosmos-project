@@ -105,6 +105,13 @@ export const grupoRepository = {
     });
   },
 
+  async removerMembro(grupoId: string, usuarioId: string): Promise<void> {
+    await db.execute({
+      sql: `DELETE FROM grupo_membros WHERE grupo_id = ? AND usuario_id = ?`,
+      args: [grupoId, usuarioId],
+    });
+  },
+
   async listarMembros(grupoId: string): Promise<MembroGrupo[]> {
     const res = await db.execute({
       sql: `
@@ -176,5 +183,19 @@ export const grupoRepository = {
       sql: `UPDATE convites SET usado_por_id = ?, usado_em = ? WHERE id = ?`,
       args: [usuarioId, agora, conviteId],
     });
+  },
+
+  // Remove grupo + projetos do grupo + demandas desses projetos (e comentários/notificações
+  // ligados). Membros/convites saem por ON DELETE CASCADE. Usuários não são removidos.
+  // Deletes explícitos (não só cascade) pois libsql/Turso pode não ter FK enforcement ligado.
+  async excluir(grupoId: string): Promise<void> {
+    const demandasDoGrupo = `SELECT id FROM demandas WHERE projeto_id IN (SELECT id FROM projetos WHERE grupo_id = ?)`;
+    await db.execute({ sql: `DELETE FROM comentarios WHERE demanda_id IN (${demandasDoGrupo})`, args: [grupoId] });
+    await db.execute({ sql: `DELETE FROM notificacoes WHERE demanda_id IN (${demandasDoGrupo})`, args: [grupoId] });
+    await db.execute({ sql: `DELETE FROM demandas WHERE projeto_id IN (SELECT id FROM projetos WHERE grupo_id = ?)`, args: [grupoId] });
+    await db.execute({ sql: `DELETE FROM projetos WHERE grupo_id = ?`, args: [grupoId] });
+    await db.execute({ sql: `DELETE FROM grupo_membros WHERE grupo_id = ?`, args: [grupoId] });
+    await db.execute({ sql: `DELETE FROM convites WHERE grupo_id = ?`, args: [grupoId] });
+    await db.execute({ sql: `DELETE FROM grupos WHERE id = ?`, args: [grupoId] });
   },
 };

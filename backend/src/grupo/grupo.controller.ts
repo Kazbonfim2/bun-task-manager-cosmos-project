@@ -42,4 +42,16 @@ export const grupoController = {
     const resultado = await grupoService.aceitarConvite(req.body?.codigo, usuarioId);
     res.json(resultado);
   },
+
+  excluir: async (req: Request, res: Response) => {
+    const usuarioId = req.usuario?.id ?? "";
+    await grupoService.excluir(String(req.params.id), usuarioId);
+    res.status(204).end();
+  },
+
+  removerMembro: async (req: Request, res: Response) => {
+    const usuarioId = req.usuario?.id ?? "";
+    await grupoService.removerMembro(String(req.params.id), String(req.params.usuarioId), usuarioId);
+    res.status(204).end();
+  },
 };
