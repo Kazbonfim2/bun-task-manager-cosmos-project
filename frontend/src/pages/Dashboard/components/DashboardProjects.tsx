@@ -4,7 +4,9 @@ import {
   ChevronDown,
   ChevronUp,
   Folder,
+  FolderPlus,
   Layers,
+  Plus,
   X,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -57,6 +59,7 @@ interface DashboardProjectsProps {
   projetos: Projeto[];
   filtroProjeto: string;
   onSelecionarProjeto: (id: string) => void;
+  onNovoProjeto: () => void;
 }
 
 const CHAVE_STORAGE_EXPANDIDO = "orion:projetos-expandido";
@@ -65,6 +68,7 @@ export function DashboardProjects({
   projetos,
   filtroProjeto,
   onSelecionarProjeto,
+  onNovoProjeto,
 }: DashboardProjectsProps) {
   const [expandido, setExpandido] = useState(() => {
     const salvo = localStorage.getItem(CHAVE_STORAGE_EXPANDIDO);
@@ -358,6 +362,33 @@ export function DashboardProjects({
               </Tooltip>
             );
           })}
+
+          {/* // Card vazio (mesma estética) para criar o primeiro projeto */}
+          {projetos.length === 0 ? (
+            <Card
+              render={
+                <button
+                  type="button"
+                  onClick={onNovoProjeto}
+                  aria-label="Criar primeiro projeto"
+                />
+              }
+              className={cn(
+                "flex flex-col items-center justify-center gap-2 p-4 text-center transition-all duration-200 cursor-pointer",
+                "border-dashed border-border/70 bg-muted/10 hover:bg-muted/30 hover:border-primary/40",
+                "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
+              )}
+            >
+              <div className="rounded-md bg-muted p-1.5 text-muted-foreground">
+                <FolderPlus className="size-4" aria-hidden="true" />
+              </div>
+              <span className="font-semibold text-sm text-foreground">Nenhum projeto criado</span>
+              <span className="inline-flex items-center gap-1 text-xs text-primary">
+                <Plus className="size-3.5" aria-hidden="true" />
+                Criar projeto
+              </span>
+            </Card>
+          ) : null}
         </div>
       ) : null}
     </section>

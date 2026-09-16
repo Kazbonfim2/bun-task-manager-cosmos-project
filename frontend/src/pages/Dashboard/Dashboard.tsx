@@ -384,6 +384,7 @@ export function Dashboard() {
         projetos={projetos}
         filtroProjeto={filtroProjeto}
         onSelecionarProjeto={selecionarProjeto}
+        onNovoProjeto={() => abrirModalProjeto(null)}
       />
 
       {/* // Seção principal de listagem de demandas, filtros e ações */}
