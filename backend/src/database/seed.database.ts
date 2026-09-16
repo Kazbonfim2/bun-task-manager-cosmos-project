@@ -158,6 +158,10 @@ export async function seedDatabase() {
 }
 
 export async function seedDatabaseIfEmpty() {
+  if (process.env.NODE_ENV !== "development") {
+    return;
+  }
+
   const res = await db.execute(
     "SELECT COUNT(*) as count FROM usuarios"
   );
@@ -172,5 +176,5 @@ export async function seedDatabaseIfEmpty() {
 }
 
 if (import.meta.main) {
-  await seedDatabase();
+  await seedDatabaseIfEmpty();
 }
