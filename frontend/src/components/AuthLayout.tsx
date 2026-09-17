@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { CheckCircle2, CircleDot, Clock, Snowflake, Sparkles } from "lucide-react";
+import { CheckCircle2, CircleDot, Clock, Snowflake } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardPanel, CardTitle } from "@/components/ui/card";
 
@@ -65,18 +65,18 @@ export function AuthLayout({ titulo, subtitulo, children }: AuthLayoutProps) {
   }, [textoDigitado, apagando, fraseIdx]);
 
   return (
-    <main className="flex-1 w-full min-h-[calc(100svh-3.5rem)] flex flex-col lg:grid lg:grid-cols-[42%_58%] xl:grid-cols-[40%_60%] relative overflow-x-hidden bg-background">
-      {/* Painel Esquerdo (Apenas Desktop - 40% a 42%) */}
-      <aside className="relative hidden lg:flex flex-col justify-between overflow-hidden border-r border-border/40 bg-gradient-to-br from-muted/50 via-muted/20 to-background p-8 xl:p-10 text-foreground">
+    <main className="flex-1 w-full h-[calc(100dvh-3.5rem)] flex flex-col lg:grid lg:grid-cols-[40%_60%] xl:grid-cols-[38%_62%] relative overflow-hidden bg-background">
+      {/* Painel Esquerdo (Apenas Desktop) */}
+      <aside className="relative hidden lg:flex flex-col justify-between overflow-hidden border-r border-border/40 bg-gradient-to-br from-muted/50 via-muted/20 to-background p-6 xl:p-8 text-foreground h-full">
         <div className="pointer-events-none absolute -top-24 -left-24 size-96 rounded-full bg-primary/10 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-24 -right-24 size-96 rounded-full bg-primary/5 blur-3xl" />
 
-        {/* Topo / Typewriter & Brand pill */}
-        <div className="relative z-10 space-y-3">
-          <h2 className="font-heading min-h-16 text-2xl xl:text-3xl font-bold tracking-tight text-foreground leading-snug">
+        {/* Topo / Typewriter */}
+        <div className="relative z-10 space-y-2">
+          <h2 className="font-heading min-h-12 text-xl xl:text-2xl font-bold tracking-tight text-foreground leading-snug">
             {textoDigitado}
             <span
-              className="ml-1 inline-block h-6 w-1.5 translate-y-0.5 bg-primary align-baseline animate-pulse rounded-xs"
+              className="ml-1 inline-block h-5 w-1.5 translate-y-0.5 bg-primary align-baseline animate-pulse rounded-xs"
               aria-hidden="true"
             />
           </h2>
@@ -85,8 +85,8 @@ export function AuthLayout({ titulo, subtitulo, children }: AuthLayoutProps) {
           </p>
         </div>
 
-        {/* Mockups de Cards Flutuantes */}
-        <div className="relative z-10 my-auto flex flex-col items-center justify-center py-6 gap-0">
+        {/* Mockups de Cards Flutuantes Compactos */}
+        <div className="relative z-10 my-auto flex flex-col items-center justify-center py-2 gap-0 scale-90 xl:scale-95 origin-center">
           {/* Card 1 - Topo */}
           <Card className="pointer-events-none w-full max-w-xs -rotate-2 -translate-x-3 scale-95 border-border/60 bg-card/75 text-card-foreground opacity-85 shadow-lg backdrop-blur-md transition-transform">
             <CardHeader className="gap-1.5 pb-2">
@@ -145,8 +145,8 @@ export function AuthLayout({ titulo, subtitulo, children }: AuthLayoutProps) {
           </Card>
         </div>
 
-        {/* Rodapé do Aside / GitHub do Desenvolvedor */}
-        <div className="relative z-10 pt-4 border-t border-border/40 flex items-center justify-between">
+        {/* Rodapé do Aside */}
+        <div className="relative z-10 pt-3 border-t border-border/40 flex items-center justify-between">
           <span className="text-xs text-muted-foreground">Desenvolvido por Kazbonfim</span>
           <Button
             type="button"
@@ -167,24 +167,24 @@ export function AuthLayout({ titulo, subtitulo, children }: AuthLayoutProps) {
         </div>
       </aside>
 
-      {/* Painel de Conteúdo Plano (Mobile, Tablet e Desktop) */}
-      <section className="flex flex-1 flex-col items-center justify-center p-4 sm:p-6 md:p-8 lg:p-12 my-auto w-full">
-        <div className="w-full max-w-sm sm:max-w-md space-y-6">
-          {/* Header Mobile / Brand Badge */}
-          <div className="flex flex-col items-center text-center gap-2 mb-2">
-            <div className="flex lg:hidden items-center justify-center gap-2 mb-1">
-              <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shadow-xs">
-                <Snowflake className="size-4.5 animate-sway" aria-hidden="true" />
+      {/* Painel de Formulário */}
+      <section className="flex flex-1 flex-col items-center justify-center p-4 sm:p-6 lg:p-8 w-full h-full overflow-y-auto lg:overflow-hidden">
+        <div className="w-full max-w-sm sm:max-w-md lg:max-w-lg my-auto space-y-3 sm:space-y-4">
+          {/* Header */}
+          <div className="flex flex-col items-center text-center gap-1 mb-1">
+            <div className="flex lg:hidden items-center justify-center gap-2 mb-0.5">
+              <div className="size-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shadow-xs">
+                <Snowflake className="size-4 animate-sway" aria-hidden="true" />
               </div>
-              <span className="text-sm font-semibold tracking-tight text-foreground">
-                Orion
+              <span className="font-birthstone text-2xl font-normal tracking-wide text-foreground leading-none">
+                Snow/Board*
               </span>
             </div>
 
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
               {titulo}
             </h1>
-            <p className="text-xs sm:text-sm text-muted-foreground max-w-xs leading-relaxed">
+            <p className="text-xs text-muted-foreground max-w-xs leading-relaxed">
               {subtitulo}
             </p>
           </div>

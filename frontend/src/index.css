@@ -15,6 +15,8 @@
   --font-heading: 'Inter', sans-serif;
   --font-mono: 'Geist Mono', monospace;
   --font-sans: 'Inter', sans-serif;
+  --font-birthstone: 'Birthstone', cursive;
+  --font-protest-riot: 'Protest Riot', sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -363,5 +365,13 @@
 
   html {
     @apply font-sans font-mono;
+  }
+
+  .font-birthstone {
+    font-family: 'Birthstone', cursive;
+  }
+
+  .font-protest-riot {
+    font-family: 'Protest Riot', sans-serif;
   }
 }

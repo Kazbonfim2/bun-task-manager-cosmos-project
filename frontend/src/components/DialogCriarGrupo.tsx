@@ -175,7 +175,7 @@ export function DialogCriarGrupo({
                 </FieldLabel>
                 <Input
                   id="nome_grupo"
-                  placeholder="Ex: Engenharia Orion, Equipe Alpha, Financeiro"
+                  placeholder="Ex: Engenharia Snow/Board*, Equipe Alpha, Financeiro"
                   value={nome}
                   onChange={(e) => setNome(e.target.value)}
                   autoFocus

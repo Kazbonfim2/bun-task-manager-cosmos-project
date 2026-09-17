@@ -165,26 +165,21 @@ export function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur-md">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-2.5 sm:px-6">
+      <header className="sticky top-0 z-40 h-14 w-full border-b bg-background/80 backdrop-blur-md">
+        <div className="mx-auto flex h-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
           <div className="flex items-center gap-3 min-w-0">
             <button
               type="button"
               onClick={() => navigate(usuario ? "/dashboard" : "/")}
-              className="flex items-center gap-2.5 min-w-0 text-left cursor-pointer focus:outline-hidden"
+              className="flex items-center gap-2 min-w-0 text-left cursor-pointer focus:outline-hidden"
             >
               <Snowflake
                 className="size-6 text-primary shrink-0 animate-sway"
                 aria-hidden="true"
               />
-              <div className="min-w-0">
-                <span className="text-sm font-semibold tracking-tight text-foreground block truncate">
-                  Orion
-                </span>
-                <span className="text-[11px] text-muted-foreground hidden sm:block">
-                  Gestão de Demandas
-                </span>
-              </div>
+              <span className="font-birthstone text-3xl font-normal tracking-wide text-foreground leading-none select-none">
+                Snow/Board*
+              </span>
             </button>
           </div>
 

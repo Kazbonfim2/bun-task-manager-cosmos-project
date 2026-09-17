@@ -250,11 +250,10 @@ export function Configuracoes() {
 
                   {avisoPerfil && (
                     <div
-                      className={`flex items-center gap-2 rounded-lg p-3 text-xs border ${
-                        avisoPerfil.tipo === "ok"
-                          ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400"
-                          : "bg-destructive/10 border-destructive/20 text-destructive"
-                      }`}
+                      className={`flex items-center gap-2 rounded-lg p-3 text-xs border ${avisoPerfil.tipo === "ok"
+                        ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+                        : "bg-destructive/10 border-destructive/20 text-destructive"
+                        }`}
                     >
                       {avisoPerfil.tipo === "ok" ? (
                         <CheckCircle2 className="size-4 shrink-0" />
@@ -345,11 +344,10 @@ export function Configuracoes() {
 
                   {avisoSenha && (
                     <div
-                      className={`flex items-center gap-2 rounded-lg p-3 text-xs border ${
-                        avisoSenha.tipo === "ok"
-                          ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400"
-                          : "bg-destructive/10 border-destructive/20 text-destructive"
-                      }`}
+                      className={`flex items-center gap-2 rounded-lg p-3 text-xs border ${avisoSenha.tipo === "ok"
+                        ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+                        : "bg-destructive/10 border-destructive/20 text-destructive"
+                        }`}
                     >
                       {avisoSenha.tipo === "ok" ? (
                         <CheckCircle2 className="size-4 shrink-0" />
@@ -409,10 +407,10 @@ export function Configuracoes() {
                 <div className="flex items-center justify-between gap-4">
                   <div className="space-y-0.5 min-w-0">
                     <span className="text-xs font-semibold text-foreground block">
-                      Desabilitar animações de rolagem (Scroll Reveal)
+                      Desabilitar animações
                     </span>
                     <p className="text-[11px] text-muted-foreground leading-relaxed">
-                      Remove os efeitos de transição e animações de entrada ao rolar a página em todo o sistema.
+                      Remove os efeitos de transição e animações em toda as telas - pode aumentar o desempenho em dispositivos mais lentos ou com pouca memória.
                     </p>
                   </div>
 
