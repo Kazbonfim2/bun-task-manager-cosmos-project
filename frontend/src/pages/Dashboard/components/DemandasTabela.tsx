@@ -1,4 +1,3 @@
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -81,9 +80,17 @@ export function DemandasTabela({
                     <Tooltip>
                       <TooltipTrigger
                         render={
-                          <span className="block truncate cursor-pointer font-medium hover:underline">
-                            {demanda.titulo}
-                          </span>
+                          <div className="flex items-center gap-1.5 min-w-0 cursor-pointer">
+                            <span className="truncate font-medium hover:underline">
+                              {demanda.titulo}
+                            </span>
+                            {atrasada && (
+                              <span className="relative flex size-2 shrink-0" title="Demanda em atraso">
+                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-destructive opacity-75" />
+                                <span className="relative inline-flex size-2 rounded-full bg-destructive" />
+                              </span>
+                            )}
+                          </div>
                         }
                       />
                       <TooltipPopup className="max-w-xs sm:max-w-sm whitespace-normal break-words">
@@ -97,11 +104,6 @@ export function DemandasTabela({
                       <span className="block truncate text-xs text-muted-foreground" title={demanda.descricao}>
                         {demanda.descricao}
                       </span>
-                    ) : null}
-                    {atrasada ? (
-                      <Badge variant="destructive" className="w-fit mt-0.5">
-                        Atrasada
-                      </Badge>
                     ) : null}
                   </div>
                 </TableCell>

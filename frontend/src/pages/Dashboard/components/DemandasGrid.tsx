@@ -1,4 +1,3 @@
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -78,16 +77,19 @@ export function DemandasGrid({
                         {statusInfo.label}
                       </span>
                     ) : null}
-                    {atrasada ? (
-                      <Badge variant="destructive">Atrasada</Badge>
-                    ) : null}
                   </div>
                 </div>
                 <CardTitle
                   className="line-clamp-2 min-h-[2.5rem] break-words text-base font-medium leading-snug hover:underline"
                   title={demanda.titulo}
                 >
-                  {demanda.titulo}
+                  <span>{demanda.titulo}</span>
+                  {atrasada && (
+                    <span className="relative inline-flex size-2 shrink-0 align-middle ml-1.5 -translate-y-0.5" title="Demanda em atraso">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-destructive opacity-75" />
+                      <span className="relative inline-flex size-2 rounded-full bg-destructive" />
+                    </span>
+                  )}
                 </CardTitle>
                 {demanda.descricao ? (
                   <p

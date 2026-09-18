@@ -48,6 +48,7 @@ interface DashboardToolbarProps {
   onMudarModoVisualizacao: (modo: "lista" | "cards") => void;
   busca: string;
   onMudarBusca: (valor: string) => void;
+  desabilitarNovaDemanda?: boolean;
   onAbrirNovoProjeto: () => void;
   onAbrirNovaDemanda: () => void;
   onExportarCsv: () => void;
@@ -66,6 +67,7 @@ export function DashboardToolbar({
   onMudarModoVisualizacao,
   busca,
   onMudarBusca,
+  desabilitarNovaDemanda,
   onAbrirNovoProjeto,
   onAbrirNovaDemanda,
   onExportarCsv,
@@ -188,6 +190,12 @@ export function DashboardToolbar({
               <Button
                 type="button"
                 onClick={onAbrirNovaDemanda}
+                disabled={desabilitarNovaDemanda}
+                title={
+                  desabilitarNovaDemanda
+                    ? "Crie pelo menos um projeto antes de cadastrar uma demanda"
+                    : undefined
+                }
                 className="flex-1 sm:flex-initial"
               >
                 <Plus aria-hidden="true" className="size-4" />

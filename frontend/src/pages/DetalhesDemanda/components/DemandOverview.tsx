@@ -105,8 +105,14 @@ export function DemandOverview({
 
           {/* Título Principal da Demanda */}
           <div className="flex items-start justify-between gap-4 pt-1">
-            <h1 className="font-heading text-xl sm:text-2xl font-bold tracking-tight text-foreground leading-snug">
-              {demanda.titulo}
+            <h1 className="font-heading text-xl sm:text-2xl font-bold tracking-tight text-foreground leading-snug flex items-center gap-2.5">
+              <span>{demanda.titulo}</span>
+              {infoPrazo.tipo === "atrasada" && (
+                <span className="relative flex size-2.5 shrink-0" title="Demanda em atraso">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75" />
+                  <span className="relative inline-flex size-2.5 rounded-full bg-red-500" />
+                </span>
+              )}
             </h1>
             <Button
               type="button"

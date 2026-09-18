@@ -1,4 +1,4 @@
-import { AlertTriangle, CheckCircle2, CircleDot, Clock, type LucideIcon } from "lucide-react";
+import { AlertTriangle, CheckCircle2, CheckSquare, CircleDot, Clock, type LucideIcon } from "lucide-react";
 
 export type ItemStatus = {
   label: string;
@@ -9,30 +9,45 @@ export type ItemStatus = {
   corBorda?: string;
 };
 
+export function normalizarStatus(status: string): string {
+  if (status === "aberta") return "a_fazer";
+  if (status === "em_andamento") return "em_progresso";
+  if (status === "concluida") return "feito";
+  return status;
+}
+
 export const STATUS_ITENS: readonly ItemStatus[] = [
   {
-    label: "Aberta",
-    value: "aberta",
+    label: "A fazer",
+    value: "a_fazer",
     icone: CircleDot,
     corTexto: "text-blue-500 dark:text-blue-400",
     corBg: "bg-blue-500/10",
     corBorda: "border-blue-500/30",
   },
   {
-    label: "Em andamento",
-    value: "em_andamento",
+    label: "Em progresso",
+    value: "em_progresso",
     icone: Clock,
     corTexto: "text-amber-500 dark:text-amber-400",
     corBg: "bg-amber-500/10",
     corBorda: "border-amber-500/30",
   },
   {
-    label: "Concluída",
-    value: "concluida",
+    label: "Feito",
+    value: "feito",
     icone: CheckCircle2,
     corTexto: "text-emerald-500 dark:text-emerald-400",
     corBg: "bg-emerald-500/10",
     corBorda: "border-emerald-500/30",
+  },
+  {
+    label: "Aprovado",
+    value: "aprovado",
+    icone: CheckSquare,
+    corTexto: "text-purple-500 dark:text-purple-400",
+    corBg: "bg-purple-500/10",
+    corBorda: "border-purple-500/30",
   },
 ];
 
@@ -57,5 +72,6 @@ export function hojeISO(): string {
 }
 
 export function demandaAtrasada(prazo: string, status: string): boolean {
-  return status !== "concluida" && prazo < hojeISO();
+  const normal = normalizarStatus(status);
+  return normal !== "feito" && normal !== "aprovado" && normal !== "concluida" && prazo.slice(0, 10) < hojeISO();
 }

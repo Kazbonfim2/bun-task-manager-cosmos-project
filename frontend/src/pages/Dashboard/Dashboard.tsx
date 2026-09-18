@@ -10,12 +10,15 @@ import {
 import { invalidarCache, useCachedFetch } from "@/hooks/useCachedFetch";
 import { demandaAtrasada, STATUS_ITENS } from "@/lib/status";
 import { ScrollReveal } from "@/components/ScrollReveal";
+import { Kanban, ListFilter, SquareDashed } from "lucide-react";
+import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
 import { DashboardCards } from "./components/DashboardCards";
 import { DashboardHeader } from "./components/DashboardHeader";
 import { DashboardPagination } from "./components/DashboardPagination";
 import { DashboardProjects } from "./components/DashboardProjects";
 import { DashboardToolbar } from "./components/DashboardToolbar";
 import { DemandasGrid } from "./components/DemandasGrid";
+import { DemandasKanban } from "./components/DemandasKanban";
 import { DemandasTabela } from "./components/DemandasTabela";
 import { DialogDemanda, type FormDemandaData } from "./components/DialogDemanda";
 import { DialogProjeto } from "./components/DialogProjeto";
@@ -29,7 +32,7 @@ const FORM_VAZIO: FormDemandaData = {
   projeto_id: "",
   responsavel_id: "",
   prazo: "",
-  status: "aberta",
+  status: "a_fazer",
 };
 
 export function Dashboard() {
@@ -367,6 +370,21 @@ export function Dashboard() {
     }
   }
 
+  async function reordenarDemandas(itens: { id: string; ordem: number }[]) {
+    if (!itens.length) return;
+    const mapa = new Map(itens.map((i) => [i.id, i.ordem]));
+    setDemandasCache((anteriores) =>
+      (anteriores ?? []).map((d) => (mapa.has(d.id) ? { ...d, ordem: mapa.get(d.id) } : d)),
+    );
+    try {
+      await api("/demandas/reordenar", { method: "PATCH", body: JSON.stringify({ itens }) });
+      invalidarCache("/demandas");
+    } catch (falha) {
+      setErro(falha instanceof Error ? falha.message : "Falha ao reordenar demandas");
+      await recarregarDemandas();
+    }
+  }
+
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 p-4 sm:p-6">
       {/* 1. Cabeçalho com saudação dinâmica */}
@@ -392,36 +410,78 @@ export function Dashboard() {
         />
       </ScrollReveal>
 
-      {/* 4. Seção principal de listagem de demandas, filtros e ações */}
+      {/* 4. Seção principal com Tabs (Demandas, Kanban e Nova Aba em branco) */}
       <ScrollReveal direction="up" delay={140} duration={400} className="flex flex-col gap-4">
-        {/* Barra de ferramentas superior: filtros, alternador de visualização, busca e criação */}
-        <DashboardToolbar
-          itensResponsavel={itensResponsavel}
-          filtroResponsavel={filtroResponsavel}
-          onMudarFiltroResponsavel={setFiltroResponsavel}
-          itensProjeto={itensFiltroProjeto}
-          filtroProjeto={filtroProjeto}
-          onMudarFiltroProjeto={setFiltroProjeto}
-          filtroStatus={filtroStatus}
-          onMudarFiltroStatus={setFiltroStatus}
-          modoVisualizacao={modoVisualizacao}
-          onMudarModoVisualizacao={setModoVisualizacao}
-          busca={busca}
-          onMudarBusca={setBusca}
-          onAbrirNovoProjeto={() => abrirModalProjeto(null)}
-          onAbrirNovaDemanda={abrirNovaDemanda}
-          onExportarCsv={exportarCsv}
-        />
+        <Tabs defaultValue="demandas" className="flex flex-col gap-4">
+          <div className="flex items-center justify-between gap-4 border-b border-border/40 pb-2">
+            <TabsList>
+              <TabsTab value="demandas" className="flex items-center gap-1.5">
+                <ListFilter className="size-4" />
+                <span>Demandas</span>
+              </TabsTab>
+              <TabsTab value="kanban" className="flex items-center gap-1.5">
+                <Kanban className="size-4" />
+                <span>Kanban</span>
+              </TabsTab>
+              <TabsTab value="em-branco" className="flex items-center gap-1.5">
+                <SquareDashed className="size-4" />
+                <span>Nova Tab</span>
+              </TabsTab>
+            </TabsList>
+          </div>
 
-        {/* Exibição de mensagem de erro global da dashboard */}
-        {erro && !dialogDemanda && !dialogProjeto ? (
-          <p className="text-destructive text-sm">{erro}</p>
-        ) : null}
+          {/* Tab 1: Demandas (Listagem / Grid) */}
+          <TabsPanel value="demandas" className="flex flex-col gap-4">
+            {/* Barra de ferramentas superior: filtros, alternador de visualização, busca e criação */}
+            <DashboardToolbar
+              itensResponsavel={itensResponsavel}
+              filtroResponsavel={filtroResponsavel}
+              onMudarFiltroResponsavel={setFiltroResponsavel}
+              itensProjeto={itensFiltroProjeto}
+              filtroProjeto={filtroProjeto}
+              onMudarFiltroProjeto={setFiltroProjeto}
+              filtroStatus={filtroStatus}
+              onMudarFiltroStatus={setFiltroStatus}
+              modoVisualizacao={modoVisualizacao}
+              onMudarModoVisualizacao={setModoVisualizacao}
+              busca={busca}
+              onMudarBusca={setBusca}
+              desabilitarNovaDemanda={projetos.length === 0}
+              onAbrirNovoProjeto={() => abrirModalProjeto(null)}
+              onAbrirNovaDemanda={abrirNovaDemanda}
+              onExportarCsv={exportarCsv}
+            />
 
-        {/* Exibição: mobile sempre em cards; desktop respeita a alternância entre tabela e cards */}
-        {modoVisualizacao === "lista" ? (
-          <>
-            <div className="sm:hidden">
+            {/* Exibição de mensagem de erro global da dashboard */}
+            {erro && !dialogDemanda && !dialogProjeto ? (
+              <p className="text-destructive text-sm">{erro}</p>
+            ) : null}
+
+            {/* Exibição: mobile sempre em cards; desktop respeita a alternância entre tabela e cards */}
+            {modoVisualizacao === "lista" ? (
+              <>
+                <div className="sm:hidden">
+                  <DemandasGrid
+                    demandas={demandasPaginadas}
+                    busca={busca}
+                    carregando={carregando}
+                    onVisualizarDemanda={(id) => navigate(`/demandas/${id}`)}
+                    onTrocarStatus={trocarStatus}
+                    onEditarDemanda={abrirEdicao}
+                  />
+                </div>
+                <div className="hidden sm:block">
+                  <DemandasTabela
+                    demandas={demandasPaginadas}
+                    busca={busca}
+                    carregando={carregando}
+                    onVisualizarDemanda={(id) => navigate(`/demandas/${id}`)}
+                    onTrocarStatus={trocarStatus}
+                    onEditarDemanda={abrirEdicao}
+                  />
+                </div>
+              </>
+            ) : (
               <DemandasGrid
                 demandas={demandasPaginadas}
                 busca={busca}
@@ -430,37 +490,66 @@ export function Dashboard() {
                 onTrocarStatus={trocarStatus}
                 onEditarDemanda={abrirEdicao}
               />
-            </div>
-            <div className="hidden sm:block">
-              <DemandasTabela
-                demandas={demandasPaginadas}
-                busca={busca}
-                carregando={carregando}
-                onVisualizarDemanda={(id) => navigate(`/demandas/${id}`)}
-                onTrocarStatus={trocarStatus}
-                onEditarDemanda={abrirEdicao}
-              />
-            </div>
-          </>
-        ) : (
-          <DemandasGrid
-            demandas={demandasPaginadas}
-            busca={busca}
-            carregando={carregando}
-            onVisualizarDemanda={(id) => navigate(`/demandas/${id}`)}
-            onTrocarStatus={trocarStatus}
-            onEditarDemanda={abrirEdicao}
-          />
-        )}
+            )}
 
-        {/* Rodapé fixo de paginação com resumo numérico de itens e controles */}
-        <DashboardPagination
-          totalItens={demandasFiltradas.length}
-          paginaAtual={paginaAtual}
-          itensPorPagina={ITENS_POR_PAGINA}
-          totalPaginas={totalPaginas}
-          onMudarPagina={setPaginaAtual}
-        />
+            {/* Rodapé fixo de paginação com resumo numérico de itens e controles */}
+            <DashboardPagination
+              totalItens={demandasFiltradas.length}
+              paginaAtual={paginaAtual}
+              itensPorPagina={ITENS_POR_PAGINA}
+              totalPaginas={totalPaginas}
+              onMudarPagina={setPaginaAtual}
+            />
+          </TabsPanel>
+
+          {/* Tab 2: Kanban (4 steps com @dnd-kit) */}
+          <TabsPanel value="kanban" className="flex flex-col gap-4">
+            <DashboardToolbar
+              itensResponsavel={itensResponsavel}
+              filtroResponsavel={filtroResponsavel}
+              onMudarFiltroResponsavel={setFiltroResponsavel}
+              itensProjeto={itensFiltroProjeto}
+              filtroProjeto={filtroProjeto}
+              onMudarFiltroProjeto={setFiltroProjeto}
+              filtroStatus={filtroStatus}
+              onMudarFiltroStatus={setFiltroStatus}
+              modoVisualizacao={modoVisualizacao}
+              onMudarModoVisualizacao={setModoVisualizacao}
+              busca={busca}
+              onMudarBusca={setBusca}
+              desabilitarNovaDemanda={projetos.length === 0}
+              onAbrirNovoProjeto={() => abrirModalProjeto(null)}
+              onAbrirNovaDemanda={abrirNovaDemanda}
+              onExportarCsv={exportarCsv}
+            />
+
+            {erro && !dialogDemanda && !dialogProjeto ? (
+              <p className="text-destructive text-sm">{erro}</p>
+            ) : null}
+
+            <DemandasKanban
+              demandas={demandasFiltradas}
+              carregando={carregando}
+              onVisualizarDemanda={(id) => navigate(`/demandas/${id}`)}
+              onTrocarStatus={trocarStatus}
+              onReordenar={reordenarDemandas}
+              onEditarDemanda={abrirEdicao}
+            />
+          </TabsPanel>
+
+          {/* Tab 3: Nova Tab em Branco (T1) */}
+          <TabsPanel value="em-branco">
+            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/80 bg-card/40 p-12 text-center min-h-[360px]">
+              <div className="flex size-12 items-center justify-center rounded-xl bg-muted text-muted-foreground shadow-xs">
+                <SquareDashed className="size-6" />
+              </div>
+              <h3 className="mt-4 text-base font-semibold">Nova Tab em Branco</h3>
+              <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+                Esta aba está pronta e reservada para futuras funcionalidades e visualizações personalizadas do sistema.
+              </p>
+            </div>
+          </TabsPanel>
+        </Tabs>
       </ScrollReveal>
 
       {/* // Diálogo modal para criar ou editar demanda (com ação de excluir) */}

@@ -47,6 +47,7 @@ export type Grupo = {
   total_projetos?: number;
   total_demandas?: number;
   convites_disponiveis?: number;
+  membros_nomes?: string;
 };
 
 export type MembroGrupo = {
@@ -93,6 +94,7 @@ export type Demanda = {
   status: string;
   criado_em: string;
   atualizado_em: string;
+  ordem?: number;
   projeto_nome: string;
   responsavel_nome: string;
 };
