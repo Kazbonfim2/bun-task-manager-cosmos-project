@@ -60,7 +60,8 @@ export const grupoRepository = {
           u.nome_completo AS dono_nome,
           (SELECT COUNT(*) FROM grupo_membros gm WHERE gm.grupo_id = g.id) AS total_membros,
           (SELECT COUNT(*) FROM projetos p WHERE p.grupo_id = g.id) AS total_projetos,
-          (SELECT COUNT(*) FROM convites c WHERE c.grupo_id = g.id AND c.usado_por_id IS NULL) AS convites_disponiveis
+          (SELECT COUNT(*) FROM convites c WHERE c.grupo_id = g.id AND c.usado_por_id IS NULL) AS convites_disponiveis,
+          (SELECT GROUP_CONCAT(u2.nome_completo, '||') FROM grupo_membros gm2 JOIN usuarios u2 ON u2.id = gm2.usuario_id WHERE gm2.grupo_id = g.id) AS membros_nomes
         FROM grupos g
         JOIN usuarios u ON u.id = g.dono_id
         WHERE g.id = ?
@@ -78,7 +79,8 @@ export const grupoRepository = {
           u.nome_completo AS dono_nome,
           (SELECT COUNT(*) FROM grupo_membros gm WHERE gm.grupo_id = g.id) AS total_membros,
           (SELECT COUNT(*) FROM projetos p WHERE p.grupo_id = g.id) AS total_projetos,
-          (SELECT COUNT(*) FROM convites c WHERE c.grupo_id = g.id AND c.usado_por_id IS NULL) AS convites_disponiveis
+          (SELECT COUNT(*) FROM convites c WHERE c.grupo_id = g.id AND c.usado_por_id IS NULL) AS convites_disponiveis,
+          (SELECT GROUP_CONCAT(u2.nome_completo, '||') FROM grupo_membros gm2 JOIN usuarios u2 ON u2.id = gm2.usuario_id WHERE gm2.grupo_id = g.id) AS membros_nomes
         FROM grupos g
         JOIN grupo_membros gm ON gm.grupo_id = g.id
         JOIN usuarios u ON u.id = g.dono_id

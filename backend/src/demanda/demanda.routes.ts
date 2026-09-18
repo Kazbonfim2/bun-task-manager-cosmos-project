@@ -5,6 +5,7 @@ import { demandaController } from "./demanda.controller";
 
 export const demandaRoutes = Router();
 demandaRoutes.use(authMiddleware);
+demandaRoutes.patch("/reordenar", demandaController.reordenar);
 demandaRoutes.get("/", demandaController.listar);
 demandaRoutes.get("/:id", demandaController.buscarPorId);
 demandaRoutes.post("/", demandaController.criar);

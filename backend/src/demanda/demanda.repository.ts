@@ -16,8 +16,9 @@ export const demandaRepository = {
     await db.execute({
       sql: `INSERT INTO demandas (
         id, titulo, descricao, projeto_id, responsavel_id, criado_por_id,
-        prazo, status, criado_em, atualizado_em
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        prazo, status, criado_em, atualizado_em, ordem
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+        (SELECT COALESCE(MAX(ordem), 0) + 1 FROM demandas WHERE status = ?))`,
       args: [
         demanda.id,
         demanda.titulo,
@@ -29,6 +30,7 @@ export const demandaRepository = {
         demanda.status,
         demanda.criado_em,
         demanda.atualizado_em,
+        demanda.status,
       ],
     });
     return (await this.buscarPorId(demanda.id)) as DemandaComNomes;
@@ -145,5 +147,18 @@ export const demandaRepository = {
       sql: "UPDATE demandas SET atraso_notificado_em = NULL WHERE id = ?",
       args: [id],
     });
+  },
+
+  // Persiste a ordem manual dos cards do Kanban (batch atômico)
+  async reordenar(itens: Array<{ id: string; ordem: number }>): Promise<void> {
+    if (!itens.length) return;
+    const agora = new Date().toISOString();
+    await db.batch(
+      itens.map((it) => ({
+        sql: "UPDATE demandas SET ordem = ?, atualizado_em = ? WHERE id = ?",
+        args: [it.ordem, agora, it.id],
+      })),
+      "write",
+    );
   },
 };

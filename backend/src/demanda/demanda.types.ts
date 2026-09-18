@@ -1,4 +1,12 @@
-export const STATUS_DEMANDA = ["aberta", "em_andamento", "concluida"] as const;
+export const STATUS_DEMANDA = [
+  "a_fazer",
+  "em_progresso",
+  "feito",
+  "aprovado",
+  "aberta",
+  "em_andamento",
+  "concluida",
+] as const;
 
 export type StatusDemanda = (typeof STATUS_DEMANDA)[number];
 
@@ -13,6 +21,7 @@ export type Demanda = {
   status: StatusDemanda;
   criado_em: string;
   atualizado_em: string;
+  ordem?: number;
 };
 
 export type DemandaComNomes = Demanda & {

@@ -85,7 +85,7 @@ export async function initDatabase() {
       responsavel_id TEXT NOT NULL,
       criado_por_id TEXT NOT NULL,
       prazo TEXT NOT NULL,
-      status TEXT NOT NULL CHECK (status IN ('aberta', 'em_andamento', 'concluida')),
+      status TEXT NOT NULL CHECK (status IN ('a_fazer', 'em_progresso', 'feito', 'aprovado', 'aberta', 'em_andamento', 'concluida')),
       criado_em TEXT NOT NULL,
       atualizado_em TEXT NOT NULL,
       FOREIGN KEY (projeto_id) REFERENCES projetos(id),
@@ -165,6 +165,61 @@ export async function initDatabase() {
     try {
       await db.execute("ALTER TABLE demandas ADD COLUMN atraso_notificado_em TEXT;");
     } catch { }
+  }
+  // Ordem manual dos cards no Kanban (por status). Backfill preserva a ordem atual (prazo, id).
+  if (!colunasDemanda.some((c) => c.name === "ordem")) {
+    try {
+      await db.execute("ALTER TABLE demandas ADD COLUMN ordem INTEGER;");
+      // ponytail: subquery correlacionada O(n^2), roda só uma vez na migração.
+      await db.execute(`
+        UPDATE demandas SET ordem = (
+          SELECT COUNT(*) FROM demandas d2
+          WHERE d2.status = demandas.status
+            AND (d2.prazo < demandas.prazo
+                 OR (d2.prazo = demandas.prazo AND d2.id <= demandas.id))
+        )
+      `);
+    } catch { }
+  }
+
+  const sqlDemandaTableRes = await db.execute("SELECT sql FROM sqlite_master WHERE name='demandas'");
+  const sqlDemandaTable = (sqlDemandaTableRes.rows[0] as unknown as { sql?: string } | undefined)?.sql;
+  if (sqlDemandaTable && !sqlDemandaTable.includes("'a_fazer'")) {
+    try {
+      await db.execute("PRAGMA foreign_keys = OFF;");
+      await db.executeMultiple(`
+        CREATE TABLE IF NOT EXISTS demandas_temp (
+          id TEXT PRIMARY KEY,
+          titulo TEXT NOT NULL,
+          descricao TEXT,
+          projeto_id TEXT NOT NULL,
+          responsavel_id TEXT NOT NULL,
+          criado_por_id TEXT NOT NULL,
+          prazo TEXT NOT NULL,
+          status TEXT NOT NULL CHECK (status IN ('a_fazer', 'em_progresso', 'feito', 'aprovado', 'aberta', 'em_andamento', 'concluida')),
+          criado_em TEXT NOT NULL,
+          atualizado_em TEXT NOT NULL,
+          atraso_notificado_em TEXT,
+          FOREIGN KEY (projeto_id) REFERENCES projetos(id),
+          FOREIGN KEY (responsavel_id) REFERENCES usuarios(id),
+          FOREIGN KEY (criado_por_id) REFERENCES usuarios(id)
+        );
+        INSERT INTO demandas_temp (id, titulo, descricao, projeto_id, responsavel_id, criado_por_id, prazo, status, criado_em, atualizado_em, atraso_notificado_em)
+        SELECT id, titulo, descricao, projeto_id, responsavel_id, criado_por_id, prazo,
+          CASE
+            WHEN status = 'aberta' THEN 'a_fazer'
+            WHEN status = 'em_andamento' THEN 'em_progresso'
+            WHEN status = 'concluida' THEN 'feito'
+            ELSE status
+          END,
+          criado_em, atualizado_em, atraso_notificado_em FROM demandas;
+        DROP TABLE demandas;
+        ALTER TABLE demandas_temp RENAME TO demandas;
+      `);
+      await db.execute("PRAGMA foreign_keys = ON;");
+    } catch (e) {
+      console.error("Erro na migração de status:", e);
+    }
   }
 
   const colunasUsuario = (await db.execute("PRAGMA table_info(usuarios)")).rows as unknown as Array<{ name: string }>;

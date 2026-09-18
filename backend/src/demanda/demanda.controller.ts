@@ -52,6 +52,11 @@ export const demandaController = {
     res.json(demanda);
   },
 
+  reordenar: async (req: Request, res: Response) => {
+    await demandaService.reordenar(req.body?.itens);
+    res.status(204).send();
+  },
+
   excluir: async (req: Request, res: Response) => {
     await demandaService.excluir(String(req.params.id));
     res.status(204).send();

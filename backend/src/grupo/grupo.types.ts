@@ -11,6 +11,7 @@ export interface GrupoComDetalhes extends Grupo {
   total_projetos?: number;
   total_demandas?: number;
   convites_disponiveis?: number;
+  membros_nomes?: string;
 }
 
 export interface MembroGrupo {

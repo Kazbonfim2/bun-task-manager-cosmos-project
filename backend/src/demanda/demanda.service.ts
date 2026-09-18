@@ -24,7 +24,12 @@ function validarPrazo(prazo: string): string {
 }
 
 function estaAtrasada(prazo: string, status: string): boolean {
-  return status !== "concluida" && prazo.slice(0, 10) < new Date().toISOString().slice(0, 10);
+  return (
+    status !== "feito" &&
+    status !== "aprovado" &&
+    status !== "concluida" &&
+    prazo.slice(0, 10) < new Date().toISOString().slice(0, 10)
+  );
 }
 
 export const demandaService = {
@@ -204,6 +209,18 @@ export const demandaService = {
     const atual = await demandaRepository.buscarPorId(id);
     if (!atual) throw new HttpError(404, "Demanda não encontrada");
     await demandaRepository.excluir(id);
+  },
+
+  // Reordena os cards do Kanban. Só mexe em `ordem`; troca de coluna continua via alterarStatus.
+  async reordenar(itens: unknown): Promise<void> {
+    if (!Array.isArray(itens)) throw new HttpError(400, "Payload inválido");
+    const limpos = itens.map((it) => {
+      const id = String((it as { id?: unknown })?.id ?? "");
+      const ordem = Number((it as { ordem?: unknown })?.ordem);
+      if (!id || Number.isNaN(ordem)) throw new HttpError(400, "Item de reordenação inválido");
+      return { id, ordem };
+    });
+    await demandaRepository.reordenar(limpos);
   },
 
   // Notifica o responsável de cada demanda que entrou em atraso (uma vez por atraso)

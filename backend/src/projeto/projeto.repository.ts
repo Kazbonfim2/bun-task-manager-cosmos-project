@@ -30,9 +30,9 @@ export const projetoRepository = {
           p.grupo_id,
           p.criado_em,
           COUNT(d.id) AS total_demandas,
-          SUM(CASE WHEN d.status = 'aberta' THEN 1 ELSE 0 END) AS demandas_abertas,
-          SUM(CASE WHEN d.status = 'em_andamento' THEN 1 ELSE 0 END) AS demandas_em_andamento,
-          SUM(CASE WHEN d.status = 'concluida' THEN 1 ELSE 0 END) AS demandas_concluidas
+          SUM(CASE WHEN d.status IN ('a_fazer', 'aberta') THEN 1 ELSE 0 END) AS demandas_abertas,
+          SUM(CASE WHEN d.status IN ('em_progresso', 'em_andamento') THEN 1 ELSE 0 END) AS demandas_em_andamento,
+          SUM(CASE WHEN d.status IN ('feito', 'aprovado', 'concluida') THEN 1 ELSE 0 END) AS demandas_concluidas
         FROM projetos p
         LEFT JOIN demandas d ON d.projeto_id = p.id
         ${where}
