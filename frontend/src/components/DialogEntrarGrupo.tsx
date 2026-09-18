@@ -93,7 +93,7 @@ export function DialogEntrarGrupo({
               </FieldLabel>
               <Input
                 id="codigo_convite"
-                placeholder="Ex: ORION-A83F-9BC2"
+                placeholder="XXXXX-XXXX-XXXX"
                 value={codigo}
                 onChange={(e) => setCodigo(e.target.value.toUpperCase())}
                 className="font-mono tracking-wider uppercase text-center text-sm font-semibold h-10"
